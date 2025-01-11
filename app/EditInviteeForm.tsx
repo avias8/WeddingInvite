@@ -8,15 +8,43 @@ type Invitee = {
   guests: number;
   isAttending: boolean;
   maxInvites?: number;
-  dietaryRestrictions?: string;
-  accessibilityInfo?: string;
-  songRequests?: string;
-  comments?: string;
+  dietaryRestrictions?: string | null;
+  accessibilityInfo?: string | null;
+  songRequests?: string | null;
+  comments?: string | null;
+  token: string;
+  respondedAt: string | null;
 };
 
 interface EditInviteeFormProps {
-  invitee: Invitee;
-  onSubmit: (updatedInvitee: Invitee) => Promise<void>;
+  invitee: {
+    id: number;
+    name: string;
+    email: string;
+    isAttending: boolean;
+    guests: number;
+    token: string;
+    maxInvites: number;
+    respondedAt: string | null;
+    dietaryRestrictions: string | null;
+    accessibilityInfo: string | null;
+    comments: string | null;
+    songRequests: string | null;
+  };
+  onSubmit: (updatedInvitee: {
+    id: number;
+    name: string;
+    email: string;
+    isAttending: boolean;
+    guests: number;
+    token: string;
+    maxInvites: number;
+    respondedAt: string | null;
+    dietaryRestrictions: string | null;
+    accessibilityInfo: string | null;
+    comments: string | null;
+    songRequests: string | null;
+  }) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -38,7 +66,14 @@ export default function EditInviteeForm({ invitee, onSubmit, onCancel }: EditInv
       return;
     }
 
-    onSubmit(formData);
+    onSubmit({
+      ...formData,
+      maxInvites: formData.maxInvites || 0,
+      dietaryRestrictions: formData.dietaryRestrictions || null,
+      accessibilityInfo: formData.accessibilityInfo || null,
+      songRequests: formData.songRequests || null,
+      comments: formData.comments || null,
+    });
   };
 
   return (
