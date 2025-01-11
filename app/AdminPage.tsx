@@ -1,7 +1,8 @@
 "use client"; // Marks this file as a client component
 
 import { useEffect, useState } from "react";
-import { FaTrash } from "react-icons/fa";
+import { FaTrash, FaEdit } from "react-icons/fa";
+import EditInviteeForm from "./EditInviteeForm"; // Correct path for EditInviteeForm component
 
 // Define the Invitee type
 type Invitee = {
@@ -23,6 +24,9 @@ export default function AdminPage() {
   const [invitees, setInvitees] = useState<Invitee[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // State for editing
+  const [editingInvitee, setEditingInvitee] = useState<Invitee | null>(null);
 
   useEffect(() => {
     const fetchInvitees = async () => {
@@ -61,6 +65,31 @@ export default function AdminPage() {
     }
   };
 
+  const handleEditClick = (invitee: Invitee) => {
+    setEditingInvitee(invitee); // Open the editing form with the selected invitee
+  };
+
+  const handleEditSubmit = async (updatedInvitee: Invitee) => {
+    try {
+      const response = await fetch("/api/invitees", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedInvitee),
+      });
+
+      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+
+      // Update the invitee list in the UI
+      const updatedInvitees = invitees.map((i) =>
+        i.id === updatedInvitee.id ? updatedInvitee : i
+      );
+      setInvitees(updatedInvitees);
+      setEditingInvitee(null); // Close the editing form
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to edit invitee.");
+    }
+  };
+
   if (loading) return <div className="text-center">Loading...</div>;
   if (error) return <div className="text-center text-red-500">{error}</div>;
 
@@ -75,10 +104,16 @@ export default function AdminPage() {
             <div key={i.id} className="bg-white p-4 rounded shadow">
               <div className="tile-header">
                 <span>{i.name}</span>
-                <FaTrash
-                  className="trash-icon"
-                  onClick={() => handleRemovePerson(i.id, index)}
-                />
+                <div className="actions">
+                  <FaEdit
+                    className="edit-icon"
+                    onClick={() => handleEditClick(i)}
+                  />
+                  <FaTrash
+                    className="trash-icon"
+                    onClick={() => handleRemovePerson(i.id, index)}
+                  />
+                </div>
               </div>
               <p>
                 <strong>Email:</strong> {i.email}
@@ -121,6 +156,15 @@ export default function AdminPage() {
           ))}
         </div>
       )}
+
+      {editingInvitee && (
+        <EditInviteeForm
+          invitee={editingInvitee}
+          onSubmit={handleEditSubmit}
+          onCancel={() => setEditingInvitee(null)}
+        />
+      )}
+
       <style jsx>{`
         .tile {
           position: relative;
@@ -130,9 +174,19 @@ export default function AdminPage() {
           justify-content: space-between;
           align-items: center;
         }
-        .trash-icon {
+        .actions {
+          display: flex;
+          gap: 10px;
+        }
+        .trash-icon,
+        .edit-icon {
           cursor: pointer;
+        }
+        .trash-icon {
           color: red;
+        }
+        .edit-icon {
+          color: blue;
         }
       `}</style>
     </div>

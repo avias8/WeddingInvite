@@ -52,7 +52,48 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Add the DELETE route
+export async function PUT(req: NextRequest) {
+  try {
+    const {
+      id,
+      name,
+      email,
+      guests,
+      isAttending,
+      maxInvites,
+      dietaryRestrictions,
+      accessibilityInfo,
+      comments,
+      songRequests,
+    } = await req.json();
+
+    // Validate required fields
+    if (!id || typeof id !== "number") {
+      return new NextResponse("Invalid or missing ID", { status: 400 });
+    }
+
+    const updatedInvitee = await prisma.invitee.update({
+      where: { id },
+      data: {
+        name,
+        email,
+        guests,
+        isAttending,
+        maxInvites: maxInvites || 0,
+        dietaryRestrictions: dietaryRestrictions || null,
+        accessibilityInfo: accessibilityInfo || null,
+        comments: comments || null,
+        songRequests: songRequests || null,
+      },
+    });
+
+    return NextResponse.json(updatedInvitee);
+  } catch (error) {
+    console.error("PUT invitee error:", error);
+    return new NextResponse("Error updating invitee", { status: 500 });
+  }
+}
+
 export async function DELETE(req: NextRequest) {
   try {
     const { id } = await req.json();
