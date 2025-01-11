@@ -1,0 +1,60 @@
+/* Header Styles */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--color-background);
+    padding: 1rem 2rem;
+    border-bottom: 1.5px solid var(--color-border);
+    font-family: var(--font-body);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+  }
+  
+  /* Left section (hidden management link) */
+  .header-left {
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Right section (bookmark links) */
+  .header-right {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  /* Shared styles for all links */
+  .header-link {
+    font-size: 1rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+  }
+  
+  .header-link:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+  
+  /* Hidden management link */
+  .hidden-link {
+    opacity: 0.6;
+    font-size: 0.9rem;
+    font-style: italic;
+    transition: opacity 0.3s ease, color 0.3s ease;
+  }
+  
+  .hidden-link:hover {
+    opacity: 1;
+    color: var(--color-accent);
+  }
+  
+  /* Sticky behavior for content below header */
+  main {
+    margin-top: 5rem; /* Adjust for header height */
+  }
+  

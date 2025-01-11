@@ -1,21 +1,33 @@
 import Link from "next/link";
+import OurStory from "./OurStory/OurStory";
+import "./Header.css";
 
 export default function HomePage() {
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-4">Welcome</h1>
-      <div className="flex space-x-4">
-        <Link href="/management">
-          <div className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">
-            Management
-          </div>
-        </Link>
-        <Link href="/invited">
-          <div className="bg-green-500 text-white px-4 py-2 rounded cursor-pointer">
-            Invited
-          </div>
-        </Link>
-      </div>
+    <div>
+      {/* Header */}
+      <header className="header">
+        <div className="header-left">
+          {/* Hidden "Management" link */}
+          <Link href="/management">
+            <span className="header-link hidden-link">Management</span>
+          </Link>
+        </div>
+        <div className="header-right">
+          {/* Placeholder links for other pages */}
+          <Link href="/rsvp">
+            <span className="header-link">RSVP</span>
+          </Link>
+          <Link href="/details">
+            <span className="header-link">Details</span>
+          </Link>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main>
+        <OurStory />
+      </main>
     </div>
   );
 }

@@ -1,5 +1,5 @@
-import HomePage from "../HomePage";
+import BigInvitePage from "./BigInvitePage";
 
 export default function InvitedPage() {
-  return <HomePage />;
+  return <BigInvitePage />;
 }

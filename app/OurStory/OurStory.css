@@ -1,0 +1,116 @@
+/* Page Container */
+.pageContainer {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-wedding);
+    padding: 2rem;
+    width: 100%;
+  }
+  
+  /* Hero Section */
+  .hero {
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 1.5px solid var(--color-border);
+    width: 100%;
+  }
+  
+  .hero span {
+    font-size: clamp(2.5rem, 10vw, 6rem);
+    font-weight: lighter;
+    letter-spacing: 0.05rem;
+    display: block;
+    margin-bottom: 2rem;
+  }
+  
+  .heroSubtext {
+    font-size: 1.2rem;
+    margin-top: 0.5rem;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  
+  /* Section Styles */
+  .section {
+    text-align: center;
+    margin-bottom: 3rem;
+    max-width: 800px; /* Limit section width for better readability */
+  }
+  
+  .sectionTitle {
+    text-transform: uppercase;
+    font-size: 1.5rem;
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+  }
+  
+  .sectionText {
+    font-size: 1rem;
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+    line-height: 1.6; /* Add better readability */
+  }
+  
+  /* Event Details Section */
+  .eventDetails {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    color: var(--color-text-primary);
+    width: 100%;
+    max-width: 1200px; /* Constrain width for larger screens */
+    font-size: 2rem;
+    text-align: center;
+    border-top: 1.5px solid var(--color-border);
+    border-bottom: 1.5px solid var(--color-border);
+    flex-direction: row;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 2rem;
+  }
+  
+  /* Hosted By Section */
+  .hostedBy {
+    font-family: "Hernandez Bros", serif;
+    flex-basis: 50%;
+    border-right: 2px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Dates Section */
+  .datesSection {
+    font-family: "Hernandez Bros", serif;
+    flex-basis: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+  }
+  
+  .dates {
+    margin: 0.5rem 0;
+  }
+  
+  .location {
+    font-size: 1.5rem;
+    color: var(--color-text-primary);
+  }
+  
+  /* Footer */
+  .footer {
+    height: auto;
+    text-align: center;
+    font-size: 1.2rem;
+    padding: 2rem 0;
+    color: var(--color-text-primary);
+  }
+  

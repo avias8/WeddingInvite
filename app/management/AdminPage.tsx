@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FaTrash, FaEdit } from "react-icons/fa";
-import EditInviteeForm from "./EditInviteeForm"; // Correct path for EditInviteeForm component
+import EditInviteeForm from "../EditInviteeForm"; // Correct path for EditInviteeForm component
 
 // Define the Invitee type
 type Invitee = {
@@ -95,7 +95,7 @@ export default function AdminPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-center mb-6">Admin - Invitees</h1>
+      <h1 className="text-3xl font-bold text-center mb-6">Admin View - Invitees</h1>
       {invitees.length === 0 ? (
         <p className="text-center text-gray-500">No invitees found.</p>
       ) : (

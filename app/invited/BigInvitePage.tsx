@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Modal from "react-modal";
-import InvitedGuest from "./InvitedGuest"; // Import your component
+import InvitedGuest from "../InvitedGuest"; // Import your component
 import Cookies from "js-cookie"; // For managing cookies on the client side
-import styles from "./HomePage.module.css";
+import styles from "./BigInvitePage.module.css";
 
 Modal.setAppElement("#__next"); // Set the root app element for accessibility
 
-export default function HomePage() {
+export default function BigInvitePage() {
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal open state
   const [inviteeName, setInviteeName] = useState<string | null>(null);
   const [isAttending, setIsAttending] = useState<boolean | null>(null);
