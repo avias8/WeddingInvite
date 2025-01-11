@@ -94,7 +94,6 @@ export default function HomePage() {
         </div>
         {/* Dates Section */}
         <div className={styles.datesSection}>
-          <p className={styles.dates}>June 28, 2025 | 2 PM</p>
           <p className={styles.dates}>June 29, 2025 | 11 AM</p>
           <br />
           <p className={styles.location}>Calgary, Alberta</p>
