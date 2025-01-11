@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // Handle GET (list invitees) or POST (create invitee)
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const invitees = await prisma.invitee.findMany();
     return NextResponse.json(invitees);
