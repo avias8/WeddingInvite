@@ -8,7 +8,8 @@ type Invitee = {
   name: string;
   email: string;
   isAttending: boolean;
-  guests: number; // Optional if relevant
+  guests: number;
+  token: string; // Include the token field
 };
 
 export default function AdminPage() {
@@ -51,8 +52,22 @@ export default function AdminPage() {
         <p>No invitees found.</p>
       ) : (
         invitees.map((i) => (
-          <div key={i.id}>
-            {i.name} ({i.email}), Attending: {i.isAttending ? "Yes" : "No"}
+          <div key={i.id} className="mb-4 border-b pb-2">
+            <p>
+              <strong>Name:</strong> {i.name}
+            </p>
+            <p>
+              <strong>Email:</strong> {i.email}
+            </p>
+            <p>
+              <strong>Attending:</strong> {i.isAttending ? "Yes" : "No"}
+            </p>
+            <p>
+              <strong>Number of Guests:</strong> {i.guests}
+            </p>
+            <p>
+              <strong>Token:</strong> {i.token}
+            </p>
           </div>
         ))
       )}

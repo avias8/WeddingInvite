@@ -10,7 +10,6 @@ export default function RSVPForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    // POST to /api/invitees
     const res = await fetch("/api/invitees", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -18,14 +17,12 @@ export default function RSVPForm() {
         name,
         email,
         guests,
-        // If you want to store isAttending as well:
-        isAttending: true, 
+        isAttending: true,
       }),
     });
 
     if (res.ok) {
       alert("RSVP Submitted!");
-      // reset form or show success
       setName("");
       setEmail("");
       setGuests(1);
@@ -39,7 +36,7 @@ export default function RSVPForm() {
       <div className="mb-2">
         <label className="block">Name</label>
         <input
-          className="border px-2 py-1 w-full"
+          className="border px-2 py-1 w-full text-black"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -50,7 +47,7 @@ export default function RSVPForm() {
       <div className="mb-2">
         <label className="block">Email</label>
         <input
-          className="border px-2 py-1 w-full"
+          className="border px-2 py-1 w-full text-black"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -61,7 +58,7 @@ export default function RSVPForm() {
       <div className="mb-2">
         <label className="block">Number of Guests</label>
         <input
-          className="border px-2 py-1 w-full"
+          className="border px-2 py-1 w-full text-black"
           type="number"
           min="1"
           value={guests}
