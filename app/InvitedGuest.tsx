@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 
 export default function InvitedGuest() {
   const [token, setToken] = useState<string | null>(null);
+  const [lookupValue, setLookupValue] = useState<string>("");
   const [invitee, setInvitee] = useState<{
     name: string;
     maxInvites: number;
@@ -16,9 +17,8 @@ export default function InvitedGuest() {
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Track local states for the RSVP form
   const [isAttending, setIsAttending] = useState<boolean | null>(null);
-  const [guests, setGuests] = useState<number>(0); // Default to 0 until maxInvites is known
+  const [guests, setGuests] = useState<number>(1);
   const [dietaryRestrictions, setDietaryRestrictions] = useState<string>("");
   const [accessibilityInfo, setAccessibilityInfo] = useState<string>("");
   const [comments, setComments] = useState<string>("");
@@ -27,60 +27,59 @@ export default function InvitedGuest() {
   const extractTokenFromHash = () => {
     const hash = window.location.hash;
     if (hash.startsWith("#")) {
-      return hash.substring(1); // Remove "#" and return the token
+      return hash.substring(1);
     }
     return null;
   };
 
-  useEffect(() => {
-    const fetchInvitee = async (token: string) => {
-      try {
-        const response = await fetch(`/api/invitees/${token}`);
-        if (!response.ok) {
-          throw new Error("Invalid token. Please check your invitation link.");
-        }
-        const data = await response.json();
-        setInvitee(data);
-
-        // Initialize form fields from server
-        setIsAttending(data.isAttending);
-        setGuests(data.guests || data.maxInvites); // Default to maxInvites if guests are not set
-        setDietaryRestrictions(data.dietaryRestrictions || "");
-        setAccessibilityInfo(data.accessibilityInfo || "");
-        setComments(data.comments || "");
-        setSongRequests(data.songRequests || "");
-      } catch (err) {
-        console.error("Error fetching invitee:", err);
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("An unknown error occurred. Please try again.");
-        }
+  const fetchInvitee = async (lookupToken: string) => {
+    try {
+      const response = await fetch(`/api/invitees/${lookupToken}`);
+      if (!response.ok) {
+        throw new Error("No invitation found for the provided token.");
       }
-    };
+      const data = await response.json();
+      setInvitee(data);
 
+      setIsAttending(data.isAttending);
+      setGuests(data.guests || data.maxInvites);
+      setDietaryRestrictions(data.dietaryRestrictions || "");
+      setAccessibilityInfo(data.accessibilityInfo || "");
+      setComments(data.comments || "");
+      setSongRequests(data.songRequests || "");
+    } catch (err) {
+      console.error("Error fetching invitee:", err);
+      setError(err instanceof Error ? err.message : "An unknown error occurred.");
+    }
+  };
+
+  useEffect(() => {
     const tokenFromHash = extractTokenFromHash();
     if (tokenFromHash) {
       setToken(tokenFromHash);
       fetchInvitee(tokenFromHash);
-    } else {
-      setError("No token found in the URL. Please ensure you are using the correct invitation link.");
     }
   }, []);
+
+  const handleLookup = async () => {
+    if (!lookupValue.trim()) {
+      setError("Please enter your Invitation Token.");
+      return;
+    }
+    setError(null);
+    fetchInvitee(lookupValue.trim());
+  };
 
   const handleAttendance = (attending: boolean) => {
     setIsAttending(attending);
     if (attending && invitee) {
-      // Default guests to maxInvites if switching to "Yes"
       setGuests(invitee.maxInvites);
     } else {
-      // Reset guests to 0 if not attending
       setGuests(0);
     }
   };
 
   const handleGuestsChange = (value: number) => {
-    // Ensure guests are always between 1 and maxInvites
     if (invitee) {
       const validGuests = Math.max(1, Math.min(value, invitee.maxInvites));
       setGuests(validGuests);
@@ -88,13 +87,13 @@ export default function InvitedGuest() {
   };
 
   const handleSubmit = async () => {
-    if (!token) {
-      setError("Token is missing.");
+    if (!token && !lookupValue) {
+      setError("Invitation Token is missing.");
       return;
     }
 
     try {
-      const response = await fetch(`/api/invitees/${token}`, {
+      const response = await fetch(`/api/invitees/${token || lookupValue}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -125,7 +124,30 @@ export default function InvitedGuest() {
       <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
         Welcome to the Event!
       </h1>
-      {token ? (
+      {!token && !invitee && (
+        <div className="mb-6">
+          <p className="text-gray-600 text-center mb-4">
+            Enter your <strong>Invitation Token</strong> to access your RSVP details.
+          </p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={lookupValue}
+              onChange={(e) => setLookupValue(e.target.value)}
+              placeholder="Enter your Invitation Token"
+              className="border rounded px-3 py-2 flex-1"
+            />
+            <button
+              onClick={handleLookup}
+              className="bg-blue-600 text-white px-4 py-2 rounded"
+            >
+              Lookup
+            </button>
+          </div>
+          {error && <p className="text-red-600 mt-2 text-center">{error}</p>}
+        </div>
+      )}
+      {token || invitee ? (
         <div>
           {error ? (
             <p className="text-red-600 text-center font-semibold">{error}</p>
@@ -141,11 +163,8 @@ export default function InvitedGuest() {
                 <strong>Max Guests Allowed:</strong> {invitee.maxInvites}
               </p>
 
-              {/* Attendance selection */}
               <div className="mt-4">
-                <label className="block font-semibold mb-2">
-                  Will you be attending?
-                </label>
+                <label className="block font-semibold mb-2">Will you be attending?</label>
                 <div className="flex gap-4">
                   <button
                     onClick={() => handleAttendance(true)}
@@ -166,28 +185,32 @@ export default function InvitedGuest() {
                 </div>
               </div>
 
-              {/* Conditionally show the rest if attending */}
               {isAttending && (
                 <div>
                   <div className="mt-4">
-                    <label className="block font-semibold mb-2">
-                      Guests Attending:
-                    </label>
-                    <input
-                      type="range"
-                      min="1"
-                      max={invitee.maxInvites}
-                      value={guests}
-                      onChange={(e) => handleGuestsChange(Number(e.target.value))}
-                      className="w-full"
-                    />
-                    <div className="text-center mt-2">{guests}</div>
+                    <label className="block font-semibold mb-2">Guests Attending:</label>
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => handleGuestsChange(Math.max(1, guests - 1))}
+                        className="px-3 py-1 bg-gray-300 rounded"
+                        disabled={guests <= 1}
+                      >
+                        -
+                      </button>
+                      <span className="text-lg">{guests}</span>
+                      <button
+                        onClick={() => handleGuestsChange(Math.min(invitee.maxInvites, guests + 1))}
+                        className="px-3 py-1 bg-gray-300 rounded"
+                        disabled={guests >= invitee.maxInvites}
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
 
+                  {/* Remaining sections like Dietary Restrictions */}
                   <div className="mt-4">
-                    <label className="block font-semibold mb-2">
-                      Dietary Restrictions:
-                    </label>
+                    <label className="block font-semibold mb-2">Dietary Restrictions:</label>
                     <textarea
                       value={dietaryRestrictions}
                       onChange={(e) => setDietaryRestrictions(e.target.value)}
@@ -197,9 +220,7 @@ export default function InvitedGuest() {
                   </div>
 
                   <div className="mt-4">
-                    <label className="block font-semibold mb-2">
-                      Accessibility Info:
-                    </label>
+                    <label className="block font-semibold mb-2">Accessibility Info:</label>
                     <textarea
                       value={accessibilityInfo}
                       onChange={(e) => setAccessibilityInfo(e.target.value)}
@@ -209,9 +230,7 @@ export default function InvitedGuest() {
                   </div>
 
                   <div className="mt-4">
-                    <label className="block font-semibold mb-2">
-                      Comments:
-                    </label>
+                    <label className="block font-semibold mb-2">Comments:</label>
                     <textarea
                       value={comments}
                       onChange={(e) => setComments(e.target.value)}
@@ -221,9 +240,7 @@ export default function InvitedGuest() {
                   </div>
 
                   <div className="mt-4">
-                    <label className="block font-semibold mb-2">
-                      Song Requests:
-                    </label>
+                    <label className="block font-semibold mb-2">Song Requests:</label>
                     <textarea
                       value={songRequests}
                       onChange={(e) => setSongRequests(e.target.value)}
@@ -245,9 +262,7 @@ export default function InvitedGuest() {
             <p className="text-blue-500 text-center">Validating your token...</p>
           )}
         </div>
-      ) : (
-        <p className="text-red-600 text-center font-semibold">{error}</p>
-      )}
+      ) : null}
     </div>
   );
 }
