@@ -40,7 +40,6 @@ export default function OurStory() {
         </div>
         {/* Dates Section */}
         <div className="datesSection">
-          <p className="dates">June 28, 2025 | 2 PM</p>
           <p className="dates">June 29, 2025 | 11 AM</p>
           <br />
           <p className="location">Calgary, Alberta</p>
