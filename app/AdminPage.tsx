@@ -9,7 +9,13 @@ type Invitee = {
   email: string;
   isAttending: boolean;
   guests: number;
-  token: string; // Include the token field
+  token: string;
+  maxInvites: number;
+  respondedAt: string | null; // Optional field
+  dietaryRestrictions: string | null; // Optional field
+  accessibilityInfo: string | null; // Optional field
+  comments: string | null; // Optional field
+  songRequests: string | null; // Optional field
 };
 
 export default function AdminPage() {
@@ -66,7 +72,34 @@ export default function AdminPage() {
               <strong>Number of Guests:</strong> {i.guests}
             </p>
             <p>
-              <strong>Token:</strong> {i.token}
+              <strong>Max Invites:</strong> {i.maxInvites}
+            </p>
+            <p>
+              <strong>Responded At:</strong>{" "}
+              {i.respondedAt ? new Date(i.respondedAt).toLocaleString() : "Not Responded"}
+            </p>
+            <p>
+              <strong>Dietary Restrictions:</strong> {i.dietaryRestrictions || "None"}
+            </p>
+            <p>
+              <strong>Accessibility Info:</strong> {i.accessibilityInfo || "None"}
+            </p>
+            <p>
+              <strong>Comments:</strong> {i.comments || "None"}
+            </p>
+            <p>
+              <strong>Song Requests:</strong> {i.songRequests || "None"}
+            </p>
+            <p>
+              <strong>Invite Link:</strong>{" "}
+              <a
+                href={`${window.location.origin}/invited#${i.token}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline"
+              >
+                {window.location.origin}/invited#{i.token}
+              </a>
             </p>
           </div>
         ))

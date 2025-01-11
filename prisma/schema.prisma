@@ -14,13 +14,17 @@ generator client {
 }
 
 model Invitee {
-  id          Int      @id @default(autoincrement())
-  name        String
-  email       String   @unique
-  isAttending Boolean  @default(false)
-  guests      Int      @default(1)
-  createdAt   DateTime @default(now())
-  token       String   @unique @default(uuid())
-
-  @@map("Invitee") // Ensure correct table mapping
+  id                   Int      @id @default(autoincrement())
+  name                 String
+  email                String   @unique
+  isAttending          Boolean  @default(false)
+  guests               Int      @default(1)
+  createdAt            DateTime @default(now())
+  token                String   @unique @default(uuid())
+  maxInvites           Int
+  respondedAt          DateTime?
+  dietaryRestrictions  String?
+  accessibilityInfo    String?
+  comments             String?
+  songRequests         String?
 }
