@@ -1,6 +1,4 @@
-import AdminInfo from "../AdminAdd";
 import AdminAdd from "../AdminAdd";
-import RSVPForm from "../AdminAdd";
 import AdminPage from "../AdminPage";
 
 export default function ManagementPage() {

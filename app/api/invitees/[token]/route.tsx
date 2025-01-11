@@ -5,16 +5,15 @@ const prisma = new PrismaClient();
 
 export async function GET(
   req: NextRequest,
-  context: { params: { token: string } }
+  context: { params: Promise<{ token: string }> } // Keep params as a Promise
 ) {
-  const { params } = context;
-  const { token } = await params; // Await the params
-
-  if (!token) {
-    return new NextResponse("Token is required", { status: 400 });
-  }
-
   try {
+    const { token } = await context.params; // Await the params object
+
+    if (!token) {
+      return new NextResponse("Token is required", { status: 400 });
+    }
+
     const invitee = await prisma.invitee.findUnique({
       where: { token },
     });
@@ -32,16 +31,15 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  context: { params: { token: string } }
+  context: { params: Promise<{ token: string }> } // Keep params as a Promise
 ) {
-  const { params } = context;
-  const { token } = await params; // Await the params
-
-  if (!token) {
-    return new NextResponse("Token is required", { status: 400 });
-  }
-
   try {
+    const { token } = await context.params; // Await the params object
+
+    if (!token) {
+      return new NextResponse("Token is required", { status: 400 });
+    }
+
     const {
       isAttending,
       guests,
