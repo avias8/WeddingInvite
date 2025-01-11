@@ -21,12 +21,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body
-        id="__next" // Added id for react-modal to function properly
-        className={`${geistSans.variable} ${geistMono.variable} bg-gray-50 text-gray-900 antialiased`}
+        id="__next" // Required by react-modal
+        className={`${geistSans.variable} ${geistMono.variable} text-gray-900 antialiased`}
+        style={{ backgroundColor: "#fef8f5" }} // Apply your custom color
       >
-        <main>
-          {children}
-        </main>
+        {children}
         <footer className="bg-gray-800 text-white text-center py-4 mt-6">
           <p>© 2025 Avi Varma & Family. All rights reserved.</p>
         </footer>

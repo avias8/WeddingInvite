@@ -49,20 +49,12 @@ export default function HomePage() {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  // Clear token functionality
-  const clearTokenFromCookies = () => {
-    Cookies.remove("inviteToken");
-    setInviteeName(null);
-    setIsAttending(null);
-    setError("Token cache cleared. Please re-enter your token.");
-  };
-
   return (
     <div className={styles.pageContainer}>
       {/* Title Section */}
       <header className={styles.hero}>
         <h1>
-          <span>AVI AND SHAKTHI'S WEDDING</span>
+          <span>AVI AND SHAKTHI&apos;S WEDDING</span>
         </h1>
         <p className={styles.heroSubtext}>
           To: {inviteeName || "Guest"} {/* Display the invitee's name */}

@@ -1,4 +1,4 @@
-import AdminAdd from "../AdminAdd";
+import AdminAdd from "../AdminInfo";
 import AdminPage from "../AdminPage";
 
 export default function ManagementPage() {
