@@ -1,19 +1,21 @@
-import React from "react";
-import RSVPButton from "./RSVPButton"; // We'll create this Client Component
-import RSVPForm from "./RSVPForm";
-import AdminPage from "./AdminPage";
-import TokenReader from "./tokenreader";
+import Link from "next/link";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div>
-      <TokenReader />
-      <h1>You&apos;re Invited!</h1>
-      {/* ...some static wedding info... */}
-      <RSVPButton />
-      <RSVPForm />
-      <AdminPage />
-      
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-4">Welcome</h1>
+      <div className="flex space-x-4">
+        <Link href="/management">
+          <div className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">
+            Management
+          </div>
+        </Link>
+        <Link href="/invited">
+          <div className="bg-green-500 text-white px-4 py-2 rounded cursor-pointer">
+            Invited
+          </div>
+        </Link>
+      </div>
     </div>
   );
 }

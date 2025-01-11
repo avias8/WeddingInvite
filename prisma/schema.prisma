@@ -21,4 +21,6 @@ model Invitee {
   guests      Int      @default(1)
   createdAt   DateTime @default(now())
   token       String   @unique @default(uuid())
+
+  @@map("Invitee") // Ensure correct table mapping
 }
