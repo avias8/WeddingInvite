@@ -19,90 +19,74 @@ type Invitee = {
 };
 
 export default function AdminPage() {
-  const [invitees, setInvitees] = useState<Invitee[]>([]); // Properly typed state
+  const [invitees, setInvitees] = useState<Invitee[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch data from the API
   useEffect(() => {
     const fetchInvitees = async () => {
       try {
-        const response = await fetch("/api/invitees"); // API endpoint
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
-        const data: Invitee[] = await response.json(); // Specify the expected response type
+        const response = await fetch("/api/invitees");
+        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+        const data: Invitee[] = await response.json();
         setInvitees(data);
         setLoading(false);
       } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("An unknown error occurred");
-        }
+        setError(err instanceof Error ? err.message : "Unknown error");
         setLoading(false);
       }
     };
 
     fetchInvitees();
-  }, []); // Empty dependency array to fetch data on component mount
+  }, []);
 
-  // Render loading state, error message, or invitees list
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return <div className="text-center">Loading...</div>;
+  if (error) return <div className="text-center text-red-500">{error}</div>;
 
   return (
     <div>
-      <h1>Admin - All Invitees</h1>
+      <h1 className="text-3xl font-bold text-center mb-6">Admin - Invitees</h1>
       {invitees.length === 0 ? (
-        <p>No invitees found.</p>
+        <p className="text-center text-gray-500">No invitees found.</p>
       ) : (
-        invitees.map((i) => (
-          <div key={i.id} className="mb-4 border-b pb-2">
-            <p>
-              <strong>Name:</strong> {i.name}
-            </p>
-            <p>
-              <strong>Email:</strong> {i.email}
-            </p>
-            <p>
-              <strong>Attending:</strong> {i.isAttending ? "Yes" : "No"}
-            </p>
-            <p>
-              <strong>Number of Guests:</strong> {i.guests}
-            </p>
-            <p>
-              <strong>Max Invites:</strong> {i.maxInvites}
-            </p>
-            <p>
-              <strong>Responded At:</strong>{" "}
-              {i.respondedAt ? new Date(i.respondedAt).toLocaleString() : "Not Responded"}
-            </p>
-            <p>
-              <strong>Dietary Restrictions:</strong> {i.dietaryRestrictions || "None"}
-            </p>
-            <p>
-              <strong>Accessibility Info:</strong> {i.accessibilityInfo || "None"}
-            </p>
-            <p>
-              <strong>Comments:</strong> {i.comments || "None"}
-            </p>
-            <p>
-              <strong>Song Requests:</strong> {i.songRequests || "None"}
-            </p>
-            <p>
-              <strong>Invite Link:</strong>{" "}
-              <a
-                href={`${window.location.origin}/invited#${i.token}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 underline"
-              >
-                {window.location.origin}/invited#{i.token}
-              </a>
-            </p>
-          </div>
-        ))
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {invitees.map((i) => (
+            <div key={i.id} className="bg-white p-4 rounded shadow">
+              <p>
+                <strong>Name:</strong> {i.name}
+              </p>
+              <p>
+                <strong>Email:</strong> {i.email}
+              </p>
+              <p>
+                <strong>Attending:</strong> {i.isAttending ? "Yes" : "No"}
+              </p>
+              <p>
+                <strong>Guests:</strong> {i.guests}/{i.maxInvites}
+              </p>
+              <p>
+                <strong>Dietary Restrictions:</strong> {i.dietaryRestrictions || "None"}
+              </p>
+              <p>
+                <strong>Accessibility Info:</strong> {i.accessibilityInfo || "None"}
+              </p>
+              <p>
+                <strong>Song Requests:</strong> {i.songRequests || "None"}
+              </p>
+              <p>
+                <strong>Invite Link:</strong>{" "}
+                <a
+                  href={`${window.location.origin}/invited#${i.token}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 underline"
+                >
+                  View Invite
+                </a>
+              </p>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

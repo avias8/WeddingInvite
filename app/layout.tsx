@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </header>
         <main className="container mx-auto px-4 py-6">{children}</main>
         <footer className="bg-gray-800 text-white text-center py-4 mt-6">
-          <p>© 2025 Event Manager. All rights reserved.</p>
+          <p>© 2025 Avi Varma. All rights reserved.</p>
         </footer>
       </body>
     </html>
