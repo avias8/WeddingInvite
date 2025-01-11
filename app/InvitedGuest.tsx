@@ -7,6 +7,7 @@ export default function InvitedGuest() {
   const [lookupValue, setLookupValue] = useState<string>("");
   const [invitee, setInvitee] = useState<{
     name: string;
+    email: string; // Added email field
     maxInvites: number;
     guests: number;
     isAttending: boolean;
@@ -27,7 +28,7 @@ export default function InvitedGuest() {
   const extractTokenFromHash = () => {
     const hash = window.location.hash;
     if (hash.startsWith("#")) {
-      return hash.substring(1);
+      return hash.substring(1); // Remove "#" and return the token
     }
     return null;
   };
@@ -47,6 +48,9 @@ export default function InvitedGuest() {
       setAccessibilityInfo(data.accessibilityInfo || "");
       setComments(data.comments || "");
       setSongRequests(data.songRequests || "");
+
+      // Cache the token in localStorage
+      localStorage.setItem("inviteToken", lookupToken);
     } catch (err) {
       console.error("Error fetching invitee:", err);
       setError(err instanceof Error ? err.message : "An unknown error occurred.");
@@ -55,9 +59,14 @@ export default function InvitedGuest() {
 
   useEffect(() => {
     const tokenFromHash = extractTokenFromHash();
+    const cachedToken = localStorage.getItem("inviteToken");
+
     if (tokenFromHash) {
       setToken(tokenFromHash);
       fetchInvitee(tokenFromHash);
+    } else if (cachedToken) {
+      setToken(cachedToken);
+      fetchInvitee(cachedToken);
     }
   }, []);
 
@@ -119,11 +128,26 @@ export default function InvitedGuest() {
     }
   };
 
+  const clearCache = () => {
+    localStorage.removeItem("inviteToken");
+    setToken(null);
+    setInvitee(null);
+    setError("Token cache cleared. Please re-enter your token.");
+  };
+
   return (
     <div className="p-6 border rounded shadow-lg max-w-md mx-auto bg-white">
       <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
         Welcome to the Event!
       </h1>
+
+      <div className="mt-6 p-4 border border-dashed rounded bg-gray-100">
+        <h2 className="text-xl font-bold text-center mb-2">Debug Info</h2>
+        <p className="text-gray-800">
+          <strong>Cached Token:</strong> {localStorage.getItem("inviteToken") || "None"}
+        </p>
+      </div>
+
       {!token && !invitee && (
         <div className="mb-6">
           <p className="text-gray-600 text-center mb-4">
@@ -147,6 +171,7 @@ export default function InvitedGuest() {
           {error && <p className="text-red-600 mt-2 text-center">{error}</p>}
         </div>
       )}
+
       {token || invitee ? (
         <div>
           {error ? (
@@ -158,6 +183,9 @@ export default function InvitedGuest() {
               </p>
               <p className="text-gray-800">
                 <strong>Name:</strong> {invitee.name}
+              </p>
+              <p className="text-gray-800">
+                <strong>Email:</strong> {invitee.email}
               </p>
               <p className="text-gray-800">
                 <strong>Max Guests Allowed:</strong> {invitee.maxInvites}
@@ -208,7 +236,6 @@ export default function InvitedGuest() {
                     </div>
                   </div>
 
-                  {/* Remaining sections like Dietary Restrictions */}
                   <div className="mt-4">
                     <label className="block font-semibold mb-2">Dietary Restrictions:</label>
                     <textarea
@@ -256,6 +283,12 @@ export default function InvitedGuest() {
                 className="mt-6 bg-blue-600 text-white px-4 py-2 rounded w-full font-semibold"
               >
                 Submit RSVP
+              </button>
+              <button
+                onClick={clearCache}
+                className="mt-4 bg-red-600 text-white px-4 py-2 rounded w-full font-semibold"
+              >
+                This isn't the right person
               </button>
             </div>
           ) : (
