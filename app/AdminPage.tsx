@@ -1,6 +1,7 @@
 "use client"; // Marks this file as a client component
 
 import { useEffect, useState } from "react";
+import { FaTrash } from "react-icons/fa";
 
 // Define the Invitee type
 type Invitee = {
@@ -40,6 +41,26 @@ export default function AdminPage() {
     fetchInvitees();
   }, []);
 
+  const handleRemovePerson = async (id: number, index: number) => {
+    if (!window.confirm("Are you sure you want to delete this invitee?")) return;
+
+    try {
+      const response = await fetch("/api/invitees", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+
+      // Update the UI by removing the invitee
+      const updatedInvitees = invitees.filter((_, i) => i !== index);
+      setInvitees(updatedInvitees);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete invitee.");
+    }
+  };
+
   if (loading) return <div className="text-center">Loading...</div>;
   if (error) return <div className="text-center text-red-500">{error}</div>;
 
@@ -50,11 +71,15 @@ export default function AdminPage() {
         <p className="text-center text-gray-500">No invitees found.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {invitees.map((i) => (
+          {invitees.map((i, index) => (
             <div key={i.id} className="bg-white p-4 rounded shadow">
-              <p>
-                <strong>Name:</strong> {i.name}
-              </p>
+              <div className="tile-header">
+                <span>{i.name}</span>
+                <FaTrash
+                  className="trash-icon"
+                  onClick={() => handleRemovePerson(i.id, index)}
+                />
+              </div>
               <p>
                 <strong>Email:</strong> {i.email}
               </p>
@@ -65,13 +90,21 @@ export default function AdminPage() {
                 <strong>Guests:</strong> {i.guests}/{i.maxInvites}
               </p>
               <p>
-                <strong>Dietary Restrictions:</strong> {i.dietaryRestrictions || "None"}
+                <strong>Dietary Restrictions:</strong>{" "}
+                {i.dietaryRestrictions || "None"}
               </p>
               <p>
-                <strong>Accessibility Info:</strong> {i.accessibilityInfo || "None"}
+                <strong>Accessibility Info:</strong>{" "}
+                {i.accessibilityInfo || "None"}
               </p>
               <p>
                 <strong>Song Requests:</strong> {i.songRequests || "None"}
+              </p>
+              <p>
+                <strong>Comments:</strong> {i.comments || "None"}
+              </p>
+              <p>
+                <strong>Token:</strong> {i.token || "None"}
               </p>
               <p>
                 <strong>Invite Link:</strong>{" "}
@@ -88,6 +121,20 @@ export default function AdminPage() {
           ))}
         </div>
       )}
+      <style jsx>{`
+        .tile {
+          position: relative;
+        }
+        .tile-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .trash-icon {
+          cursor: pointer;
+          color: red;
+        }
+      `}</style>
     </div>
   );
 }

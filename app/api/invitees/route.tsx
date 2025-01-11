@@ -24,21 +24,11 @@ export async function POST(req: NextRequest) {
       dietaryRestrictions,
       accessibilityInfo,
       comments,
-      songRequests
+      songRequests,
     } = await req.json();
 
-    // Validate required fields
     if (!name || !email || guests === undefined || isAttending === undefined) {
       return new NextResponse("Missing required fields", { status: 400 });
-    }
-
-    // Ensure `maxInvites` is a positive number
-    if (maxInvites !== undefined && (typeof maxInvites !== "number" || maxInvites < 0)) {
-      return new NextResponse("Invalid value for maxInvites", { status: 400 });
-    }
-
-    if (songRequests && typeof songRequests !== "string") {
-      return new NextResponse("Invalid songRequests format", { status: 400 });
     }
 
     const newInvitee = await prisma.invitee.create({
@@ -51,20 +41,35 @@ export async function POST(req: NextRequest) {
         dietaryRestrictions: dietaryRestrictions || null,
         accessibilityInfo: accessibilityInfo || null,
         comments: comments || null,
-        songRequests: songRequests || null, // Include the songRequests field
+        songRequests: songRequests || null,
       },
     });
-    
 
     return NextResponse.json(newInvitee);
   } catch (error) {
     console.error("POST invitees error:", error);
+    return new NextResponse("Error creating invitee", { status: 500 });
+  }
+}
 
-    // Handle Prisma-specific errors
-    if (error instanceof Error && error.message.includes("Unique constraint failed")) {
-      return new NextResponse("Email or token already exists", { status: 409 });
+// Add the DELETE route
+export async function DELETE(req: NextRequest) {
+  try {
+    const { id } = await req.json();
+
+    // Validate the ID
+    if (!id || typeof id !== "number") {
+      return new NextResponse("Invalid or missing ID", { status: 400 });
     }
 
-    return new NextResponse("Error creating invitee", { status: 500 });
+    // Delete the invitee by ID
+    await prisma.invitee.delete({
+      where: { id },
+    });
+
+    return new NextResponse("Invitee deleted successfully", { status: 200 });
+  } catch (error) {
+    console.error("DELETE invitee error:", error);
+    return new NextResponse("Error deleting invitee", { status: 500 });
   }
 }
