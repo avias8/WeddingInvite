@@ -144,3 +144,13 @@
     background-color: var(--color-accent);
     color: #fff;
   }
+
+  /* Active Button Style */
+  .activeButton {
+  background-color: var(--color-accent); /* Active background color */
+  color: #fff; /* Active text color */
+  border-color: var(--color-accent); /* Match border with background */
+  font-weight: bold; /* Optionally make text bold */
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2); /* Add a subtle shadow for emphasis */
+  transform: scale(1.02); /* Slightly enlarge the button for a dynamic look */
+}
