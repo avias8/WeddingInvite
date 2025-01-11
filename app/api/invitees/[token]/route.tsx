@@ -7,7 +7,8 @@ export async function GET(
   req: NextRequest,
   context: { params: { token: string } }
 ) {
-  const { token } = await context.params; // Await the params object
+  const { params } = context;
+  const { token } = await params; // Await the params
 
   if (!token) {
     return new NextResponse("Token is required", { status: 400 });
@@ -33,7 +34,8 @@ export async function PUT(
   req: NextRequest,
   context: { params: { token: string } }
 ) {
-  const { token } = await context.params; // Await the params object
+  const { params } = context;
+  const { token } = await params; // Await the params
 
   if (!token) {
     return new NextResponse("Token is required", { status: 400 });
@@ -46,7 +48,7 @@ export async function PUT(
       dietaryRestrictions,
       accessibilityInfo,
       comments,
-      songRequests
+      songRequests,
     } = await req.json();
 
     if (isAttending === undefined || guests === undefined) {
@@ -56,18 +58,17 @@ export async function PUT(
     }
 
     const updatedInvitee = await prisma.invitee.update({
-        where: { token },
-        data: {
-          isAttending,
-          guests,
-          dietaryRestrictions: dietaryRestrictions || null,
-          accessibilityInfo: accessibilityInfo || null,
-          comments: comments || null,
-          songRequests: songRequests || null, 
-          respondedAt: new Date(),
-        },
-      });
-      
+      where: { token },
+      data: {
+        isAttending,
+        guests,
+        dietaryRestrictions: dietaryRestrictions || null,
+        accessibilityInfo: accessibilityInfo || null,
+        comments: comments || null,
+        songRequests: songRequests || null,
+        respondedAt: new Date(),
+      },
+    });
 
     return NextResponse.json(updatedInvitee);
   } catch (error) {
