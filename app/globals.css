@@ -1,21 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Hernandez+Bros:wght@300&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Root Variables for Colors and Fonts */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-wedding: 'Hernandez Bros', serif;
+  --font-body: 'Georgia', serif;
+
+  --color-background: #fef8f5;
+  --color-text-primary: #5a4d4d;
+  --color-accent: #b084cc;
+  --color-secondary-accent: #ffe4e1;
+  --color-border: #d1c4d8;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Universal Styles */
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-wedding);
+  color: var(--color-text-primary);
+}
+
+p {
+  font-family: var(--font-body);
 }

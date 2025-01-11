@@ -1,0 +1,146 @@
+/* Page Container */
+.pageContainer {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-wedding);
+    padding: 2rem;
+    width: 100%;
+  }
+  
+  /* Hero Section */
+  .hero {
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 1.5px solid var(--color-border);
+    width: 100%;
+  }
+  
+  .hero span {
+    font-size: clamp(2.5rem, 8vw, 6rem);
+    font-weight: lighter;
+    letter-spacing: 0.05rem;
+    display: block;
+    margin-bottom: 1rem;
+  }
+  
+  .heroSubtext {
+    font-size: 1.2rem;
+    margin-top: 0.5rem;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  
+  .heroSubtextInvite {
+    font-size: 1.2rem;
+    margin-top: 0.5rem;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+    font-style: italic;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  
+  /* Section Styles */
+  .section {
+    text-align: center;
+    width: 100%;
+    max-width: 800px;
+    margin: 2rem 0;
+    padding: 2rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sectionTitle {
+    text-transform: uppercase;
+    font-size: 1.5rem;
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+  }
+  
+  .sectionText {
+    font-size: 1rem;
+    color: var(--color-text-primary);
+    margin-bottom: 1.5rem;
+  }
+  
+  .sectionButton {
+    background-color: transparent;
+    border: 1px solid var(--color-text-primary);
+    padding: 0.5rem 2rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .sectionButton:hover {
+    background-color: var(--color-accent);
+    color: #fff;
+  }
+  
+  /* RSVP Form */
+  .formField {
+    margin: 1rem 0;
+  }
+  
+  .formField label {
+    display: block;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-primary);
+  }
+  
+  .formField input,
+  .formField textarea {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.5rem;
+    font-size: 1rem;
+    font-family: var(--font-body);
+    color: var(--color-text-primary);
+  }
+  
+  .formField textarea {
+    min-height: 80px;
+  }
+  
+  .formField input:focus,
+  .formField textarea:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 4px var(--color-accent);
+  }
+  
+  .buttonGroup { 
+    display: flex;
+    justify-content: center; /* Center the buttons in the container */
+    gap: 3rem; /* Add spacing between the buttons */
+  }
+
+  
+  .sectionButton {
+    background-color: transparent;
+    border: 1px solid var(--color-text-primary);
+    padding: 0.5rem 2rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .sectionButton:hover {
+    background-color: var(--color-accent);
+    color: #fff;
+  }

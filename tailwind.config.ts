@@ -1,18 +1,21 @@
-import type { Config } from "tailwindcss";
-
 export default {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx}",
+    "./pages/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
+      fontFamily: {
+        wedding: ['"Hernandez Bros"', "serif"], // Add your custom font
+      },
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: "#fef8f5",
+        textPrimary: "#5a4d4d",
+        accent: "#b084cc",
+        secondaryAccent: "#ffe4e1",
       },
     },
   },
   plugins: [],
-} satisfies Config;
+};

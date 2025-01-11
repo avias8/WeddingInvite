@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Cookies from "js-cookie"; // For managing cookies on the client side
+import styles from "./InvitedGuest.module.css";
 
 export default function InvitedGuest() {
   const [token, setToken] = useState<string | null>(null);
@@ -29,14 +30,6 @@ export default function InvitedGuest() {
   // Save the token to cookies
   const saveTokenToCookies = (token: string) => {
     Cookies.set("inviteToken", token, { expires: 7 }); // Expires in 7 days
-  };
-
-  // Clear the token from cookies
-  const clearTokenFromCookies = () => {
-    Cookies.remove("inviteToken");
-    setToken(null);
-    setInvitee(null);
-    setError("Token cache cleared. Please re-enter your token.");
   };
 
   // Fetch invitee data
@@ -138,159 +131,113 @@ export default function InvitedGuest() {
   };
 
   return (
-    <div className="p-6 border rounded shadow-lg max-w-md mx-auto bg-white">
-      <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
-        Welcome to the Event!
-      </h1>
+    <div className={styles.pageContainer}>
+      <header className={styles.hero}>
+        <h1>
+          <span>RSVP Invitation</span>
+        </h1>
+        <p className={styles.heroSubtext}>
+          Enter your details to confirm your RSVP.
+        </p>
+      </header>
 
-      {!token && !invitee && (
-        <div className="mb-6">
-          <p className="text-gray-600 text-center mb-4">
-            Enter your <strong>Invitation Token</strong> to access your RSVP details.
-          </p>
-          <div className="flex gap-2">
+      {!invitee && (
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>Lookup Invitation</h3>
+          <div className={styles.formField}>
+            <label htmlFor="inviteToken">Invitation Token</label>
             <input
               type="text"
+              id="inviteToken"
               value={lookupValue}
               onChange={(e) => setLookupValue(e.target.value)}
               placeholder="Enter your Invitation Token"
-              className="border rounded px-3 py-2 flex-1"
             />
-            <button
-              onClick={handleLookup}
-              className="bg-blue-600 text-white px-4 py-2 rounded"
-            >
-              Lookup
-            </button>
           </div>
-          {error && <p className="text-red-600 mt-2 text-center">{error}</p>}
-        </div>
+          <button className={styles.sectionButton} onClick={handleLookup}>
+            Lookup
+          </button>
+          {error && <p className="text-red-600 mt-2">{error}</p>}
+        </section>
       )}
 
-      {token || invitee ? (
-        <div>
-          {error ? (
-            <p className="text-red-600 text-center font-semibold">{error}</p>
-          ) : invitee ? (
-            <div>
-              <p className="text-lg font-semibold text-green-700 mb-4">
-                Invitation Validated!
-              </p>
-              <p className="text-gray-800">
-                <strong>Name:</strong> {invitee.name}
-              </p>
-              <p className="text-gray-800">
-                <strong>Email:</strong> {invitee.email}
-              </p>
-              <p className="text-gray-800">
-                <strong>Max Guests Allowed:</strong> {invitee.maxInvites}
-              </p>
-
-              <div className="mt-4">
-                <label className="block font-semibold mb-2">Will you be attending?</label>
-                <div className="flex gap-4">
-                  <button
-                    onClick={() => handleAttendance(true)}
-                    className={`px-4 py-2 font-semibold rounded ${
-                      isAttending === true ? "bg-green-600 text-white" : "bg-gray-300"
-                    }`}
-                  >
-                    Yes
-                  </button>
-                  <button
-                    onClick={() => handleAttendance(false)}
-                    className={`px-4 py-2 font-semibold rounded ${
-                      isAttending === false ? "bg-red-600 text-white" : "bg-gray-300"
-                    }`}
-                  >
-                    No
-                  </button>
-                </div>
-              </div>
-
-              {isAttending && (
-                <div>
-                  <div className="mt-4">
-                    <label className="block font-semibold mb-2">Guests Attending:</label>
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={() => handleGuestsChange(Math.max(1, guests - 1))}
-                        className="px-3 py-1 bg-gray-300 rounded"
-                        disabled={guests <= 1}
-                      >
-                        -
-                      </button>
-                      <span className="text-lg">{guests}</span>
-                      <button
-                        onClick={() => handleGuestsChange(Math.min(invitee.maxInvites, guests + 1))}
-                        className="px-3 py-1 bg-gray-300 rounded"
-                        disabled={guests >= invitee.maxInvites}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="mt-4">
-                    <label className="block font-semibold mb-2">Dietary Restrictions:</label>
-                    <textarea
-                      value={dietaryRestrictions}
-                      onChange={(e) => setDietaryRestrictions(e.target.value)}
-                      className="w-full border px-2 py-1 rounded bg-white text-black"
-                      placeholder="e.g., Vegan, Nut Allergy"
-                    />
-                  </div>
-
-                  <div className="mt-4">
-                    <label className="block font-semibold mb-2">Accessibility Info:</label>
-                    <textarea
-                      value={accessibilityInfo}
-                      onChange={(e) => setAccessibilityInfo(e.target.value)}
-                      className="w-full border px-2 py-1 rounded bg-white text-black"
-                      placeholder="e.g., Wheelchair access required"
-                    />
-                  </div>
-
-                  <div className="mt-4">
-                    <label className="block font-semibold mb-2">Comments:</label>
-                    <textarea
-                      value={comments}
-                      onChange={(e) => setComments(e.target.value)}
-                      className="w-full border px-2 py-1 rounded bg-white text-black"
-                      placeholder="Any additional comments"
-                    />
-                  </div>
-
-                  <div className="mt-4">
-                    <label className="block font-semibold mb-2">Song Requests:</label>
-                    <textarea
-                      value={songRequests}
-                      onChange={(e) => setSongRequests(e.target.value)}
-                      className="w-full border px-2 py-1 rounded bg-white text-black"
-                      placeholder="e.g., Your favorite songs"
-                    />
-                  </div>
-                </div>
-              )}
-
+      {invitee && (
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>Welcome, {invitee.name}</h3>
+          <div className={styles.formField}>
+            <label>Will you be attending?</label>
+            <div className={styles.buttonGroup}>
               <button
-                onClick={handleSubmit}
-                className="mt-6 bg-blue-600 text-white px-4 py-2 rounded w-full font-semibold"
+                className={`${styles.sectionButton} ${
+                  isAttending === true ? styles.activeButton : ""
+                }`}
+                onClick={() => handleAttendance(true)}
               >
-                Submit RSVP
+                Yes
               </button>
               <button
-                onClick={clearTokenFromCookies}
-                className="mt-4 bg-red-600 text-white px-4 py-2 rounded w-full font-semibold"
+                className={`${styles.sectionButton} ${
+                  isAttending === false ? styles.activeButton : ""
+                }`}
+                onClick={() => handleAttendance(false)}
               >
-                This isn&apos;t the right person
+                No
               </button>
             </div>
-          ) : (
-            <p className="text-blue-500 text-center">Validating your token...</p>
+          </div>
+
+          {isAttending && (
+            <>
+              <div className={styles.formField}>
+                <label>Number of Guests:</label>
+                <input
+                  type="number"
+                  value={guests}
+                  onChange={(e) => handleGuestsChange(parseInt(e.target.value))}
+                  min="1"
+                  max={invitee.maxInvites}
+                />
+              </div>
+              <div className={styles.formField}>
+                <label>Dietary Restrictions:</label>
+                <textarea
+                  value={dietaryRestrictions}
+                  onChange={(e) => setDietaryRestrictions(e.target.value)}
+                  placeholder="e.g., Vegan, Nut Allergy"
+                />
+              </div>
+              <div className={styles.formField}>
+                <label>Accessibility Info:</label>
+                <textarea
+                  value={accessibilityInfo}
+                  onChange={(e) => setAccessibilityInfo(e.target.value)}
+                  placeholder="e.g., Wheelchair access required"
+                />
+              </div>
+              <div className={styles.formField}>
+                <label>Comments:</label>
+                <textarea
+                  value={comments}
+                  onChange={(e) => setComments(e.target.value)}
+                  placeholder="Any additional comments"
+                />
+              </div>
+              <div className={styles.formField}>
+                <label>Song Requests:</label>
+                <textarea
+                  value={songRequests}
+                  onChange={(e) => setSongRequests(e.target.value)}
+                  placeholder="e.g., Your favorite songs"
+                />
+              </div>
+            </>
           )}
-        </div>
-      ) : null}
+
+          <button className={styles.sectionButton} onClick={handleSubmit}>
+            Submit RSVP
+          </button>
+        </section>
+      )}
     </div>
   );
 }

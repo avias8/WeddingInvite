@@ -1,9 +1,8 @@
 import InvitedGuest from "../InvitedGuest";
+import HomePage from "../HomePage";
 
 export default function InvitedPage() {
   return (
-    <div className="p-8">
-      <InvitedGuest />
-    </div>
+    <HomePage />
   );
 }

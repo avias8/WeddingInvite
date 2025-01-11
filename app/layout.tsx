@@ -13,24 +13,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Event Invite Manager",
-  description: "Manage and RSVP for event invites.",
+  title: "Avi & Shakthi's Wedding",
+  description: "Manage and RSVP for wedding invites.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body
+        id="__next" // Added id for react-modal to function properly
         className={`${geistSans.variable} ${geistMono.variable} bg-gray-50 text-gray-900 antialiased`}
       >
-        <header className="bg-blue-600 text-white py-4 shadow-lg">
-          <div className="container mx-auto px-4">
-            <h1 className="text-xl font-bold">Event Invite Manager</h1>
-          </div>
-        </header>
-        <main className="container mx-auto px-4 py-6">{children}</main>
+        <main>
+          {children}
+        </main>
         <footer className="bg-gray-800 text-white text-center py-4 mt-6">
-          <p>© 2025 Avi Varma. All rights reserved.</p>
+          <p>© 2025 Avi Varma & Family. All rights reserved.</p>
         </footer>
       </body>
     </html>

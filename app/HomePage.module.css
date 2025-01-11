@@ -1,0 +1,271 @@
+/* Page Container */
+.pageContainer {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-wedding);
+    height: 100%;
+    padding: 2rem;
+    width: 100%;
+  }
+
+  /* Modal Content */
+.modalContent {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--color-background);
+    border-radius: 8px;
+    padding: 2rem;
+    width: 80%; /* Set a fixed width, 50% of the viewport width */
+    height: auto; /* Adjust height automatically */
+    max-height: 80%; /* Ensure it doesn't exceed 80% of the viewport height */
+    overflow-y: auto; /* Enable scrolling if content exceeds the height */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Modal Overlay */
+  .modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent overlay */
+    z-index: 1000; /* Ensure it's on top of everything */
+  }
+  
+    /* Close Button */
+    .closeButton {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: transparent;
+    border: 1px solid var(--color-text-primary);
+    padding: 0.5rem 2rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    z-index: 1001; /* Ensure it's above the modal content */
+  }
+
+  .closeButton:hover {
+    background-color: var(--color-secondary-accent); /* Change background color on hover */
+  }
+
+  .bottomCloseButton {
+    display: block; /* Ensures the button is treated as a block-level element */
+    margin: 2rem auto 0; /* Centers horizontally with `auto` and adds spacing on top (2rem) */
+    background-color: transparent;
+    border: 1px solid var(--color-text-primary);
+    padding: 0.5rem 2rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    z-index: 1001; /* Ensures it's above the modal content */
+    text-align: center; /* Aligns the text in the center */
+  }
+  
+  .bottomCloseButton:hover {
+    background-color: var(--color-secondary-accent); /* Change background color on hover */
+  }
+  
+  
+  /* Title Section */
+  .hero {
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 1.5px solid var(--color-border);
+    width: 100%;
+  }
+  
+  .hero span {
+    font-size: clamp(2.5rem, 10vw, 100rem); /* Minimum: 2.5rem, Scales with viewport, Max: 6rem */
+    font-weight: lighter;
+    letter-spacing: 0.05rem;
+    display: block;
+    margin-bottom: 2rem;
+  }
+  
+  .heroSubtext {
+    font-size: 1.2rem;
+    margin-top: 0.5rem;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  .heroSubtextInvite {
+    font-size: 1.2rem;
+    margin-top: 0.5rem;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+  }
+  
+  /* Horizontal Divider */
+  .horizontalDivider {
+    width: 100%;
+    height: 1px;
+    background-color: var(--color-border);
+    margin: 2rem 0;
+  }
+  
+  /* Section Styles */
+  .section {
+    height: 30%; /* Adjust percentage height for each section */
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  
+  .sectionTitle {
+    text-transform: uppercase;
+    font-size: 1.5rem;
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+  }
+  
+  .sectionText {
+    font-size: 1rem;
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+  }
+  
+  .sectionButton {
+    background-color: transparent;
+    border: 1px solid var(--color-text-primary);
+    padding: 0.5rem 2rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .sectionButton:hover {
+    background-color: var(--color-accent);
+    color: #fff;
+  }
+
+  .hostQuestion {
+    width: 100%;
+  }
+  /* Event Details Section */
+  .eventDetails {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    color: var(--color-text-primary);
+    width: 100%;
+    height: 250px; /* Fixed height for better layout control */
+    font-size: 2rem; /* Large font size for dates and times */
+    text-align: center;
+    border-top: 1.5px solid var(--color-border);
+    border-bottom: 1.5px solid var(--color-border);
+    flex-direction: row; /* Default: Horizontal layout */
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  /* Hosted By Section */
+  .hostedBy {
+    font-family: 'Hernandez Bros', serif;
+    flex-basis: 50%; /* 30% width for hosted by */
+    border-right: 2px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center the content vertically */
+    align-items: center; /* Center the content horizontally */
+  }
+  
+  /* Dates Section */
+  .datesSection {
+    font-family: 'Hernandez Bros', serif;
+    flex-basis: 70%; /* 70% width for dates */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center the content vertically */
+    align-items: center; /* Center the content horizontally */
+    padding: 4rem;
+  }
+  
+  /* Footer */
+  .footer {
+    height: 10%; /* Footer height if needed */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem; /* Large font size for RSVP */
+    letter-spacing: 0.1rem;
+    color: var(--color-text-primary);
+  }
+  
+  .footerText {
+    font-size: 1rem;
+    color: var(--color-text-primary);
+  }
+  
+  /* Fonts and Text Styles */
+  .heroFont {
+    font-family: 'Hernandez Bros', serif;
+    font-weight: 300; /* Adjust weight if needed */
+    color: var(--color-text-primary);
+    letter-spacing: 0.05rem;
+  }
+  
+  .familyName {
+    font-size: 2rem; /* Large font size for families */
+    letter-spacing: 0.05rem;
+    margin: 0.5rem 0;
+    color: var(--color-text-primary);
+  }
+  
+  .location {
+    font-size: 2rem; /* Large font size for location */
+    margin: 0.5rem 0;
+    color: var(--color-text-primary);
+  }
+  
+
+  /* Responsive Design */
+@media (max-width: 900px) {
+    .eventDetails {
+      flex-direction: column; /* Stack vertically on smaller screens */
+      height: auto; /* Adjust height for content */
+      gap: 0; /* Remove gaps */
+    }
+  
+    .hostedBy,
+    .datesSection {
+      flex-basis: 100%; /* Full width for each section */
+      border-right: none; /* Remove divider for stacked layout */
+      border-bottom: 1px solid var(--color-border); /* Optional: Add divider between stacked sections */
+      padding: 1rem 0; /* Add vertical padding */
+    }
+  
+    .datesSection {
+      border-bottom: none; /* Remove bottom border for the last section */
+    }
+  }
+
+  @media (max-width: 600px) {
+    .modalContent {
+      width: 90%; /* Take up more space on smaller screens */
+      max-width: 90%; /* Match width for small screens */
+      padding: 1rem; /* Reduce padding for smaller screens */
+      height: 90vh; /* Adjust modal height for smaller screens */
+    }
+
+    .bottomCloseButton {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+  }
+  
