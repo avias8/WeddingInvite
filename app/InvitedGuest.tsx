@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Cookies from "js-cookie"; // For managing cookies on the client side
 
 export default function InvitedGuest() {
   const [token, setToken] = useState<string | null>(null);
@@ -25,6 +26,7 @@ export default function InvitedGuest() {
   const [comments, setComments] = useState<string>("");
   const [songRequests, setSongRequests] = useState<string>("");
 
+  // Extract token from URL hash
   const extractTokenFromHash = () => {
     const hash = window.location.hash;
     if (hash.startsWith("#")) {
@@ -33,6 +35,20 @@ export default function InvitedGuest() {
     return null;
   };
 
+  // Save the token to cookies
+  const saveTokenToCookies = (token: string) => {
+    Cookies.set("inviteToken", token, { expires: 7 }); // Expires in 7 days
+  };
+
+  // Clear the token from cookies
+  const clearTokenFromCookies = () => {
+    Cookies.remove("inviteToken");
+    setToken(null);
+    setInvitee(null);
+    setError("Token cache cleared. Please re-enter your token.");
+  };
+
+  // Fetch invitee data
   const fetchInvitee = async (lookupToken: string) => {
     try {
       const response = await fetch(`/api/invitees/${lookupToken}`);
@@ -42,6 +58,7 @@ export default function InvitedGuest() {
       const data = await response.json();
       setInvitee(data);
 
+      // Set invitee details
       setIsAttending(data.isAttending);
       setGuests(data.guests || data.maxInvites);
       setDietaryRestrictions(data.dietaryRestrictions || "");
@@ -49,17 +66,18 @@ export default function InvitedGuest() {
       setComments(data.comments || "");
       setSongRequests(data.songRequests || "");
 
-      // Cache the token in localStorage
-      localStorage.setItem("inviteToken", lookupToken);
+      // Save token to cookies
+      saveTokenToCookies(lookupToken);
     } catch (err) {
       console.error("Error fetching invitee:", err);
       setError(err instanceof Error ? err.message : "An unknown error occurred.");
     }
   };
 
+  // Initialize token and fetch data
   useEffect(() => {
     const tokenFromHash = extractTokenFromHash();
-    const cachedToken = localStorage.getItem("inviteToken");
+    const cachedToken = Cookies.get("inviteToken");
 
     if (tokenFromHash) {
       setToken(tokenFromHash);
@@ -76,7 +94,7 @@ export default function InvitedGuest() {
       return;
     }
     setError(null);
-    fetchInvitee(lookupValue.trim());
+    await fetchInvitee(lookupValue.trim());
   };
 
   const handleAttendance = (attending: boolean) => {
@@ -128,25 +146,11 @@ export default function InvitedGuest() {
     }
   };
 
-  const clearCache = () => {
-    localStorage.removeItem("inviteToken");
-    setToken(null);
-    setInvitee(null);
-    setError("Token cache cleared. Please re-enter your token.");
-  };
-
   return (
     <div className="p-6 border rounded shadow-lg max-w-md mx-auto bg-white">
       <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
         Welcome to the Event!
       </h1>
-
-      <div className="mt-6 p-4 border border-dashed rounded bg-gray-100">
-        <h2 className="text-xl font-bold text-center mb-2">Debug Info</h2>
-        <p className="text-gray-800">
-          <strong>Cached Token:</strong> {localStorage.getItem("inviteToken") || "None"}
-        </p>
-      </div>
 
       {!token && !invitee && (
         <div className="mb-6">
@@ -285,10 +289,10 @@ export default function InvitedGuest() {
                 Submit RSVP
               </button>
               <button
-                onClick={clearCache}
+                onClick={clearTokenFromCookies}
                 className="mt-4 bg-red-600 text-white px-4 py-2 rounded w-full font-semibold"
               >
-                This isn't the right person
+                This isn&apos;t the right person
               </button>
             </div>
           ) : (
