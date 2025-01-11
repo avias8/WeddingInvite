@@ -12,24 +12,22 @@ export default function OurStory() {
         <h1>
           <span>Avi & Shakthi</span>
         </h1>
-        <p className="heroSubtext">A Love Story Written in the Stars</p>
+        <p className="heroSubtext">A Story of Us</p>
       </header>
 
       {/* Our Story Section */}
       <section className="section">
         <h2 className="sectionTitle">Our Story</h2>
         <p className="sectionText">
-          Once upon a time in the vibrant city of Calgary, two paths crossed
-          that were destined to intertwine. Avi, a dreamer with a passion for
-          technology, and Shakthi, a creative spirit with a love for life,
-          found each other in the most serendipitous way. Together, they
-          embarked on a journey filled with love, laughter, and adventure.
+          It all began in Calgary, where Avi and Shakthi first met. From that
+          moment, a connection formed, and what started as a simple
+          conversation soon grew into something special.
         </p>
         <p className="sectionText">
-          From their first coffee date to late-night stargazing, every moment
-          brought them closer. Now, as they take the next step in their
-          beautiful journey, they invite you to join them in celebrating their
-          love story.
+          Over time, they discovered shared values, laughter, and experiences
+          that brought them closer together. Now, they are excited to take the
+          next step in their journey and look forward to celebrating this
+          special occasion with all of you.
         </p>
       </section>
 
@@ -38,7 +36,7 @@ export default function OurStory() {
         {/* Hosted By Section */}
         <div className="hostedBy">
           <p className="sectionTitle">Hosted By</p>
-          <p className="familyName">The Varma and Ganesh Families 💍</p>
+          <p className="familyName">The Varma and Ganesh Families</p>
         </div>
         {/* Dates Section */}
         <div className="datesSection">
@@ -51,7 +49,7 @@ export default function OurStory() {
 
       {/* Footer */}
       <footer className="footer">
-        <p className="footerText">We can't wait to celebrate with you!</p>
+        <p className="footerText">We can&apos;t wait to celebrate with you.</p>
       </footer>
     </div>
   );
