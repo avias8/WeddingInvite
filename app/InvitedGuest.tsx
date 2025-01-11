@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Cookies from "js-cookie"; // For managing cookies on the client side
 
 export default function InvitedGuest() {
@@ -8,7 +8,7 @@ export default function InvitedGuest() {
   const [lookupValue, setLookupValue] = useState<string>("");
   const [invitee, setInvitee] = useState<{
     name: string;
-    email: string; // Added email field
+    email: string;
     maxInvites: number;
     guests: number;
     isAttending: boolean;
@@ -26,15 +26,6 @@ export default function InvitedGuest() {
   const [comments, setComments] = useState<string>("");
   const [songRequests, setSongRequests] = useState<string>("");
 
-  // Extract token from URL hash
-  const extractTokenFromHash = () => {
-    const hash = window.location.hash;
-    if (hash.startsWith("#")) {
-      return hash.substring(1); // Remove "#" and return the token
-    }
-    return null;
-  };
-
   // Save the token to cookies
   const saveTokenToCookies = (token: string) => {
     Cookies.set("inviteToken", token, { expires: 7 }); // Expires in 7 days
@@ -49,7 +40,7 @@ export default function InvitedGuest() {
   };
 
   // Fetch invitee data
-  const fetchInvitee = async (lookupToken: string) => {
+  const fetchInvitee = useCallback(async (lookupToken: string) => {
     try {
       const response = await fetch(`/api/invitees/${lookupToken}`);
       if (!response.ok) {
@@ -72,11 +63,11 @@ export default function InvitedGuest() {
       console.error("Error fetching invitee:", err);
       setError(err instanceof Error ? err.message : "An unknown error occurred.");
     }
-  };
+  }, []);
 
   // Initialize token and fetch data
   useEffect(() => {
-    const tokenFromHash = extractTokenFromHash();
+    const tokenFromHash = window.location.hash.substring(1);
     const cachedToken = Cookies.get("inviteToken");
 
     if (tokenFromHash) {
@@ -86,7 +77,7 @@ export default function InvitedGuest() {
       setToken(cachedToken);
       fetchInvitee(cachedToken);
     }
-  }, []);
+  }, [fetchInvitee]);
 
   const handleLookup = async () => {
     if (!lookupValue.trim()) {
