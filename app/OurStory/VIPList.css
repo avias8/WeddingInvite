@@ -1,0 +1,36 @@
+.vip-container {
+  text-align: center;
+  margin: 2rem auto;
+  font-family: var(--font-wedding);
+  color: var(--color-text-primary);
+}
+
+.vip-section-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}
+
+.vip-guest-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3rem;
+}
+
+.vip-guest-section {
+  flex: 1 1 300px; /* Ensures responsiveness */
+  max-width: 300px;
+}
+
+.vip-guest-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.vip-guest-name {
+  font-size: 1rem;
+  margin: 0.5rem 0;
+}

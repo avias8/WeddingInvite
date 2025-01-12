@@ -3,8 +3,52 @@
 import React from "react";
 // Import the CSS file
 import "./OurStory.css";
+// Import the VIPList component
+import VIPList from "./VIPlist";
 
 export default function OurStory() {
+  const vipData = [
+    {
+      title: "Parents of the Bride",
+      names: ["Karthika Devi & Ganesh Sankar Govindarajan"],
+    },
+    {
+      title: "Parents of the Groom",
+      names: ["Vaishali and Anil Varma"],
+    },
+    {
+      title: "Brother of the Bride",
+      names: ["Prathyunkar Ganesh Sankar"],
+    },
+    {
+      title: "Sisters of the Groom",
+      names: ["Tanya & Vani Chowdhary"],
+    },
+    {
+      title: "Maid of Honour",
+      names: ["Areeba Nadeem"],
+    },
+    {
+      title: "Best Man",
+      names: ["Zain Chandani"],
+    },
+    {
+      title: "Bridal Party",
+      names: [
+        "Kavya Bhagawatula",
+        "Harshad Karishnaraj"
+      ],
+    },
+    {
+      title: "Groomsmen",
+      names: [
+        "Sunith Arlic",
+        "Sim Khinda",
+        "Saffy Swaleh"
+      ],
+    },
+  ];
+
   return (
     <div className="pageContainer">
       {/* Hero Section */}
@@ -12,7 +56,6 @@ export default function OurStory() {
         <h1>
           <span>Avi & Shakthi</span>
         </h1>
-        <p className="heroSubtext">A Story of Us</p>
       </header>
 
       {/* Our Story Section */}
@@ -44,6 +87,11 @@ export default function OurStory() {
           <br />
           <p className="location">Calgary, Alberta</p>
         </div>
+      </section>
+
+      {/* VIP List Section */}
+      <section className="section">
+        <VIPList sectionTitle="Our Guests of Honor" guests={vipData} />
       </section>
 
       {/* Footer */}
