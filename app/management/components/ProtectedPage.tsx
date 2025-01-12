@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import AdminAdd from "./AdminInvite";
+import AdminInvite from "./AdminInvite";
 import AdminPage from "./AdminTiles";
 import "./ManagementPage.css";
 
@@ -36,7 +36,7 @@ const ProtectedPage: React.FC = () => {
         <h1 className="management-title">Manage Invitees</h1>
         <div className="management-section">
           <h2 className="section-title">Send Invite</h2>
-          <AdminAdd />
+          <AdminInvite />
         </div>
         <div className="management-section">
           <AdminPage />
@@ -67,6 +67,14 @@ const ProtectedPage: React.FC = () => {
           className="bg-blue-500 text-white px-4 py-2 rounded w-full"
         >
           Submit
+        </button>
+        {/* Go Back Button */}
+        <button
+          type="button"
+          onClick={() => (window.location.href = "/")} // Navigate back to the base domain
+          className="mt-4 bg-gray-500 text-white px-4 py-2 rounded w-full hover:bg-gray-600"
+        >
+          Go Back
         </button>
       </form>
     </div>

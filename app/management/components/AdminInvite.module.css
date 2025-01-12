@@ -1,0 +1,56 @@
+/* Form Container */
+.formContainer {
+  width: 100%;
+  max-width: 100%;
+  padding: 2rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-background);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin: 2rem 0;
+}
+
+/* Form Field */
+.formField {
+  margin-bottom: 1.5rem;
+}
+
+.formField label {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: bold;
+  font-size: 1rem;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.formField input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: var(--font-body);
+  color: var(--color-text-primary);
+  background-color: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.formField input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 4px var(--color-accent);
+}
+
+/* Error Text */
+.errorText {
+  color: #d9534f; /* Bootstrap-like red color */
+  font-size: 0.875rem; /* Slightly smaller than label */
+  margin-top: 0.25rem;
+  font-family: var(--font-body);
+}
+
+/* Shadow Effect */
+.shadowEffect {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}

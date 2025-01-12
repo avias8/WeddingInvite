@@ -26,6 +26,25 @@
   animation: fadeIn 0.3s ease-in-out; /* Optional animation for smoother appearance */
 }
 
+/* Button Hover Styles */
+button {
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+
+button:hover {
+  transform: scale(1.03);
+}
+
+/* 'Go Back' Button Specific Styles */
+button.bg-gray-500 {
+  background-color: #6b7280; /* Tailwind's gray-500 color */
+}
+
+button.bg-gray-500:hover {
+  background-color: #4b5563; /* Tailwind's gray-600 color */
+}
+
+
 .modal-form h2 {
   font-size: 2rem;
   text-align: center;

@@ -1,6 +1,4 @@
-/* Header.css */
-
-/* Container for the header */
+/* Header container */
 .header {
     background-color: var(--color-background);
     border-bottom: 2px solid var(--color-border);
@@ -8,44 +6,55 @@
     align-items: center;
     justify-content: space-between;
     padding: 1rem 2rem;
-    /* Adjust spacing as needed */
   }
   
-  /* Left (Management link) and Right (RSVP, Details) containers */
+  /* Left (Favicon) and Right (Links & Cog Icon) containers */
   .header-left,
   .header-right {
     display: flex;
     align-items: center;
-    gap: 2rem; /* Adjust as needed */
+    gap: 2rem;
   }
   
-  /* If you want spacing between the links on the right */
-  .header-right .header-link:not(:first-child) {
-    margin-left: 1rem;
+  /* Styling for the favicon in the header-left */
+  .header-left .header-icon {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  /* Add a slight hover effect to the favicon */
+  .header-left .header-icon:hover {
+    transform: scale(1.1);
   }
   
   /* Common style for all links in the header */
   .header-link {
-    font-family: var(--font-wedding); /* or var(--font-body), whichever you prefer */
+    font-family: var(--font-wedding);
     font-weight: 400;
     color: var(--color-text-primary);
     text-decoration: none;
-    /* Slight letter spacing for a refined look */
     letter-spacing: 0.5px;
     transition: color 0.2s ease-in-out;
   }
   
-  /* Hover effect to use your accent color */
+  /* Hover effect for the links */
   .header-link:hover {
     color: var(--color-accent);
   }
   
-  /* 
-     If you ever want to fully hide the "Management" link in production, 
-     you can add a hidden class:
-  
-  .hidden {
-    display: none !important;
+  /* Cog icon styling */
+  .header-cog {
+    font-size: 24px; /* Adjust the size of the cog icon */
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
   }
-  */
+  
+  /* Hover effect for the cog icon */
+  .header-cog:hover {
+    transform: scale(1.1);
+    color: var(--color-accent);
+  }
   

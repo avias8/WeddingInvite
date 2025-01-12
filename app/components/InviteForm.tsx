@@ -154,7 +154,7 @@ export default function InvitedGuest() {
               placeholder="Enter your Invitation Token"
             />
           </div>
-          <button className={styles.sectionButton} onClick={handleLookup}>
+          <button className="primary" onClick={handleLookup}>
             Lookup
           </button>
           {error && <p className="text-red-600 mt-2">{error}</p>}
@@ -166,19 +166,15 @@ export default function InvitedGuest() {
           <h3 className={styles.sectionTitle}>Welcome, {invitee.name}</h3>
           <div className={styles.formField}>
             <label>Will you be attending?</label>
-            <div className={styles.buttonGroup}>
+            <div className="buttonGroup">
               <button
-                className={`${styles.sectionButton} ${
-                  isAttending === true ? styles.activeButton : ""
-                }`}
+                className={`secondary ${isAttending === true ? "active" : ""}`}
                 onClick={() => handleAttendance(true)}
               >
                 Yes
               </button>
               <button
-                className={`${styles.sectionButton} ${
-                  isAttending === false ? styles.activeButton : ""
-                }`}
+                className={`secondary ${isAttending === false ? "active" : ""}`}
                 onClick={() => handleAttendance(false)}
               >
                 No
@@ -233,7 +229,7 @@ export default function InvitedGuest() {
             </>
           )}
 
-          <button className={styles.sectionButton} onClick={handleSubmit}>
+          <button className="primary" onClick={handleSubmit}>
             Submit RSVP
           </button>
         </section>
