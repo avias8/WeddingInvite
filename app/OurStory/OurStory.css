@@ -26,6 +26,9 @@
     width: 100%;
     height: auto;
     display: block;
+    border-radius: 16px; /* Add rounded corners to match the image */
+    overflow: hidden; /* Ensures no overflow beyond the rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle shadow for consistency */
 }
 
 /* Style the span to overlay the video */
