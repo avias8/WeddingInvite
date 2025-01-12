@@ -1,0 +1,52 @@
+.detailsContainer {
+  padding: 2rem;
+  background-color: #fef8f5; /* Match the wedding background */
+  color: #5a4d4d; /* Match text color */
+  min-height: 100vh;
+  font-family: var(--font-body); /* Use consistent body font */
+}
+
+.title {
+  font-family: var(--font-wedding); /* Use wedding font */
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #b084cc; /* Accent color */
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #fff; /* White background for sections */
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sectionTitle {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #b084cc; /* Accent color */
+  margin-bottom: 1rem;
+}
+
+.sectionText {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #5a4d4d;
+}
+
+.scheduleList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.scheduleList li {
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+.scheduleList li strong {
+  color: #b084cc; /* Accent color for time */
+}

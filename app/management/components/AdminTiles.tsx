@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FaTrash, FaEdit } from "react-icons/fa";
-import EditInviteeForm from "../EditInviteeForm"; // Correct path for EditInviteeForm component
+import EditInviteeForm from "../../EditInviteeForm"; // Correct path for EditInviteeForm component
 
 // Define the Invitee type
 type Invitee = {

@@ -1,11 +1,9 @@
-"use client";
-
 import React from "react";
 // Import the CSS file
 import "./OurStory.css";
 // Import the VIPList component
-import VIPList from "./VIPlist";
-import Timeline from "../Timeline";
+import VIPList from "../components/VIPlist";
+import Timeline from "../components/Timeline";
 
 export default function OurStory() {
     const vipData = [

@@ -1,0 +1,51 @@
+/* Header.css */
+
+/* Container for the header */
+.header {
+    background-color: var(--color-background);
+    border-bottom: 2px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    /* Adjust spacing as needed */
+  }
+  
+  /* Left (Management link) and Right (RSVP, Details) containers */
+  .header-left,
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 2rem; /* Adjust as needed */
+  }
+  
+  /* If you want spacing between the links on the right */
+  .header-right .header-link:not(:first-child) {
+    margin-left: 1rem;
+  }
+  
+  /* Common style for all links in the header */
+  .header-link {
+    font-family: var(--font-wedding); /* or var(--font-body), whichever you prefer */
+    font-weight: 400;
+    color: var(--color-text-primary);
+    text-decoration: none;
+    /* Slight letter spacing for a refined look */
+    letter-spacing: 0.5px;
+    transition: color 0.2s ease-in-out;
+  }
+  
+  /* Hover effect to use your accent color */
+  .header-link:hover {
+    color: var(--color-accent);
+  }
+  
+  /* 
+     If you ever want to fully hide the "Management" link in production, 
+     you can add a hidden class:
+  
+  .hidden {
+    display: none !important;
+  }
+  */
+  

@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import AdminAdd from "./management/AdminInfo";
-import AdminPage from "./management/AdminPage";
-import "./management/ManagementPage.css";
+import AdminAdd from "./AdminInvite";
+import AdminPage from "./AdminTiles";
+import "./ManagementPage.css";
 
 const ProtectedPage: React.FC = () => {
   const [password, setPassword] = useState("");

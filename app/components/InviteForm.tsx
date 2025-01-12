@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Cookies from "js-cookie"; // For managing cookies on the client side
-import styles from "./InvitedGuest.module.css";
+import styles from "./InviteForm.module.css";
 
 export default function InvitedGuest() {
   const [token, setToken] = useState<string | null>(null);
