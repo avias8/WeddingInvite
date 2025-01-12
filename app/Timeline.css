@@ -1,0 +1,77 @@
+.timeline-container {
+  font-family: var(--font-wedding);
+  color: var(--color-text-primary);
+  padding: 2rem;
+}
+
+.timeline-covertitle {
+  text-align: center;
+  font-size: 2.5rem;
+  font-family: var(--font-wedding);
+  font-weight: bold;
+  margin-bottom: 2rem;
+  color: var(--color-text-primary);
+}
+
+.timeline-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-family: var(--font-wedding);
+  font-weight: bold;
+  margin-bottom: 2rem;
+  color: var(--color-text-primary);
+}
+
+.timeline-day {
+  margin-bottom: 2rem;
+}
+
+.timeline-date {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: var(--color-accent);
+  justify-content: space-between;
+  align-items: center;
+}
+
+.timeline-location {
+  font-size: 1rem;
+  font-style: italic;
+  color: var(  --color-text-primary  );
+  margin-left: 0.5rem;
+}
+
+.timeline-events {
+  border-left: 2px solid var(--color-border);
+  padding-left: 2rem;
+  position: relative;
+}
+
+.timeline-event {
+  margin-bottom: 1.5rem;
+  position: relative;
+  padding-left: 0;
+  display: flex;
+  align-items: center;
+}
+
+.timeline-event::before {
+  content: "♥"; /* You can replace this with other symbols like "★", "•", "◆", "✔", "✿", etc. */
+  color: var(--color-accent);
+  font-size: 2rem;
+  position: absolute;
+  left: -2.7rem;
+  transform: translateY(-50%);
+}
+
+.timeline-time {
+  font-weight: bold;
+  font-size: 1.5rem;
+  margin-right: 1rem;
+}
+
+.timeline-details {
+  font-size: 1rem;
+  font-style: italic;
+}

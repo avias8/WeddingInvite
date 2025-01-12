@@ -1,4 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Hernandez+Bros:wght@300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap');
+
 
 @tailwind base;
 @tailwind components;
@@ -6,7 +8,7 @@
 
 /* Root Variables for Colors and Fonts */
 :root {
-  --font-wedding: 'Hernandez Bros', serif;
+  --font-wedding: 'Libre Baskerville', serif;
   --font-body: 'Georgia', serif;
 
   --color-background: #fef8f5;
