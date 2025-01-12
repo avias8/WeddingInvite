@@ -15,7 +15,7 @@ export default function AdminAdd() {
       email,
       maxInvites: maxGuests, // Assign maxGuests to maxInvites
       guests: 0, // Default guests attending is 0
-      isAttending: false, // Default to not attending
+      isAttending: null, // Default to null
     };
 
     try {

@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       songRequests,
     } = await req.json();
 
-    if (!name || !email || guests === undefined || isAttending === undefined) {
+    if (!name || !email || guests === undefined) {
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
@@ -52,47 +52,58 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function PUT(req: NextRequest) {
+export async function PUT(
+  req: NextRequest,
+  context: { params: Promise<{ token: string }> }
+) {
   try {
+    const { token } = await context.params;
+
+    if (!token) {
+      return new NextResponse("Token is required", { status: 400 });
+    }
+
     const {
-      id,
-      name,
-      email,
-      guests,
       isAttending,
-      maxInvites,
+      guests,
       dietaryRestrictions,
       accessibilityInfo,
       comments,
       songRequests,
     } = await req.json();
 
-    // Validate required fields
-    if (!id || typeof id !== "number") {
-      return new NextResponse("Invalid or missing ID", { status: 400 });
+    if (isAttending === undefined && guests === undefined) {
+      return new NextResponse("isAttending or guests are required", {
+        status: 400,
+      });
     }
+    
 
     const updatedInvitee = await prisma.invitee.update({
-      where: { id },
+      where: { token },
       data: {
-        name,
-        email,
-        guests,
         isAttending,
-        maxInvites: maxInvites || 0,
+        guests,
         dietaryRestrictions: dietaryRestrictions || null,
         accessibilityInfo: accessibilityInfo || null,
         comments: comments || null,
         songRequests: songRequests || null,
+        respondedAt: new Date(),
       },
     });
 
     return NextResponse.json(updatedInvitee);
   } catch (error) {
-    console.error("PUT invitee error:", error);
+    console.error("Error updating invitee:", error);
+
+    if (error instanceof Error && error.message.includes("No record found")) {
+      return new NextResponse("Invitee not found", { status: 404 });
+    }
+
     return new NextResponse("Error updating invitee", { status: 500 });
   }
 }
+
 
 export async function DELETE(req: NextRequest) {
   try {

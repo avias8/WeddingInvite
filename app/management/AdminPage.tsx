@@ -119,7 +119,8 @@ export default function AdminPage() {
                 <strong>Email:</strong> {i.email}
               </p>
               <p>
-                <strong>Attending:</strong> {i.isAttending ? "Yes" : "No"}
+                <strong>Attending:</strong>{" "}
+                {i.isAttending === null ? "No Response" : i.isAttending ? "Yes" : "No"}
               </p>
               <p>
                 <strong>Guests:</strong> {i.guests}/{i.maxInvites}
@@ -166,29 +167,30 @@ export default function AdminPage() {
       )}
 
       <style jsx>{`
-        .tile {
-          position: relative;
-        }
-        .tile-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .actions {
-          display: flex;
-          gap: 10px;
-        }
-        .trash-icon,
-        .edit-icon {
-          cursor: pointer;
-        }
-        .trash-icon {
-          color: red;
-        }
-        .edit-icon {
-          color: blue;
-        }
-      `}</style>
+    .tile {
+      position: relative;
+    }
+    .tile-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+    .trash-icon,
+    .edit-icon {
+      cursor: pointer;
+    }
+    .trash-icon {
+      color: red;
+    }
+    .edit-icon {
+      color: blue;
+    }
+  `}</style>
     </div>
+
   );
 }

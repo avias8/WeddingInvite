@@ -1,15 +1,15 @@
 .timeline-container {
   font-family: var(--font-wedding);
   color: var(--color-text-primary);
-  padding: 2rem;
+  padding: 2.5rem; /* Increased padding for the container */
 }
 
 .timeline-covertitle {
   text-align: center;
-  font-size: 2.5rem;
+  font-size: 2.8rem; /* Slightly larger for emphasis */
   font-family: var(--font-wedding);
   font-weight: bold;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem; /* More space below the title */
   color: var(--color-text-primary);
 }
 
@@ -23,55 +23,56 @@
 }
 
 .timeline-day {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem; /* Increased space between days */
 }
 
 .timeline-date {
-  font-size: 2.5rem;
+  font-size: 2.8rem; /* Larger date font */
   font-weight: bold;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem; /* Slightly reduced margin below */
   color: var(--color-accent);
-  justify-content: space-between;
-  align-items: center;
+  text-align: left;
 }
 
 .timeline-location {
-  font-size: 1rem;
+  font-size: 1.5rem; /* Slightly larger for emphasis */
   font-style: italic;
-  color: var(  --color-text-primary  );
-  margin-left: 0.5rem;
+  color: var(--color-text-secondary);
+  margin-top: 1rem; /* Increased spacing between the date and location */
 }
 
 .timeline-events {
-  border-left: 2px solid var(--color-border);
-  padding-left: 2rem;
+  border-left: 3px solid var(--color-border); /* Slightly thicker border */
+  padding-left: 2.5rem; /* Increased padding for events */
   position: relative;
 }
 
 .timeline-event {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem; /* Increased spacing between events */
   position: relative;
   padding-left: 0;
   display: flex;
-  align-items: center;
+  flex-direction: column; /* Stack the time and details vertically */
+  align-items: flex-start; /* Align to the left */
 }
 
 .timeline-event::before {
-  content: "♥"; /* You can replace this with other symbols like "★", "•", "◆", "✔", "✿", etc. */
+  content: "🪷"; /* Lotus symbol */
   color: var(--color-accent);
-  font-size: 2rem;
+  font-size: 2rem; /* Slightly larger symbol */
   position: absolute;
-  left: -2.7rem;
-  transform: translateY(-50%);
+  left: -4rem; /* Adjusted to align properly with increased spacing */
+  transform: translateY(0%);
 }
 
 .timeline-time {
   font-weight: bold;
-  font-size: 1.5rem;
-  margin-right: 1rem;
+  font-size: 1.8rem; /* Slightly larger font for time */
+  margin-bottom: 0.8rem; /* More space below the time */
 }
 
 .timeline-details {
-  font-size: 1rem;
+  font-size: 1.2rem; /* Slightly larger for readability */
   font-style: italic;
+  line-height: 1.5; /* Added line height for better spacing in details */
 }
