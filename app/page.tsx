@@ -1,4 +1,3 @@
-import Link from "next/link";
 import OurStory from "./OurStory/OurStory";
 import Header from "./components/Header"; // Adjust path as needed
 
