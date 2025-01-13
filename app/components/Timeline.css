@@ -1,78 +1,70 @@
 .timeline-container {
-  font-family: var(--font-wedding);
-  color: var(--color-text-primary);
-  padding: 2.5rem; /* Increased padding for the container */
+  font-family: var(--font-wedding); /* Global font for wedding theme */
+  color: var(--color-text-primary); /* Global primary text color */
+  padding: 2.5rem; /* Comfortable padding for the container */
 }
 
 .timeline-covertitle {
   text-align: center;
-  font-size: 2.8rem; /* Slightly larger for emphasis */
+  font-size: 2.8rem; /* Larger for prominence */
   font-family: var(--font-wedding);
   font-weight: bold;
-  margin-bottom: 2.5rem; /* More space below the title */
-  color: var(--color-text-primary);
-}
-
-.timeline-title {
-  text-align: center;
-  font-size: 2.5rem;
-  font-family: var(--font-wedding);
-  font-weight: bold;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem; /* Increased spacing for balance */
   color: var(--color-text-primary);
 }
 
 .timeline-day {
-  margin-bottom: 3rem; /* Increased space between days */
+  margin-bottom: 3rem; /* Clear separation between days */
 }
 
 .timeline-date {
-  font-size: 2.8rem; /* Larger date font */
+  font-size: 2.8rem; /* Highlighted date */
   font-weight: bold;
-  margin-bottom: 0.8rem; /* Slightly reduced margin below */
-  color: var(--color-accent);
+  margin-bottom: 0.8rem;
+  color: var(--color-accent); /* Global accent color for importance */
   text-align: left;
 }
 
 .timeline-location {
-  font-size: 1.5rem; /* Slightly larger for emphasis */
+  font-size: 1.5rem; /* Subtle emphasis */
   font-style: italic;
-  color: var(--color-text-secondary);
-  margin-top: 1rem; /* Increased spacing between the date and location */
+  color: var(--color-text-secondary); /* Define a secondary text color if needed */
+  margin-top: 1rem;
 }
 
 .timeline-events {
-  border-left: 3px solid var(--color-border); /* Slightly thicker border */
-  padding-left: 2.5rem; /* Increased padding for events */
+  border-left: 3px solid var(--color-border); /* Vertical line using global border color */
+  padding-left: 2.5rem; /* Space between border and events */
   position: relative;
 }
 
 .timeline-event {
-  margin-bottom: 2rem; /* Increased spacing between events */
+  margin-bottom: 2rem; /* Space between events */
   position: relative;
-  padding-left: 0;
   display: flex;
-  flex-direction: column; /* Stack the time and details vertically */
-  align-items: flex-start; /* Align to the left */
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .timeline-event::before {
-  content: "🪷"; /* Lotus symbol */
+  content: "🪷"; /* Symbol for aesthetic */
   color: var(--color-accent);
-  font-size: 2rem; /* Slightly larger symbol */
+  font-size: 2rem; /* Emphasized icon size */
   position: absolute;
-  left: -4rem; /* Adjusted to align properly with increased spacing */
+  left: -4rem;
   transform: translateY(0%);
 }
 
 .timeline-time {
   font-weight: bold;
-  font-size: 1.8rem; /* Slightly larger font for time */
-  margin-bottom: 0.8rem; /* More space below the time */
+  font-size: 1.8rem; /* Distinct time size */
+  margin-bottom: 0.8rem;
+  color: var(--color-text-primary); /* Global text color */
 }
 
 .timeline-details {
-  font-size: 1.2rem; /* Slightly larger for readability */
+  font-size: 1.2rem; /* Readable size */
   font-style: italic;
-  line-height: 1.5; /* Added line height for better spacing in details */
+  line-height: 1.5; /* Better readability */
+  color: var(--color-text-primary); /* Ensure consistency with global primary text */
 }
