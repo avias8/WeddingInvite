@@ -1,4 +1,3 @@
-// app/details/page.tsx (or wherever your details page lives)
 "use client"; // optional if you need client features here; if not, omit
 
 import Header from "../components/Header"; // <--- Adjust path if needed
@@ -10,10 +9,22 @@ export default function DetailsPage() {
       {/* Reusable Header at the top */}
       <Header />
 
+      {/* Hero Section with Video */}
+      <div className={styles.hero}>
+        <div className={styles.videoContainer}>
+          <video autoPlay muted loop playsInline className={styles.heroVideo}>
+            <source src="/Caramellover.webm" type="video/webm" />
+            <source src="/Caramellover.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <div className={styles.heroOverlay}>
+            <h1 className={styles.heroTitle}>Wedding Details</h1>
+          </div>
+        </div>
+      </div>
+
       {/* Main content container */}
       <div className={styles.detailsContainer}>
-        <h1 className={styles.title}>Wedding Details</h1>
-
         {/* Section: About the Hindu Wedding */}
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>About the Hindu Wedding</h2>

@@ -61,8 +61,8 @@ export default function OurStory() {
             <div className="hero">
                 <div className="videoContainer">
                     <video autoPlay muted loop playsInline className="heroVideo">
-                        <source src="/Sandwitchsnatch.webm" type="video/webm" />
-                        <source src="/Sandwitchsnatch.mp4" type="video/mp4" />
+                        <source src="/KissInMountains.webm" type="video/webm" />
+                        <source src="/KissInMountains.mp4" type="video/mp4" />
                         Your browser does not support the video tag.
                     </video>
                     <div className="heroOverlay">
