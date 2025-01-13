@@ -161,6 +161,8 @@
   font-size: 1rem;
   padding: 2rem 0;
   color: var(--color-text-primary);
+  border-top: none;
+  width: 100%;
 }
 
 /* Event Details Section */
@@ -231,7 +233,7 @@
   border-radius: 16px; /* Rounded edges */
   max-width: 1000px; /* Shrink modal width */
   width: 90%; /* Ensure responsiveness */
-  max-height: 90%; /* Prevent modal from overflowing the screen */
+  max-height: 100%; /* Prevent modal from overflowing the screen */
   overflow-y: auto; /* Scroll content if it overflows */
   margin: auto; /* Center the modal */
   position: relative; /* Keep it in place */
@@ -274,7 +276,6 @@
 
   .hostedBy {
     border-right: none;
-    border-bottom: 1px solid var(--color-border);
     padding-bottom: 1rem;
   }
 
