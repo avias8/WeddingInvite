@@ -55,11 +55,22 @@ export default function BigInvitePage() {
       <Header />
 
       <div className={styles.pageContainer}>
-        {/* Hero Section (replaced <header> with <div>) */}
+        {/* Hero Section */}
         <div className={styles.hero}>
-          <h1>
-            <span>AVI AND SHAKTHI&apos;S WEDDING</span>
-          </h1>
+          <video autoPlay muted loop playsInline className={styles.heroVideo}>
+            <source src="/Sandwitchsnatch.webm" type="video/webm" />
+            <source src="/Sandwitchsnatch.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <div className={styles.heroOverlay}>
+            <h1>
+              <span>AVI AND SHAKTHI&apos;S WEDDING</span>
+            </h1>
+          </div>
+        </div>
+
+        {/* To: Guest Section */}
+        <section className={styles.toGuestSection}>
           <p className={styles.heroSubtext}>
             To: {inviteeName || "Guest"}
           </p>
@@ -70,10 +81,10 @@ export default function BigInvitePage() {
             {isAttending === null
               ? "RSVP Status Unknown"
               : isAttending
-              ? "You Are Attending"
-              : "You Are Not Attending"}
+                ? "You Are Attending"
+                : "You Are Not Attending"}
           </p>
-        </div>
+        </section>
 
         {/* Host Question Section */}
         <section className={`${styles.section} ${styles.hostQuestion}`}>
@@ -88,12 +99,10 @@ export default function BigInvitePage() {
 
         {/* Event Details Section */}
         <section className={styles.eventDetails}>
-          {/* Hosted By Section */}
           <div className={styles.hostedBy}>
             <p className={styles.sectionTitle}>Hosted By</p>
             <p className={styles.familyName}>The Varma and Ganesh Family 💍</p>
           </div>
-          {/* Dates Section */}
           <div className={styles.datesSection}>
             <p className={styles.dates}>June 29, 2025 | 11 AM</p>
             <br />
@@ -125,13 +134,13 @@ export default function BigInvitePage() {
           </button>
         </Modal>
 
-        {/* Error Message */}
         {error && (
           <div className={`${styles.error} text-red-600`}>
             <p>{error}</p>
           </div>
         )}
       </div>
+
     </>
   );
 }
