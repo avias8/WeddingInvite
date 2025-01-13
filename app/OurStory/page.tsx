@@ -53,17 +53,25 @@ export default function OurStory() {
             ],
         },
     ];
-    
+
 
     return (
         <div className="pageContainer">
-            <header className="hero">
-                <video autoPlay muted loop playsInline className="hero-video">
-                    <source src="/Sandwitchsnatch.webm" type="video/webm" />
-                    Your browser does not support the video tag.
-                </video>
-                <span className="hero-title">Avi & Shakthi</span>
-            </header>
+            {/* Hero Section */}
+            <div className="hero">
+                <div className="videoContainer">
+                    <video autoPlay muted loop playsInline className="heroVideo">
+                        <source src="/Sandwitchsnatch.webm" type="video/webm" />
+                        <source src="/Sandwitchsnatch.mp4" type="video/mp4" />
+                        Your browser does not support the video tag.
+                    </video>
+                    <div className="heroOverlay">
+                        <h1>
+                            <span>AVI AND SHAKTHI&apos;S WEDDING</span>
+                        </h1>
+                    </div>
+                </div>
+            </div>
 
 
             {/* Our Story Section */}

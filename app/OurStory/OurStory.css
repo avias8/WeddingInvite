@@ -13,62 +13,51 @@
 }
 
 /* Hero Section */
-/* Ensure the header is relatively positioned */
 .hero {
     position: relative;
     text-align: center;
     width: 100%;
     margin-bottom: 3rem;
+    overflow: hidden;
 }
 
-/* Style the video to fit its container */
-.hero-video {
+.videoContainer {
+    position: relative;
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+    border-radius: 16px;
+}
+
+.heroVideo {
     width: 100%;
     height: auto;
     display: block;
-    border-radius: 16px; /* Add rounded corners to match the image */
-    overflow: hidden; /* Ensures no overflow beyond the rounded corners */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle shadow for consistency */
+    filter: grayscale(100%);
+    transition: filter 0.3s ease; /* Smooth transition to color */
 }
 
-/* Style the span to overlay the video */
-.hero-title {
+.videoContainer:hover .heroVideo {
+    filter: grayscale(0%);
+}
+
+.heroOverlay {
     position: absolute;
-    top: 50%; /* Center vertically */
-    left: 50%; /* Center horizontally */
-    transform: translate(-50%, -50%); /* Adjust to true center */
-    font-size: clamp(4rem, 12vw, 8rem);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 1;
+}
+
+.heroOverlay h1 span {
+    font-size: clamp(2.5rem, 10vw, 6rem);
     font-family: var(--font-wedding);
     font-weight: bold;
     letter-spacing: 0.1rem;
     color: var(--color-accent);
+    text-shadow: 0 4px 6px var(--color-shadow); /* Use global shadow */
     text-transform: uppercase;
-    text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Optional: Add text shadow for better contrast */
-}
-
-
-.hero span {
-    font-size: clamp(4rem, 12vw, 8rem);
-    /* Larger, responsive font size */
-    font-family: var(--font-wedding);
-    /* Use the wedding font */
-    font-weight: bold;
-    /* Make it bold to stand out */
-    letter-spacing: 0.1rem;
-    /* Add slight spacing between letters */
-    color: var(--color-accent);
-    /* Use an accent color for prominence */
-    display: block;
-    margin-bottom: 2rem;
-    text-transform: uppercase;
-    /* Optional: Makes the text uppercase */
-}
-
-.heroSubtext {
-    font-size: 1.2rem;
-    margin-top: 0.5rem;
-    text-transform: uppercase;
-    color: var(--color-accent);
 }
 
 /* Section Styles */
@@ -76,7 +65,6 @@
     text-align: center;
     margin-bottom: 3rem;
     max-width: 800px;
-    /* Limit section width for better readability */
 }
 
 .sectionTitle {
@@ -91,7 +79,22 @@
     color: var(--color-text-primary);
     margin-bottom: 1rem;
     line-height: 1.6;
-    /* Add better readability */
+}
+
+.sectionButton {
+    background-color: transparent;
+    border: 1px solid var(--color-text-primary);
+    padding: 0.5rem 2rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.sectionButton:hover {
+    background-color: var(--color-accent);
+    color: #fff;
 }
 
 /* Event Details Section */
@@ -102,7 +105,6 @@
     color: var(--color-text-primary);
     width: 100%;
     max-width: 1200px;
-    /* Constrain width for larger screens */
     font-size: 2rem;
     text-align: center;
     border-top: 1.5px solid var(--color-border);
@@ -113,9 +115,8 @@
     padding: 2rem;
 }
 
-/* Hosted By Section */
 .hostedBy {
-    font-family: "Hernandez Bros", serif;
+    font-family: var(--font-decorative);
     flex-basis: 50%;
     border-right: 2px solid var(--color-border);
     display: flex;
@@ -124,9 +125,8 @@
     align-items: center;
 }
 
-/* Dates Section */
 .datesSection {
-    font-family: "Hernandez Bros", serif;
+    font-family: var(--font-decorative);
     flex-basis: 50%;
     display: flex;
     flex-direction: column;
@@ -153,50 +153,37 @@
     color: var(--color-text-primary);
 }
 
+/* Timeline Section */
 .timelineSection {
     display: flex;
     align-items: stretch;
-    /* Both divs stretch to the same height */
     justify-content: space-between;
     gap: 2rem;
     margin-top: 2rem;
     padding: 1rem;
     box-sizing: border-box;
-    /* Include padding in height/width calculations */
 }
 
 .imageContainer {
     flex: 1;
-    /* Adjust space ratio for the image */
     display: flex;
-    /* Use flexbox to center the image */
     align-items: center;
-    /* Center vertically */
     justify-content: center;
-    /* Center horizontally */
     overflow: hidden;
-    /* Crop the image if it overflows */
 }
 
 .timelineImage {
     width: 100%;
-    /* Ensure the image fills the container */
     height: 100%;
-    /* Stretch the image to match container height */
     object-fit: cover;
-    /* Crop or zoom the image while maintaining aspect ratio */
     border-radius: 16px;
-    /* Add rounded corners */
 }
-
 
 .timeline-container {
     flex: 1;
-    /* Allow the timeline to take more space */
     display: flex;
     flex-direction: column;
     justify-content: center;
-    /* Center the timeline content */
     padding: 1rem;
     box-sizing: border-box;
 }
@@ -205,39 +192,28 @@
 @media screen and (max-width: 1200px) {
     .timelineSection {
         flex-direction: column;
-        /* Stack the image and timeline vertically */
         gap: 1.5rem;
-        /* Adjust spacing for vertical layout */
     }
 
     .imageContainer,
     .timeline-container {
         flex: none;
-        /* Disable flex-grow/shrink */
         width: 100%;
-        /* Make each container take full width */
     }
 
     .imageContainer {
         height: 60vw;
-        /* Set height based on viewport width to maintain aspect ratio */
         overflow: hidden;
-        /* Ensure cropped overflow */
     }
 
     .timelineImage {
         width: 100%;
-        /* Image should fill the container width */
         height: 100%;
-        /* Stretch to container height */
         object-fit: cover;
-        /* Ensure image scales and maintains focus on key parts */
         object-position: center;
-        /* Focus the image center by default */
     }
 
     .timeline-container {
         padding: 1rem;
-        /* Maintain spacing for text content */
     }
 }

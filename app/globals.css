@@ -9,12 +9,14 @@
 :root {
   --font-wedding: 'Libre Baskerville', serif;
   --font-body: 'Georgia', serif;
+  --font-decorative: 'Hernandez Bros', serif;
 
   --color-background: #fef8f5;
   --color-text-primary: #5a4d4d;
   --color-accent: #b084cc;
   --color-secondary-accent: #ffe4e1;
   --color-border: #d1c4d8;
+  --color-shadow: rgba(0, 0, 0, 0.3);
 }
 
 /* Universal Styles */
@@ -85,7 +87,7 @@ button.active {
   color: #fff;
   border: 1px solid var(--color-accent);
   font-weight: bold;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 6px var(--color-shadow);
   transform: scale(1.02);
 }
 

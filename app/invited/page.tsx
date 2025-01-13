@@ -57,15 +57,17 @@ export default function BigInvitePage() {
       <div className={styles.pageContainer}>
         {/* Hero Section */}
         <div className={styles.hero}>
-          <video autoPlay muted loop playsInline className={styles.heroVideo}>
-            <source src="/Sandwitchsnatch.webm" type="video/webm" />
-            <source src="/Sandwitchsnatch.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-          <div className={styles.heroOverlay}>
-            <h1>
-              <span>AVI AND SHAKTHI&apos;S WEDDING</span>
-            </h1>
+          <div className={styles.videoContainer}>
+            <video autoPlay muted loop playsInline className={styles.heroVideo}>
+              <source src="/Sandwitchsnatch.webm" type="video/webm" />
+              <source src="/Sandwitchsnatch.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            <div className={styles.heroOverlay}>
+              <h1>
+                <span>AVI AND SHAKTHI&apos;S WEDDING</span>
+              </h1>
+            </div>
           </div>
         </div>
 

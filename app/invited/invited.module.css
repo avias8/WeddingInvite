@@ -20,12 +20,24 @@
   overflow: hidden;
 }
 
+.videoContainer {
+  position: relative;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  border-radius: 16px; /* Rounded corners for the video */
+}
+
+.videoContainer:hover .heroVideo {
+  filter: grayscale(0%); /* Transition to color on hover */
+}
+
 .heroVideo {
   width: 100%;
   height: auto;
   display: block;
-  border-radius: 16px;
-  filter: grayscale(100%); /* Makes the video black and white */
+  filter: grayscale(100%); /* Initially black and white */
+  transition: filter 0.3s ease; /* Smooth transition to color */
 }
 
 .heroOverlay {
@@ -35,7 +47,7 @@
   transform: translate(-50%, -50%);
   text-align: center;
   color: var(--color-text-primary);
-  z-index: 1;
+  z-index: 1; /* Ensure it's above the video */
 }
 
 .heroOverlay h1 span {
@@ -44,7 +56,7 @@
   font-weight: bold;
   letter-spacing: 0.1rem;
   color: var(--color-accent);
-  text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Optional: Better contrast */
   text-transform: uppercase;
 }
 
