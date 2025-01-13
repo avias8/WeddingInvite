@@ -36,40 +36,45 @@ export default function AdminInvite() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-
+  
     if (!handleValidation()) return;
-
+  
     setIsSubmitting(true);
     const payload = {
       name,
       email,
-      maxInvites: maxGuests, // Assign maxGuests to maxInvites
-      guests: 0, // Default guests attending is 0
-      isAttending: null, // Default to null
+      maxInvites: maxGuests,
+      guests: 0,
+      isAttending: null,
     };
-
+  
     try {
       const res = await fetch("/api/invitees", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
+  
       if (!res.ok) {
-        const errorData = await res.json();
+        const errorData: { message?: string } = await res.json();
         throw new Error(errorData.message || "Error adding invite.");
       }
-
+  
       alert("Invite added successfully!");
       setName("");
       setEmail("");
-      setMaxGuests(1); // Reset to 1 max guest
-    } catch (error: any) {
-      setError(error.message || "An unexpected error occurred.");
+      setMaxGuests(1);
+    } catch (error) {
+      // Use `instanceof` to infer error type
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("An unexpected error occurred.");
+      }
     } finally {
       setIsSubmitting(false);
     }
-  }
+  }  
 
   return (
     <form
