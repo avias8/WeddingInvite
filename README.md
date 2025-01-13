@@ -266,5 +266,3 @@ For any inquiries or feedback, please contact:
 - **Avi Varma**: HarshvardhanV98@gmail.com
 
 I look forward to celebrating my wedding with my guests!
-
-```
