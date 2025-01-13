@@ -107,8 +107,8 @@ export default function BigInvitePage() {
           </div>
           <div className={styles.datesSection}>
             <p className={styles.dates}>June 29, 2025 | 11 AM</p>
-            <br />
-            <p className={styles.location}>Calgary, Alberta</p>
+            <p className={styles.location}>Hilltop Wedding Centre</p>
+            <p className={styles.location}>Sylvan Lake, Alberta</p>
           </div>
         </section>
 
