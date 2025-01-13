@@ -1,4 +1,4 @@
-import OurStory from "./ourstory/page";
+import OurStory from "./OurStory/page";
 import Header from "./components/Header"; // Adjust path as needed
 
 export default function HomePage() {
