@@ -1,13 +1,31 @@
 /* Form Container */
 .formContainer {
   width: 100%;
-  max-width: 100%;
+  max-width: 600px; /* Limit the form width for better readability */
   padding: 2rem;
   border: 1.5px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 12px; /* Slightly larger border radius for a softer look */
   background-color: var(--color-background);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin: 2rem 0;
+  margin: 2rem auto; /* Center the form horizontally with auto margins */
+  animation: fadeIn 0.3s ease; /* Add a fade-in animation */
+}
+
+.title {
+  font-family: var(--font-wedding);
+  font-size: 2.5rem; /* Default size for larger screens */
+  font-weight: bold;
+  color: var(--color-text-primary);
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.1rem; /* Subtle spacing for elegance */
+  line-height: 1.2; /* Improve readability for multiline titles */
+  text-transform: uppercase;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Add a slight shadow for depth */
+  transition: color 0.3s ease; /* Smooth transition for color changes */
+}
+
+.title:hover {
+  color: var(--color-accent); /* Change to accent color on hover */
 }
 
 /* Form Field */
@@ -19,7 +37,7 @@
   display: block;
   font-family: var(--font-body);
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 1.1rem; /* Slightly larger font for labels */
   color: var(--color-text-primary);
   margin-bottom: 0.5rem;
 }
@@ -28,29 +46,95 @@
   width: 100%;
   padding: 0.75rem;
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: 8px; /* Increased border radius for a modern look */
   font-size: 1rem;
   font-family: var(--font-body);
   color: var(--color-text-primary);
   background-color: #fff;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 .formField input:focus {
   outline: none;
   border-color: var(--color-accent);
-  box-shadow: 0 0 4px var(--color-accent);
+  box-shadow: 0 0 6px var(--color-accent);
+  background-color: #f9f9f9; /* Subtle background change on focus */
 }
 
 /* Error Text */
 .errorText {
-  color: #d9534f; /* Bootstrap-like red color */
-  font-size: 0.875rem; /* Slightly smaller than label */
+  color: var(--color-secondary-accent); /* Use theme's secondary accent color */
+  font-size: 0.875rem; /* Slightly smaller than the label */
   margin-top: 0.25rem;
   font-family: var(--font-body);
+  font-style: italic; /* Differentiate error text visually */
+}
+
+/* Section Button */
+.sectionButton {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-text-primary);
+  padding: 0.75rem 2rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: bold; /* Add weight for emphasis */
+  border-radius: 2rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+}
+
+.sectionButton:hover {
+  background-color: var(--color-accent);
+  color: #fff;
+  transform: translateY(-2px); /* Add a slight lift effect */
+}
+
+.sectionButton:disabled {
+  background-color: #e0e0e0; /* Neutral gray for disabled state */
+  color: #a1a1a1;
+  cursor: not-allowed;
+  border: 1px solid #d1d1d1;
 }
 
 /* Shadow Effect */
 .shadowEffect {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Stronger shadow for emphasis */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .formContainer {
+    padding: 1.5rem;
+    border-radius: 10px; /* Adjust border radius for smaller screens */
+  }
+
+  .formField label {
+    font-size: 1rem; /* Slightly smaller labels on mobile */
+  }
+
+  .formField input {
+    padding: 0.6rem; /* Adjust padding for smaller screens */
+  }
+
+  .sectionButton {
+    padding: 0.6rem 1.5rem; /* Smaller buttons for mobile */
+    font-size: 0.9rem;
+  }
+
+  .title {
+    font-size: 2rem; /* Adjust font size for smaller screens */
+    margin-bottom: 1rem; /* Reduce bottom margin */
+  }
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

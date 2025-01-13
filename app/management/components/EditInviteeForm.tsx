@@ -54,7 +54,10 @@ export default function EditInviteeForm({ invitee, onSubmit, onCancel }: EditInv
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: name === "guests" || name === "maxInvites" ? parseInt(value, 10) : value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "guests" || name === "maxInvites" ? parseInt(value, 10) : value,
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -180,8 +183,8 @@ export default function EditInviteeForm({ invitee, onSubmit, onCancel }: EditInv
         </div>
 
         <div className="form-actions">
-          <button type="submit" className="btn-save">Save</button>
-          <button type="button" onClick={onCancel} className="btn-cancel">Cancel</button>
+          <button type="submit" className="sectionButton">Save</button>
+          <button type="button" onClick={onCancel} className="sectionButton">Cancel</button>
         </div>
       </form>
     </div>

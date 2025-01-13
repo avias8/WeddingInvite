@@ -122,16 +122,18 @@ export default function BigInvitePage() {
           isOpen={isModalOpen}
           onRequestClose={closeModal}
           contentLabel="Respond to Host Modal"
-          className={styles.modalContent}
-          overlayClassName={styles.modalOverlay}
+          className={styles.modalContent} /* Content styles */
+          overlayClassName={styles.modalOverlay} /* Overlay styles */
         >
-          <button onClick={closeModal} className={styles.closeButton}>
+          <button onClick={closeModal} className={styles.sectionButton}>
             Close
           </button>
 
-          <InvitedGuest />
+          <div className={styles.invitedGuestContainer}>
+            <InvitedGuest />
+          </div>
 
-          <button onClick={closeModal} className={styles.bottomCloseButton}>
+          <button onClick={closeModal} className={styles.bottomsectionButton}>
             Close
           </button>
         </Modal>

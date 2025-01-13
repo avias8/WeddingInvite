@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FaTrash, FaEdit } from "react-icons/fa";
-import EditInviteeForm from "../../components/EditInviteeForm"; // Correct path for EditInviteeForm component
+import EditInviteeForm from "./EditInviteeForm"; // Correct path for EditInviteeForm component
 
 // Define the Invitee type
 type Invitee = {
@@ -103,7 +103,7 @@ export default function AdminPage() {
           {invitees.map((i, index) => (
             <div key={i.id} className="bg-white p-4 rounded shadow">
               <div className="tile-header">
-                <span>{i.name}</span>
+                <strong>{i.name}</strong>
                 <div className="actions">
                   <FaEdit
                     className="edit-icon"

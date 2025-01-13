@@ -1,8 +1,8 @@
 /* Styles for the main AdminPage */
 .admin-container {
   padding: 2rem;
-  background-color: #f9f9f9; /* Light background for better contrast */
-  min-height: 100vh; /* Ensure full-page height */
+  background-color: var(--color-background);
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -12,16 +12,17 @@
   text-align: center;
   font-size: 2.5rem;
   font-weight: bold;
-  color: #333; /* Darker color for better readability */
+  color: var(--color-text-primary);
+  font-family: var(--font-wedding);
   margin-bottom: 2rem;
 }
 
 .grid-container {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem; /* Adjust gap for better spacing */
+  gap: 1.5rem;
   width: 100%;
-  max-width: 1200px; /* Constrain grid width */
+  max-width: 1200px;
 }
 
 @media (min-width: 640px) {
@@ -40,13 +41,13 @@
   background-color: #ffffff;
   padding: 1.5rem;
   border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Softer shadow */
+  box-shadow: 0 2px 4px var(--color-shadow);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .tile:hover {
   transform: translateY(-5px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Slight lift on hover */
+  box-shadow: 0 4px 8px var(--color-shadow);
 }
 
 .tile-header {
@@ -64,25 +65,26 @@
 .trash-icon,
 .edit-icon {
   cursor: pointer;
-  font-size: 1.5rem; /* Larger icons for better usability */
+  font-size: 1.5rem;
 }
 
 .trash-icon {
-  color: #e63946; /* Subtle red for delete */
+  color: var(--color-secondary-accent);
 }
 
 .edit-icon {
-  color: #1d3557; /* Blue tone for edit */
+  color: var(--color-secondary-accent);
 }
 
 p {
   margin-bottom: 0.5rem;
-  color: #555; /* Softer text color */
-  font-size: 0.9rem; /* Slightly smaller font for details */
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  font-family: var(--font-body);
 }
 
 a {
-  color: #007bff;
+  color: var(--color-secondary-accent);
   text-decoration: none;
 }
 
@@ -101,24 +103,26 @@ a:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1050; /* Ensure it's above other elements */
+  z-index: 1050;
 }
 
 .modal-form {
-  background-color: #333333; /* Set the modal background color */
-  color: #ffffff; /* Ensure text is readable on the dark background */
+  background-color: var(--color-text-primary);
+  color: #ffffff;
   padding: 2rem;
   border-radius: 10px;
   width: 100%;
-  max-width: 800px; /* Increase the max-width to 800px */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  animation: fadeIn 0.3s ease-in-out; /* Optional animation for smoother appearance */
+  max-width: 800px;
+  box-shadow: 0 4px 10px var(--color-shadow);
+  animation: fadeIn 0.3s ease-in-out;
+  font-family: var(--font-body);
 }
 
 .modal-form h2 {
   font-size: 1.75rem;
   font-weight: bold;
   margin-bottom: 1.5rem;
+  font-family: var(--font-wedding);
 }
 
 .modal-form .form-group {
@@ -129,15 +133,17 @@ a:hover {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
+  color: var(--color-text-secondary);
 }
 
 .modal-form input,
 .modal-form select {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border);
   border-radius: 5px;
   font-size: 1rem;
+  font-family: var(--font-body);
 }
 
 .modal-form .form-actions {
@@ -146,32 +152,7 @@ a:hover {
   gap: 1rem;
 }
 
-.modal-form .btn-save {
-  background-color: #007bff;
-  color: #ffffff;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.modal-form .btn-save:hover {
-  background-color: #0056b3;
-}
-
-.modal-form .btn-cancel {
-  background-color: #f1f1f1;
-  color: #333;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.modal-form .btn-cancel:hover {
-  background-color: #ddd;
-}
-
+/* Keyframe for modal animation */
 @keyframes fadeIn {
   from {
     opacity: 0;

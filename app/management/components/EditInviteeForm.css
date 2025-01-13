@@ -1,0 +1,149 @@
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Dark overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+  padding: 1rem; /* Add padding for smaller screens */
+}
+
+.modal-form {
+  background-color: var(--color-background); /* Global background color */
+  color: var(--color-text-primary); /* Global text color */
+  padding: 20px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90%; /* Ensure it doesn't exceed the screen height */
+  overflow-y: auto; /* Enable scrolling for overflow content */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.3s ease-in-out; /* Optional animation for smoother appearance */
+}
+
+.modal-form h2 {
+  font-family: var(--font-wedding); /* Global font for headings */
+  font-size: 2rem;
+  text-align: center;
+  color: var(--color-accent); /* Accent color */
+  margin-bottom: 20px;
+}
+
+.modal-form .form-group {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: var(--color-secondary-accent); /* Subtle highlight */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.modal-form label {
+  font-family: var(--font-body); /* Global body font */
+  font-size: 1.25rem;
+  color: var(--color-text-primary);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.modal-form input,
+.modal-form select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border); /* Global border color */
+  border-radius: 5px;
+  font-size: 1rem;
+  font-family: var(--font-body); /* Consistent font */
+  color: var(--color-text-primary); /* Text color */
+  background-color: var(--color-background); /* Background for inputs */
+}
+
+.modal-form input:focus,
+.modal-form select:focus {
+  outline: none;
+  border-color: var(--color-accent); /* Accent color for focus */
+  box-shadow: 0 0 4px var(--color-accent); /* Subtle glow */
+}
+
+.modal-form .form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.modal-form .btn-save,
+.modal-form .btn-cancel {
+  font-family: var(--font-body); /* Global body font */
+  font-size: 1rem;
+  border-radius: 2rem;
+  padding: 0.5rem 2rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  border: 1px solid var(--color-text-primary); /* Consistent with sectionButton */
+}
+
+/* Save Button */
+.modal-form .btn-save {
+  background-color: transparent; /* Match sectionButton */
+  color: var(--color-text-primary); /* Primary text color */
+}
+
+.modal-form .btn-save:hover {
+  background-color: var(--color-accent); /* Global accent color */
+  color: #fff; /* White text for contrast */
+}
+
+/* Cancel Button */
+.modal-form .btn-cancel {
+  background-color: transparent; /* Match sectionButton */
+  color: var(--color-text-primary); /* Primary text color */
+}
+
+.modal-form .btn-cancel:hover {
+  background-color: var(--color-accent); /* Global accent color */
+  color: #fff; /* White text for contrast */
+}
+
+.sectionButton {
+  background-color: transparent;
+  border: 1px solid var(--color-text-primary);
+  padding: 0.5rem 2rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  border-radius: 2rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin-bottom: 1rem;
+}
+
+.sectionButton:hover {
+  background-color: var(--color-accent);
+  color: #fff;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (min-width: 768px) {
+  .modal-form {
+    padding: 40px;
+  }
+
+  .modal-form .form-group {
+    padding: 30px;
+  }
+
+  .modal-form label {
+    font-size: 1.5rem;
+  }
+}

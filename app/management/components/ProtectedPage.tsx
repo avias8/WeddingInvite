@@ -12,7 +12,6 @@ const ProtectedPage: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Check if the user is already authenticated (using session storage)
   useEffect(() => {
     const authStatus = sessionStorage.getItem("isAuthenticated");
     if (authStatus === "true") {
@@ -25,7 +24,7 @@ const ProtectedPage: React.FC = () => {
     const correctPassword = process.env.NEXT_PUBLIC_MANAGEMENT_PASSWORD || "";
     if (password === correctPassword) {
       setIsAuthenticated(true);
-      sessionStorage.setItem("isAuthenticated", "true"); // Save authentication status
+      sessionStorage.setItem("isAuthenticated", "true");
       setError(null);
     } else {
       setError("Incorrect password. Please try again.");
@@ -34,19 +33,19 @@ const ProtectedPage: React.FC = () => {
 
   if (isAuthenticated) {
     return (
-      <>
-        <Header /> {/* Include the header */}
-        <div className="management-container">
-          <h1 className="management-title">Manage Invitees</h1>
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <div className="management-container flex-grow">
+          <h1 className="text-5xl font-bold mb-6">Manage Invitees</h1>
           <div className="management-section">
-            <h2 className="section-title">Send Invite</h2>
+            <h2 className="text-3xl font-bold mb-6">Send Invite</h2>
             <AdminInvite />
           </div>
           <div className="management-section">
             <AdminPage />
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -73,10 +72,9 @@ const ProtectedPage: React.FC = () => {
         >
           Submit
         </button>
-        {/* Go Back Button */}
         <button
           type="button"
-          onClick={() => (window.location.href = "/")} // Navigate back to the base domain
+          onClick={() => (window.location.href = "/")}
           className="mt-4 bg-gray-500 text-white px-4 py-2 rounded w-full hover:bg-gray-600"
         >
           Go Back
@@ -85,5 +83,6 @@ const ProtectedPage: React.FC = () => {
     </div>
   );
 };
+
 
 export default ProtectedPage;

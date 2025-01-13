@@ -8,6 +8,7 @@ export default function AdminInvite() {
   const [email, setEmail] = useState("");
   const [maxGuests, setMaxGuests] = useState(1); // Default to 1 max guest
   const [error, setError] = useState<string | null>(null); // For custom validation errors
+  const [isSubmitting, setIsSubmitting] = useState(false); // Submission state
 
   // Function to validate email with stricter rules
   const isValidEmail = (email: string) => {
@@ -15,16 +16,30 @@ export default function AdminInvite() {
     return strictEmailRegex.test(email);
   };
 
+  // Function to handle form validation
+  const handleValidation = (): boolean => {
+    if (!name.trim()) {
+      setError("Name is required.");
+      return false;
+    }
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email address (e.g., user@example.com).");
+      return false;
+    }
+    if (maxGuests < 0) {
+      setError("Max guests cannot be negative.");
+      return false;
+    }
+    setError(null);
+    return true;
+  };
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!isValidEmail(email)) {
-      setError("Please enter a valid email address (e.g., user@example.com).");
-      return;
-    }
+    if (!handleValidation()) return;
 
-    setError(null); // Clear any previous error
-
+    setIsSubmitting(true);
     const payload = {
       name,
       email,
@@ -40,17 +55,19 @@ export default function AdminInvite() {
         body: JSON.stringify(payload),
       });
 
-      if (res.ok) {
-        alert("Invite added successfully!");
-        setName("");
-        setEmail("");
-        setMaxGuests(1); // Reset to 1 max guest
-      } else {
-        alert("Error adding invite. Please try again.");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Error adding invite.");
       }
-    } catch (error) {
-      console.error("Error submitting invite:", error);
-      alert("An unexpected error occurred.");
+
+      alert("Invite added successfully!");
+      setName("");
+      setEmail("");
+      setMaxGuests(1); // Reset to 1 max guest
+    } catch (error: any) {
+      setError(error.message || "An unexpected error occurred.");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -59,6 +76,10 @@ export default function AdminInvite() {
       onSubmit={handleSubmit}
       className={`${styles.formContainer} ${styles.shadowEffect}`}
     >
+      <h2 className={styles.title}>Add New Invitee</h2>
+
+      {error && <p className={`${styles.errorText} mb-4`}>{error}</p>}
+
       <div className={styles.formField}>
         <label>Name</label>
         <input
@@ -79,7 +100,6 @@ export default function AdminInvite() {
           placeholder="Enter email address"
           required
         />
-        {error && <p className={styles.errorText}>{error}</p>}
       </div>
 
       <div className={styles.formField}>
@@ -94,9 +114,13 @@ export default function AdminInvite() {
         />
       </div>
 
-      {/* Global button style with full width */}
-      <button type="submit" className="primary w-full">
-        Add Invite
+      {/* Submit Button */}
+      <button
+        type="submit"
+        className={`sectionButton w-full ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? "Submitting..." : "Add Invite"}
       </button>
     </form>
   );

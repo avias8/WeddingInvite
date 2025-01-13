@@ -128,12 +128,33 @@
   border-radius: 2rem;
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease;
+  margin-bottom: 1rem;
 }
 
 .sectionButton:hover {
   background-color: var(--color-accent);
   color: #fff;
 }
+
+/* Minimal change for centering the button */
+.bottomsectionButton {
+  background-color: transparent;
+  border: 1px solid var(--color-text-primary);
+  padding: 0.5rem 2rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  border-radius: 2rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  display: block; /* Ensure the button behaves like a block element */
+  margin: 1rem auto; /* Center horizontally using auto margins */
+}
+
+.bottomsectionButton:hover {
+  background-color: var(--color-accent);
+  color: #fff;
+}
+
 
 .footer {
   text-align: center;
@@ -202,6 +223,45 @@
   text-align: center;
   margin-top: 0.5rem;
   letter-spacing: 0.1rem;
+}
+
+.modalContent {
+  background-color: var(--color-background); /* Use the global theme */
+  padding: 2rem; /* Space inside the modal */
+  border-radius: 16px; /* Rounded edges */
+  max-width: 1000px; /* Shrink modal width */
+  width: 90%; /* Ensure responsiveness */
+  max-height: 90%; /* Prevent modal from overflowing the screen */
+  overflow-y: auto; /* Scroll content if it overflows */
+  margin: auto; /* Center the modal */
+  position: relative; /* Keep it in place */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+  display: flex; /* Ensure content is aligned */
+  flex-direction: column; /* Stack children vertically */
+  justify-content: center; /* Center children vertically */
+  align-items: center; /* Center children horizontally */
+}
+
+.modalOverlay {
+  background-color: rgba(0, 0, 0, 0.5); /* Dimmed overlay */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999; /* Ensure it appears above other content */
+}
+
+.invitedGuestContainer {
+  width: 100%;
+  border-radius: 12px; /* Round edges for the container */
+  background-color: var(--color-background); /* Match modal background */
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  margin-bottom: 1rem; /* Space below the container */
 }
 
 /* Responsive Design */
