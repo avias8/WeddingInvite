@@ -11,12 +11,14 @@
   --font-body: 'Georgia', serif;
   --font-decorative: 'Hernandez Bros', serif;
 
-  --color-background: #fef8f5;
-  --color-text-primary: #5a4d4d;
-  --color-accent: #b084cc;
-  --color-secondary-accent: #ffe4e1;
-  --color-border: #d1c4d8;
-  --color-shadow: rgba(0, 0, 0, 0.3);
+  --color-background: #f3efe4; /* A soft cream with a hint of green, like sunlight filtering through leaves */
+  --color-text-primary: #21701a; /* A deep olive-gray for text, grounding the palette in nature */
+  --color-text-secondary: #041803; /* A medium gray for secondary text, providing contrast */
+  --color-accent: #8fa88c; /* A soft sage green for an organic, earthy elegance */
+  --color-secondary-accent: #21701a; /* A warm peachy sand tone for subtle highlights */
+  --color-border: #b6c4b0; /* A muted moss green for delicate accents and borders */
+  --color-shadow: rgba(78, 74, 61, 0.3); /* A soft olive shadow for natural depth */
+  
 }
 
 /* Universal Styles */

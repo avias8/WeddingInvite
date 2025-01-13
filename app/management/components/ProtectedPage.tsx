@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import AdminInvite from "./AdminInvite";
 import AdminPage from "./AdminTiles";
 import "./ManagementPage.css";
+import Header from "../../components/Header";
+
 
 const ProtectedPage: React.FC = () => {
   const [password, setPassword] = useState("");
@@ -32,16 +34,19 @@ const ProtectedPage: React.FC = () => {
 
   if (isAuthenticated) {
     return (
-      <div className="management-container">
-        <h1 className="management-title">Manage Invitees</h1>
-        <div className="management-section">
-          <h2 className="section-title">Send Invite</h2>
-          <AdminInvite />
+      <>
+        <Header /> {/* Include the header */}
+        <div className="management-container">
+          <h1 className="management-title">Manage Invitees</h1>
+          <div className="management-section">
+            <h2 className="section-title">Send Invite</h2>
+            <AdminInvite />
+          </div>
+          <div className="management-section">
+            <AdminPage />
+          </div>
         </div>
-        <div className="management-section">
-          <AdminPage />
-        </div>
-      </div>
+      </>
     );
   }
 

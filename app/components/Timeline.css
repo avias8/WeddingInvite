@@ -10,7 +10,7 @@
   font-family: var(--font-wedding);
   font-weight: bold;
   margin-bottom: 2.5rem; /* Increased spacing for balance */
-  color: var(--color-text-primary);
+  color: var(--color-text-secondary);
 }
 
 .timeline-day {
@@ -21,7 +21,7 @@
   font-size: clamp(1.5rem, 4vw, 3rem); /* Responsive date size */
   font-weight: bold;
   margin-bottom: 0.8rem;
-  color: var(--color-accent); /* Global accent color for importance */
+  color: var(--color-secondary-accent); /* Global accent color for importance */
   text-align: left;
 }
 
@@ -66,5 +66,5 @@
   font-size: 1.2rem; /* Readable size */
   font-style: italic;
   line-height: 1.5; /* Better readability */
-  color: var(--color-text-primary); /* Ensure consistency with global primary text */
+  color: var(  --color-secondary-accent  ); /* Ensure consistency with global primary text */
 }

@@ -9,6 +9,7 @@
   font-size: 2.5rem;
   font-weight: bold;
   margin-bottom: 2rem;
+  color: var(--color-text-secondary);
 }
 
 .vip-guest-list {
@@ -16,6 +17,7 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 3rem;
+  
 }
 
 .vip-guest-section {
@@ -25,12 +27,14 @@
 
 .vip-guest-title {
   font-size: 1.5rem;
-  font-weight: bold;
+  font-weight: thin;
   text-transform: uppercase;
   margin-bottom: 1rem;
+  color: var(--color-text-secondary);
 }
 
 .vip-guest-name {
   font-size: 1rem;
   margin: 0.5rem 0;
+  color : var(--color-secondary-accent);
 }

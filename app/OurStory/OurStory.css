@@ -80,7 +80,7 @@
 .sectionTitle {
     text-transform: uppercase;
     font-size: 1.5rem;
-    color: var(--color-accent);
+    color: var(--color-text-secondary);
     margin-bottom: 1rem;
 }
 
