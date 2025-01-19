@@ -11,67 +11,6 @@
   width: 100%;
 }
 
-/* Hero Section */
-.hero {
-  position: relative;
-  text-align: center;
-  width: 100%;
-  margin-bottom: 3rem;
-  overflow: hidden;
-  height: auto; /* Default height */
-}
-
-.videoContainer {
-  position: relative;
-  width: 100%;
-  height: auto; /* Default height */
-  overflow: hidden;
-  border-radius: 16px;
-}
-
-.videoContainer:hover .heroVideo {
-  filter: grayscale(0%); /* Transition to color on hover */
-}
-
-.heroVideo {
-  width: 100%;
-  height: auto;
-  display: block;
-  filter: grayscale(100%);
-  transition: filter 0.3s ease; /* Smooth transition to color */
-}
-
-.heroOverlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  color: var(--color-text-primary);
-  z-index: 1;
-  width: 100%;
-  padding: 1rem;
-  box-sizing: border-box; /* Ensures padding doesn't affect the width */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.heroOverlay h1 span {
-  font-size: clamp(3rem, 8vw, 6rem);
-  font-family: var(--font-wedding);
-  font-weight: bold;
-  letter-spacing: 0.1rem;
-  color: var(--color-accent);
-  text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  text-transform: uppercase;
-  line-height: 1.2;
-  display: block; /* Ensures the text spans the container */
-  text-align: center;
-  width: 100%; /* Make text fill the width of the container */
-}
-
 /* To: Guest Section */
 .toGuestSection {
   width: 100%;

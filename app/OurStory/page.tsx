@@ -4,6 +4,7 @@ import "./OurStory.css";
 // Import the VIPList component
 import VIPList from "../components/VIPlist";
 import Timeline from "../components/Timeline";
+import HeroSection from "../components/HeroSection";
 
 export default function OurStory() {
     const vipData = [
@@ -58,21 +59,11 @@ export default function OurStory() {
     return (
         <div className="pageContainer">
             {/* Hero Section */}
-            <div className="hero">
-                <div className="videoContainer">
-                    <video autoPlay muted loop playsInline className="heroVideo">
-                        <source src="/KissInMountains.webm" type="video/webm" />
-                        <source src="/KissInMountains.mp4" type="video/mp4" />
-                        Your browser does not support the video tag.
-                    </video>
-                    <div className="heroOverlay">
-                        <h1>
-                            <span>AVI AND SHAKTHI&apos;S WEDDING</span>
-                        </h1>
-                    </div>
-                </div>
-            </div>
-
+            <HeroSection
+                mp4Src="/KissInMountains.mp4"
+                webmSrc="/KissInMountains.webm"
+                heroText="AVI AND SHAKTHI'S WEDDING"
+            />
 
             {/* Our Story Section */}
             <section className="section">

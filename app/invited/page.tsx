@@ -6,6 +6,7 @@ import InvitedGuest from "../components/InviteForm";
 import Cookies from "js-cookie";
 import styles from "./invited.module.css";
 import Header from "../components/Header";
+import HeroSection from "../components/HeroSection"; 
 
 Modal.setAppElement("#__next"); // For react-modal accessibility
 
@@ -56,20 +57,11 @@ export default function BigInvitePage() {
 
       <div className={styles.pageContainer}>
         {/* Hero Section */}
-        <div className={styles.hero}>
-          <div className={styles.videoContainer}>
-            <video autoPlay muted loop playsInline className={styles.heroVideo}>
-              <source src="/Sandwitchsnatch.webm" type="video/webm" />
-              <source src="/Sandwitchsnatch.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-            <div className={styles.heroOverlay}>
-              <h1>
-                <span>AVI AND SHAKTHI&apos;S WEDDING</span>
-              </h1>
-            </div>
-          </div>
-        </div>
+        <HeroSection
+          mp4Src="/Sandwitchsnatch.mp4"
+          webmSrc="/Sandwitchsnatch.webm"
+          heroText="AVI AND SHAKTHI'S WEDDING"
+        />
 
         {/* To: Guest Section */}
         <section className={styles.toGuestSection}>
