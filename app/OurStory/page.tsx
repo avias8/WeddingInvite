@@ -58,10 +58,19 @@ export default function OurStory() {
 
     return (
         <div className="pageContainer">
+
+            {/* <BannerSection
+                leftImageSrc="/ShakthiYoung/IMG_6579.JPG"
+                rightImageSrc="/ShakthiYoung/IMG_6577.JPG"
+                brideName="Shakthi"
+                groomName="Avi"
+                weddingDate="06 • 29 • 2024"
+            /> */}
+
             {/* Hero Section */}
             <HeroSection
-                mp4Src="/KissInMountains.mp4"
-                webmSrc="/KissInMountains.webm"
+                mp4Src="Videos/KissInMountains.mp4"
+                webmSrc="Videos/KissInMountains.webm"
                 heroText="AVI AND SHAKTHI'S WEDDING"
             />
 
@@ -84,7 +93,7 @@ export default function OurStory() {
             <section className="timelineSection">
                 <div className="imageContainer">
                     <img
-                        src="/Avi&Shakthi.JPEG"
+                        src="Images/Avi&Shakthi.JPEG"
                         alt="Avi and Shakthi"
                         className="timelineImage"
                     />
