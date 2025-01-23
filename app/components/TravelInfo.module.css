@@ -1,0 +1,104 @@
+.travelInfoWrapper {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: var(--color-background);
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: var(--font-body);
+  }
+  
+  .title {
+    font-family: var(--font-wedding);
+    font-size: 2.5rem;
+    color: var(--color-accent);
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background-color: var(--color-background-light);
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+  
+  .subtitle {
+    font-family: var(--font-wedding);
+    font-size: 1.8rem;
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .subtitle::before {
+    content: "";
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background-color: var(--color-accent);
+    border-radius: 50%;
+  }
+  
+  .list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .listItem {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .listItem::before {
+    content: "➔";
+    color: var(--color-accent);
+    font-size: 1.2rem;
+  }
+  
+  .link {
+    color: var(--color-accent);
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s ease;
+  }
+  
+  .link:hover {
+    color: var(--color-text-secondary);
+    text-decoration: underline;
+  }
+  
+  .listItem strong {
+    color: var(--color-text-secondary);
+  }
+  
+  @media (max-width: 768px) {
+    .travelInfoWrapper {
+      padding: 1rem;
+    }
+  
+    .title {
+      font-size: 2rem;
+    }
+  
+    .section {
+      padding: 1rem;
+    }
+  
+    .subtitle {
+      font-size: 1.5rem;
+    }
+  
+    .listItem {
+      font-size: 1rem;
+    }
+  }
+  

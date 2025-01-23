@@ -1,6 +1,9 @@
 import Header from "../components/Header"; // <--- Adjust path if needed
 import HeroSection from "../components/HeroSection";
 import styles from "./details.module.css";
+import DressCode from "../components/DressCode";
+import TravelInfo from "../components/TravelInfo";
+import Restaurants from "../components/Restaurants";
 
 export default function DetailsPage() {
   return (
@@ -28,6 +31,21 @@ export default function DetailsPage() {
             </p>
           </section>
 
+          {/* Section: Dress Code */}
+          <section className={styles.section}>
+            <DressCode />
+          </section>
+
+          {/* Section: Travel Information */}
+          <section className={styles.section}>
+            <TravelInfo />
+          </section>
+
+          {/* Section: Nearby Restaurants */}
+          <section className={styles.section}>
+            <Restaurants />
+          </section>
+          
           {/* Section: Schedule */}
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Schedule</h2>
