@@ -1,0 +1,65 @@
+.container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+  
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px var(--color-shadow);
+    text-align: center;
+    font-family: var(--font-wedding);
+  }
+  
+  .heading {
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    margin-bottom: 2rem;
+    color: var(--color-accent);
+    font-weight: 400;
+  }
+  
+  /* Lay out the schedule items in one horizontal row (wrapping on mobile) */
+  .scheduleList {
+    display: flex;
+    justify-content: space-around; /* space them across the container */
+    gap: 2rem;
+    flex-wrap: wrap;              /* allow items to wrap on smaller screens */
+    margin: 2rem auto;
+    padding: 0;
+    list-style: none;
+  }
+  
+  /* Each schedule item is a column: big time on top, smaller description below */
+  .scheduleItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;  /* center time & description horizontally */
+    text-align: center;
+  }
+  
+  /* Large time in accent color */
+  .time {
+    font-size: 1.6rem;      /* bigger for emphasis */
+    font-weight: bold;
+    color: var(--color-accent);
+    margin-bottom: 0.25rem; /* slight space before description */
+    font-family: var(--font-body);
+  }
+  
+  /* Smaller subtext below the time */
+  .description {
+    font-size: 1.1rem;
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+  }
+  
+  /* Footnote is bigger and bolder, to stand out at the bottom */
+  .footnote {
+    margin-top: 2rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    font-style: italic;
+    color: var(--color-text-primary);
+  }
+  

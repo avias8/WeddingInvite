@@ -1,6 +1,7 @@
 "use client";
+
 import React from "react";
-import styles from "./HeroSection.module.css"; // New CSS module
+import styles from "./HeroSection.module.css";
 
 interface HeroSectionProps {
   mp4Src: string;
@@ -8,6 +9,8 @@ interface HeroSectionProps {
   heroText: string;
   /** Optional text displayed if the video doesn’t load */
   altText?: string;
+  /** New optional subtext below the heroText */
+  subText?: string;
 }
 
 export default function HeroSection({
@@ -15,6 +18,7 @@ export default function HeroSection({
   webmSrc,
   heroText,
   altText = "Your browser does not support the video tag.",
+  subText, // optional
 }: HeroSectionProps) {
   return (
     <div className={styles.hero}>
@@ -28,6 +32,7 @@ export default function HeroSection({
           <h1>
             <span>{heroText}</span>
           </h1>
+          {subText && <p className={styles.subText}>{subText}</p>}
         </div>
       </div>
     </div>
