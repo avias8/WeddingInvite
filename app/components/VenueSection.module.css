@@ -1,0 +1,162 @@
+.venueWrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 3rem auto;
+    padding: 2rem;
+
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px var(--color-shadow);
+}
+
+/* Default: 3 columns for large screens */
+.leftColumn,
+.centerColumn,
+.rightColumn {
+    flex: 1 1 300px;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.leftColumn {
+    order: 1;
+}
+
+.centerColumn {
+    order: 2;
+    align-items: center;
+    justify-content: center;
+}
+
+.rightColumn {
+    order: 3;
+}
+
+/* Left column styles */
+.venueTitle {
+    font-family: var(--font-wedding);
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    margin-bottom: 0.5rem;
+    color: var(--color-text-primary);
+}
+
+.venueDescription {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Center column styles */
+.centerColumn .venueImage {
+    width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    object-fit: cover;
+    max-width: 100%; /* Prevent overflow */
+    box-shadow: 0 4px 6px var(--color-shadow); /* Subtle shadow for focus */
+}
+
+/* Right column styles */
+.locationHeading {
+    font-size: 1.2rem;
+    font-family: var(--font-wedding);
+    margin-bottom: 0.5rem;
+    color: var(--color-accent);
+}
+
+.addressLine {
+    font-size: 1rem;
+    margin: 0;
+    line-height: 1.5;
+    font-family: var(--font-body);
+}
+
+.phoneEmail {
+    margin: 1rem 0;
+    font-size: 1rem;
+    font-family: var(--font-body);
+}
+
+.emailLink {
+    color: var(--color-text-primary);
+    text-decoration: underline;
+}
+
+.mapLink {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--color-text-primary);
+    border-radius: 2rem;
+    background-color: transparent;
+    color: var(--color-text-primary);
+    text-decoration: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.mapLink:hover {
+    background-color: var(--color-accent);
+    color: #fff;
+}
+
+/* Embedded Map (Improved for Centering) */
+.mapIframe {
+    width: 100%;
+    height: auto;
+    max-width: 300px; /* Limit maximum width for responsiveness */
+    margin-bottom: 1rem;
+    display: block;
+}
+
+
+/* Small screens (<768px): single column */
+@media (max-width: 768px) {
+    .venueWrapper {
+        flex-direction: column;
+    }
+
+    .leftColumn,
+    .centerColumn,
+    .rightColumn {
+        flex: 0 0 auto;
+        width: 100%;
+        min-width: auto;
+    }
+
+    .centerColumn {
+        align-items: center;
+    }
+}
+
+/* Medium-to-large screens (≥1024px): vertical dividers */
+@media (min-width: 1024px) {
+    .leftColumn,
+    .rightColumn {
+        align-items: flex-start;
+    }
+
+    .leftColumn {
+        border-right: 1px solid var(--color-border);
+        padding-right: 1.5rem;
+        margin-right: 1.5rem;
+    }
+
+    .centerColumn {
+        align-items: center;
+        border-right: 1px solid var(--color-border);
+        padding-right: 1.5rem;
+        margin-right: 1.5rem;
+    }
+
+    .centerColumn .venueImage {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+}

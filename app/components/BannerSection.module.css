@@ -1,67 +1,308 @@
 .bannerContainer {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
     gap: 2rem;
-    text-align: center;
-    margin: 3rem 0; /* Adjust spacing as needed */
-  }
-  
-  /* The left/right image wrapper */
-  .imageWrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-width: 200px; /* Constrain the image width if desired */
-  }
-  
-  /* Black-and-white images */
-  .editImage {
+    max-width: 1200px;
     width: 100%;
-    height: auto;
-    object-fit: cover;
-    filter: grayscale(100%); /* make it black-and-white */
-    border-radius: 8px;      /* slight rounding, optional */
-    transition: filter 0.3s ease;
-  }
-  
-  /* Slight hover effect to show a color pop if you want */
-  .editImage:hover {
-    filter: grayscale(0%);
-  }
-  
-  .caption {
-    font-size: 0.9rem;
-    color: var(--color-text-secondary);
-    margin-top: 0.5rem;
-  }
-  
-  /* The center text section */
-  .centerSection {
+    margin: 0 auto;
+    /* center with extra vertical space */
+    padding: 2rem;
+    background-color: var(--color-background);
+    
+
+    /* Remove or keep these as you like */
+    font-family: var(--font-body);
+    color: var(--color-text-primary);
+}
+
+/* An optional top-level heading for the entire section */
+.sectionHeading {
+    font-family: var(--font-wedding);
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    color: var(--color-accent);
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.photoWrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-  }
-  
-  /* Names + date styling */
-  .names {
-    font-family: var(--font-wedding);
-    font-size: clamp(1.5rem, 5vw, 3rem);
-    letter-spacing: 0.05rem;
-    font-weight: bold;
+    gap: 1rem;
+    /* Space between the photo and button */
+}
+
+.topPhoto {
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+}
+
+.shuffleButton {
+    border: 1px solid var(--color-text-primary);
+    background-color: transparent;
     color: var(--color-text-primary);
-    margin-bottom: 0.5rem;
-  }
-  
-  .ampersand {
-    font-size: 1.2em; /* Slightly larger & sign if desired */
-  }
-  
-  .dateText {
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
     font-family: var(--font-body);
-    font-size: clamp(1.2rem, 4vw, 2rem);
-    color: var(--color-text-accent, #777);
-    font-style: italic;
+    text-align: center;
+    /* Ensure text alignment */
+    margin-bottom: 1rem;
+}
+
+.shuffleButton:hover {
+    background-color: var(--color-accent);
+    color: #fff;
+}
+
+/* Three story cards in a row on large screens */
+.cardsWrapper {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.storyCard {
+    flex: 1 1 250px;
+    min-width: 220px;
+    background-color: var(--color-background);
+    border: 3px solid var(--color-accent); /* Match funFactsWrapper border */
+    border-radius: 16px; /* Match rounded corners */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Match deeper shadow */
+    padding: 2rem; /* Match padding */
+    text-align: left;
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Add hover transition */
+}
+
+/* Optional hover effect for .storyCard */
+.storyCard:hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+}
+
+/* Remove border for Story of Us */
+.storyCardNoBorder {
+    border: none; /* Remove border */
+    box-shadow: none; /* Remove shadow */
+  }
+
+.storyTitle {
+    font-family: var(--font-wedding);
+    font-size: 1.4rem;
+    /* slightly bigger title */
+    color: var(--color-text-secondary);
+    margin-bottom: 0.75rem;
+    /* extra spacing under title */
+    text-align: center;
+}
+
+.storyText {
+    font-size: 1.05rem;
+    /* bump up a bit */
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Fun Facts section at bottom, more padding & slight accent */
+.funFactsWrapper {
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px var(--color-shadow);
+    padding: 1.5rem;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.funFactsTitle {
+    font-family: var(--font-wedding);
+    font-size: 1.3rem;
+    color: var(--color-accent);
+    margin-bottom: 0.75rem;
+}
+
+.funFactsText {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.photoWrapper {
+    perspective: 1000px;
+    /* Enable 3D effect */
+}
+
+.cardInner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.8s ease;
+}
+
+.flipped {
+    transform: rotateY(180deg);
+}
+
+.cardFront,
+.cardBack {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.cardBack {
+    transform: rotateY(180deg);
+}
+
+/* Fun Facts Wrapper */
+.funFactsWrapper {
+    background-color: var(--color-background);
+    border: 3px solid var(--color-accent);
+    /* Thicker border for emphasis */
+    border-radius: 16px;
+    /* Softer rounded corners */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    /* Deeper shadow for depth */
+    padding: 2rem;
+    text-align: center;
+    max-width: 900px;
+    /* Limit width for readability */
+    margin: 2rem auto;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.funFactsWrapper:hover {
+    transform: translateY(-5px);
+    /* Lift effect */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    /* Enhanced hover shadow */
+}
+
+/* Fun Facts Title */
+.funFactsTitle {
+    font-family: var(--font-wedding);
+    font-size: 2.2rem;
+    /* Slightly larger title */
+    color: var(--color-accent);
+    margin-bottom: 1.5rem;
+    /* Extra spacing below title */
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    /* Slight shadow for depth */
+}
+
+/* Decorative Sparkle */
+.funFactsWrapper::before {
+    content: "✨";
+    font-size: 2.5rem;
+    /* Larger sparkle */
+    color: var(--color-accent);
+    display: block;
+    margin-bottom: 1rem;
+    /* Extra space below sparkle */
+}
+
+/* Fun Facts List */
+.funFactsList {
+    list-style: none; /* Remove default bullets */
+    padding: 0;
+    margin: 0;
+    text-align: left; /* Align text for better readability */
   }
   
+  .funFactsItem {
+    display: flex; /* Flex layout for icon + text */
+    align-items: flex-start;
+    font-size: 1.3rem; /* Readable font size */
+    line-height: 1.8;
+    color: var(--color-text-primary);
+    font-family: var(--font-body); /* Clean, modern font */
+    margin-bottom: 1.2rem; /* Add spacing between items */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
+    padding: 0.5rem 0.75rem; /* Add padding for hover effect */
+    border-radius: 8px; /* Slight rounding for hover effect */
+  }
+  
+  .funFactsItem:last-child {
+    margin-bottom: 0;
+  }
+  
+  /* Simpler Icon Styling */
+  .funFactsItem::before {
+    content: "•"; /* Subtle bullet */
+    font-size: 1.2rem;
+    color: var(--color-accent);
+    margin-right: 0.75rem; /* Space between icon and text */
+    flex-shrink: 0; /* Prevent icon from shrinking */
+  }
+  
+  /* Hover Effect for List Items */
+  .funFactsItem:hover {
+    background-color: var(--color-accent-light); /* Subtle background change */
+    color: var(--color-emphasis); /* Invert text color */
+    transform: translateX(5px); /* Slight movement to the right */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional shadow on hover */
+  }
+  
+  /* Active/Focused State for Accessibility */
+  .funFactsItem:focus,
+  .funFactsItem:active {
+    outline: 2px solid var(--color-accent); /* Add outline for focus state */
+    outline-offset: 2px;
+  }
+  
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .bannerContainer {
+        padding: 1rem;
+        margin: 1rem auto;
+    }
+
+    .topPhoto {
+        width: 100%;
+        height: auto;
+        max-height: 400px;
+        /* optional limit */
+    }
+
+    .cardsWrapper {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .storyCard {
+        margin-bottom: 1rem;
+    }
+
+    .funFactsWrapper {
+        padding: 1.5rem;
+        /* Reduce padding for smaller screens */
+    }
+
+    .funFactsTitle {
+        font-size: 2rem;
+        /* Adjust title size */
+    }
+
+    .funFactsItem {
+        font-size: 1.2rem;
+        /* Adjust text size */
+        line-height: 1.6;
+    }
+
+    .funFactsItem::before {
+        font-size: 1.3rem;
+        /* Adjust icon size */
+    }
+}
