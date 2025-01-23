@@ -41,7 +41,7 @@ export default function Restaurants() {
     <div className={styles.restaurantsWrapper}>
       <h1 className={styles.title}>Restaurants to Eat At</h1>
       <p className={styles.subtitle}>
-        A few of Avi & Shakthi's favorite spots to try!
+        A few of Avi & Shakthi&apos;s favorite spots to try!
       </p>
       <div className={styles.grid}>
         {restaurants.map((restaurant, index) => (
