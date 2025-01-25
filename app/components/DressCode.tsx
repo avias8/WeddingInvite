@@ -20,22 +20,22 @@ const swatchColors = [
 
 const dressImages = [
   {
-    src: "/images/attire1.jpg",
+    src: "/Images/attire1.jpg",
     title: "Traditional Saree",
     description: "A vibrant red saree, symbolizing love and celebration, perfect for festive occasions.",
   },
   {
-    src: "/images/attire2.jpg",
+    src: "/Images/attire2.jpg",
     title: "Lehenga Choli",
     description: "An elegant lehenga adorned with intricate embroidery, ideal for weddings.",
   },
   {
-    src: "/images/attire3.jpg",
+    src: "/Images/attire3.jpg",
     title: "Sherwani",
     description: "A regal sherwani for men, blending tradition with sophistication.",
   },
   {
-    src: "/images/attire4.webp",
+    src: "/Images/attire4.webp",
     title: "Anarkali Dress",
     description: "A graceful anarkali with flowing layers, perfect for evening celebrations.",
   },

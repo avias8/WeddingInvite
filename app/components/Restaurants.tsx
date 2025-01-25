@@ -7,32 +7,32 @@ const restaurants = [
   {
     name: "Major Tom",
     description: "Fine dining with stunning city views.",
-    image: "/images/major-tom.jpg",
+    image: "/Images/major-tom.jpg",
   },
   {
     name: "Soul Pocha",
     description: "Korean comfort food at its finest.",
-    image: "/images/soul-pocha.jpeg",
+    image: "/Images/soul-pocha.jpeg",
   },
   {
     name: "Dosa Garden",
     description: "Authentic South Indian flavors.",
-    image: "/images/dosa-garden.webp",
+    image: "/Images/dosa-garden.webp",
   },
   {
     name: "Banzai",
     description: "Fresh sushi and Japanese cuisine.",
-    image: "/images/banzai.jpg",
+    image: "/Images/banzai.jpg",
   },
   {
     name: "Chairman’s",
     description: "Modern Fine Dining.",
-    image: "/images/chairmans.jpg",
+    image: "/Images/chairmans.jpg",
   },
   {
     name: "Baladi Shawarma",
     description: "Middle Eastern street food specialties.",
-    image: "/images/baladi-shawarma.jpg",
+    image: "/Images/baladi-shawarma.jpg",
   },
 ];
 
