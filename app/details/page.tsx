@@ -1,7 +1,7 @@
 import Header from "../components/Header"; // <--- Adjust path if needed
 import HeroSection from "../components/HeroSection";
 import styles from "./details.module.css";
-import DressCode from "../components/DressCode";
+import DressCode from "./DressCode/DressCode";
 import TravelInfo from "./Travel/TravelInfo";
 import Restaurants from "../components/Restaurants";
 
@@ -49,9 +49,9 @@ export default function DetailsPage() {
           <section className={styles.section}>
             <Restaurants />
           </section>
-          
+
           {/* Section: Schedule */}
-          <section className={styles.section}>
+          {/* <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Schedule</h2>
             <ul className={styles.scheduleList}>
               <li>
@@ -67,7 +67,7 @@ export default function DetailsPage() {
                 <strong>1:00 PM</strong> - Lunch Reception
               </li>
             </ul>
-          </section>
+          </section> */}
 
           {/* Section: Food */}
           <section className={styles.section}>
@@ -83,8 +83,13 @@ export default function DetailsPage() {
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Parking Details</h2>
             <p className={styles.sectionText}>
-              Free parking is available at the venue. Look for signs directing you to the
-              designated wedding parking area. Valet service will also be available for convenience.
+              Hilltop Wedding Center, located in Sylvan Lake, Alberta, offers on-site parking for guests attending events at their expansive 20-acre property. The venue is equipped to accommodate up to 200 guests, with parking facilities designed to support this capacity. Signs will direct you to the designated wedding parking area upon arrival.
+            </p>
+            <p className={styles.sectionText}>
+              Additionally, if you require transportation, Hilltop Wedding Center can provide golf carts for guests with mobility challenges. Please let us know in advance if you require this service so we can make the necessary arrangements.
+            </p>
+            <p className={styles.sectionText}>
+              Please note that overnight parking is not permitted at the venue due to ongoing maintenance and preparation for subsequent events. However, nearby options like Jarvis Bay Campground and several top-notch hotels in Sylvan Lake are available for extended stays. Jarvis Bay Campground is just down the road and offers a range of amenities for a comfortable overnight experience.
             </p>
           </section>
         </div>

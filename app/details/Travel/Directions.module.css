@@ -49,3 +49,24 @@
     color: #5a5a5a;
     margin-bottom: 0.5rem;
   }
+  
+  .buttonWrapper {
+    text-align: center;
+    margin-top: 2rem;
+  }
+  
+  .getDirectionsButton {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background-color: #2a9d8f;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .getDirectionsButton:hover {
+    background-color: #21867a;
+  }
