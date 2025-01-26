@@ -2,11 +2,11 @@
 
 import { useState, FormEvent, ChangeEvent } from "react";
 import "./EditInviteeForm.css"; // Import the CSS file
-import { EditFormInvitee } from "@/app/types";
+import { Invitee } from "@/app/types";
 
 interface EditInviteeFormProps {
-  invitee: EditFormInvitee;
-  onSubmit: (updatedInvitee: EditFormInvitee) => Promise<void>;
+  invitee: Invitee;
+  onSubmit: (updatedInvitee: Invitee) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -15,20 +15,14 @@ export default function EditInviteeForm({
   onSubmit,
   onCancel,
 }: EditInviteeFormProps) {
-  const [formData, setFormData] = useState<EditFormInvitee>({ ...invitee });
+  const [formData, setFormData] = useState<Invitee>({ ...invitee });
   const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Handle changes for various fields.
-   * We handle numeric fields (guests, maxInvites) by parseInt,
-   * and isAttending with a tri-state approach if needed.
-   */
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
 
-    // If the field is numeric
     if (name === "guests" || name === "maxInvites") {
       setFormData((prev) => ({
         ...prev,
@@ -37,7 +31,6 @@ export default function EditInviteeForm({
       return;
     }
 
-    // If the field isAttending (boolean | null)
     if (name === "isAttending") {
       setFormData((prev) => ({
         ...prev,
@@ -47,34 +40,31 @@ export default function EditInviteeForm({
       return;
     }
 
-    // Otherwise store string directly
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  /**
-   * Validate and submit the form
-   */
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    // Basic validation
     if (!formData.name || !formData.email) {
       setError("Name and email are required.");
       return;
     }
 
     try {
-      // We call the parent prop onSubmit — it returns a Promise<void>
       await onSubmit({
         ...formData,
-        maxInvites: formData.maxInvites || 0,
         dietaryRestrictions: formData.dietaryRestrictions ?? null,
         accessibilityInfo: formData.accessibilityInfo ?? null,
         songRequests: formData.songRequests ?? null,
         comments: formData.comments ?? null,
       });
-    } catch (err: any) {
-      setError(err.message || "Error updating invitee.");
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unexpected error occurred.");
+      }
     }
   };
 
@@ -84,7 +74,6 @@ export default function EditInviteeForm({
         <h2>Edit Invitee</h2>
         {error && <p className="text-red-500">{error}</p>}
 
-        {/* Name */}
         <div className="form-group">
           <label>Name:</label>
           <input
@@ -96,7 +85,6 @@ export default function EditInviteeForm({
           />
         </div>
 
-        {/* Email */}
         <div className="form-group">
           <label>Email:</label>
           <input
@@ -108,14 +96,13 @@ export default function EditInviteeForm({
           />
         </div>
 
-        {/* Attending */}
         <div className="form-group">
           <label>Attending:</label>
           <select
             name="isAttending"
             value={
               formData.isAttending == null
-                ? "false" // default to "No" if null
+                ? "null"
                 : formData.isAttending
                 ? "true"
                 : "false"
@@ -124,13 +111,10 @@ export default function EditInviteeForm({
           >
             <option value="true">Yes</option>
             <option value="false">No</option>
-            {/* If you wanted a true tri-state: 
-                <option value="null">No Response</option> 
-               then handle that in the code above */}
+            <option value="null">No Response</option>
           </select>
         </div>
 
-        {/* Guests */}
         <div className="form-group">
           <label>Guests:</label>
           <input
@@ -142,7 +126,6 @@ export default function EditInviteeForm({
           />
         </div>
 
-        {/* Max Invites */}
         <div className="form-group">
           <label>Max Invites:</label>
           <input
@@ -154,7 +137,6 @@ export default function EditInviteeForm({
           />
         </div>
 
-        {/* Dietary Restrictions */}
         <div className="form-group">
           <label>Dietary Restrictions:</label>
           <input
@@ -165,7 +147,6 @@ export default function EditInviteeForm({
           />
         </div>
 
-        {/* Accessibility Info */}
         <div className="form-group">
           <label>Accessibility Info:</label>
           <input
@@ -176,7 +157,6 @@ export default function EditInviteeForm({
           />
         </div>
 
-        {/* Song Requests */}
         <div className="form-group">
           <label>Song Requests:</label>
           <input
@@ -187,7 +167,6 @@ export default function EditInviteeForm({
           />
         </div>
 
-        {/* Comments */}
         <div className="form-group">
           <label>Comments:</label>
           <input
@@ -198,15 +177,21 @@ export default function EditInviteeForm({
           />
         </div>
 
+        <div className="form-group">
+          <label>Created At:</label>
+          <input
+            type="text"
+            name="createdAt"
+            value={formData.createdAt}
+            readOnly
+          />
+        </div>
+
         <div className="form-actions">
-          <button type="submit" className="sectionButton btn-save">
+          <button type="submit" className="btn-save">
             Save
           </button>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="sectionButton btn-cancel"
-          >
+          <button type="button" onClick={onCancel} className="btn-cancel">
             Cancel
           </button>
         </div>

@@ -67,33 +67,19 @@ export async function PUT(
     // Build an updateData object that only sets a property if it's provided
     const updateData: Prisma.InviteeUpdateInput = {};
 
-    if (name !== undefined) {
-      updateData.name = name;
-    }
-    if (email !== undefined) {
-      updateData.email = email;
-    }
-    if (maxInvites !== undefined) {
-      updateData.maxInvites = maxInvites;
-    }
-    if (isAttending !== undefined) {
-      updateData.isAttending = isAttending;
-    }
-    if (guests !== undefined) {
-      updateData.guests = guests;
-    }
+    if (name !== undefined) updateData.name = name;
+    if (email !== undefined) updateData.email = email;
+    if (maxInvites !== undefined) updateData.maxInvites = maxInvites;
+    if (isAttending !== undefined) updateData.isAttending = isAttending;
+    if (guests !== undefined) updateData.guests = guests;
     if (dietaryRestrictions !== undefined) {
       updateData.dietaryRestrictions = dietaryRestrictions ?? null;
     }
     if (accessibilityInfo !== undefined) {
       updateData.accessibilityInfo = accessibilityInfo ?? null;
     }
-    if (comments !== undefined) {
-      updateData.comments = comments ?? null;
-    }
-    if (songRequests !== undefined) {
-      updateData.songRequests = songRequests ?? null;
-    }
+    if (comments !== undefined) updateData.comments = comments ?? null;
+    if (songRequests !== undefined) updateData.songRequests = songRequests ?? null;
 
     // Optionally update 'respondedAt' every time
     updateData.respondedAt = new Date();
@@ -105,16 +91,14 @@ export async function PUT(
       });
       return NextResponse.json(updatedInvitee);
     } catch (error: unknown) {
-      // If you want to handle 'not found' errors
+      // Check if it's the "not found" error from Prisma
       if (
         typeof error === "object" &&
         error !== null &&
         "code" in error &&
-        (error as any).code === "P2025"
+        (error as { code?: string }).code === "P2025"
       ) {
-        return NextResponse.json({ error: "Invitee not found" }, {
-          status: 404,
-        });
+        return NextResponse.json({ error: "Invitee not found" }, { status: 404 });
       }
       throw error;
     }

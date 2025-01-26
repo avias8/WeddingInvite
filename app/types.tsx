@@ -37,5 +37,3 @@ export type Invitee = {
     comments: string | null;
     songRequests: string | null;
   };
-  
-  export type EditFormInvitee = Omit<Invitee, "createdAt">;
