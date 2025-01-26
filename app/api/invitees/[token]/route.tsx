@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+/**
+ * GET /api/invitees/[token]
+ * Fetch a single invitee by token
+ */
 export async function GET(
-  req: NextRequest,
-  context: { params: Promise<{ token: string }> } // Keep params as a Promise
+  request: NextRequest,
+  context: { params: Promise<{ token: string }> }
 ) {
   try {
-    const { token } = await context.params; // Await the params object
+    const { token } = await context.params; // lazy-loaded params
 
     if (!token) {
-      return new NextResponse("Token is required", { status: 400 });
+      return NextResponse.json({ error: "Token is required" }, { status: 400 });
     }
 
     const invitee = await prisma.invitee.findUnique({
@@ -19,63 +23,106 @@ export async function GET(
     });
 
     if (!invitee) {
-      return new NextResponse("Invitee not found", { status: 404 });
+      return NextResponse.json({ error: "Invitee not found" }, { status: 404 });
     }
 
     return NextResponse.json(invitee);
   } catch (error) {
-    console.error("Error fetching invitee:", error);
-    return new NextResponse("Error fetching invitee", { status: 500 });
+    console.error("Error fetching invitee by token:", error);
+    return NextResponse.json(
+      { error: "Error fetching invitee" },
+      { status: 500 }
+    );
   }
 }
 
+/**
+ * PUT /api/invitees/[token]
+ * Update invitee fields by token
+ */
 export async function PUT(
-  req: NextRequest,
-  context: { params: Promise<{ token: string }> } // Keep params as a Promise
+  request: NextRequest,
+  context: { params: Promise<{ token: string }> }
 ) {
   try {
-    const { token } = await context.params; // Await the params object
+    const { token } = await context.params;
 
     if (!token) {
-      return new NextResponse("Token is required", { status: 400 });
+      return NextResponse.json({ error: "Token is required" }, { status: 400 });
     }
 
+    // Destructure the request body
     const {
+      name,
+      email,
+      maxInvites,
       isAttending,
       guests,
       dietaryRestrictions,
       accessibilityInfo,
       comments,
       songRequests,
-    } = await req.json();
+    } = await request.json();
 
-    if (isAttending === undefined || guests === undefined) {
-      return new NextResponse("isAttending and guests are required", {
-        status: 400,
-      });
+    // Build an updateData object that only sets a property if it's provided
+    const updateData: Prisma.InviteeUpdateInput = {};
+
+    if (name !== undefined) {
+      updateData.name = name;
+    }
+    if (email !== undefined) {
+      updateData.email = email;
+    }
+    if (maxInvites !== undefined) {
+      updateData.maxInvites = maxInvites;
+    }
+    if (isAttending !== undefined) {
+      updateData.isAttending = isAttending;
+    }
+    if (guests !== undefined) {
+      updateData.guests = guests;
+    }
+    if (dietaryRestrictions !== undefined) {
+      updateData.dietaryRestrictions = dietaryRestrictions ?? null;
+    }
+    if (accessibilityInfo !== undefined) {
+      updateData.accessibilityInfo = accessibilityInfo ?? null;
+    }
+    if (comments !== undefined) {
+      updateData.comments = comments ?? null;
+    }
+    if (songRequests !== undefined) {
+      updateData.songRequests = songRequests ?? null;
     }
 
-    const updatedInvitee = await prisma.invitee.update({
-      where: { token },
-      data: {
-        isAttending,
-        guests,
-        dietaryRestrictions: dietaryRestrictions || null,
-        accessibilityInfo: accessibilityInfo || null,
-        comments: comments || null,
-        songRequests: songRequests || null,
-        respondedAt: new Date(),
-      },
-    });
+    // Optionally update 'respondedAt' every time
+    updateData.respondedAt = new Date();
 
-    return NextResponse.json(updatedInvitee);
+    try {
+      const updatedInvitee = await prisma.invitee.update({
+        where: { token },
+        data: updateData,
+      });
+      return NextResponse.json(updatedInvitee);
+    } catch (error: unknown) {
+      // If you want to handle 'not found' errors
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        (error as any).code === "P2025"
+      ) {
+        return NextResponse.json({ error: "Invitee not found" }, {
+          status: 404,
+        });
+      }
+      throw error;
+    }
   } catch (error) {
     console.error("Error updating invitee:", error);
-
-    if (error instanceof Error && error.message.includes("No record found")) {
-      return new NextResponse("Invitee not found", { status: 404 });
-    }
-
-    return new NextResponse("Error updating invitee", { status: 500 });
+    return NextResponse.json(
+      { error: "Error updating invitee" },
+      { status: 500 }
+    );
   }
 }

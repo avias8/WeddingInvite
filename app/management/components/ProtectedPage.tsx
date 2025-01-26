@@ -1,10 +1,11 @@
+//app/management/components/ProtectedPage.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import AdminInvite from "./AdminInvite";
-import AdminPage from "./AdminTiles";
 import "./ManagementPage.css";
 import Header from "../../components/Header";
+import AdminTiles from "./AdminTiles";
 
 
 const ProtectedPage: React.FC = () => {
@@ -42,7 +43,7 @@ const ProtectedPage: React.FC = () => {
             <AdminInvite />
           </div>
           <div className="management-section">
-            <AdminPage />
+            <AdminTiles />
           </div>
         </div>
       </div>

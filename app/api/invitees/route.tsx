@@ -1,8 +1,10 @@
+// app/api/route.tsx
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// GET all invitees
 export async function GET() {
   try {
     const invitees = await prisma.invitee.findMany();
@@ -13,6 +15,7 @@ export async function GET() {
   }
 }
 
+// Create a new invitee
 export async function POST(req: NextRequest) {
   try {
     const {
@@ -27,8 +30,22 @@ export async function POST(req: NextRequest) {
       songRequests,
     } = await req.json();
 
+    // Basic checks for required fields
     if (!name || !email || guests === undefined) {
       return new NextResponse("Missing required fields", { status: 400 });
+    }
+
+    // If your Prisma schema says maxInvites is an Int, 
+    // ensure it's a number on the server side.
+    // You can either fail or default to zero if not provided.
+    let validMaxInvites = 0;
+    if (typeof maxInvites === "number") {
+      validMaxInvites = maxInvites;
+    } else if (maxInvites === undefined) {
+      // If you want a default, do so here:
+      validMaxInvites = 0;
+    } else {
+      return new NextResponse("Invalid 'maxInvites' field", { status: 400 });
     }
 
     const newInvitee = await prisma.invitee.create({
@@ -36,12 +53,12 @@ export async function POST(req: NextRequest) {
         name,
         email,
         guests,
-        isAttending,
-        maxInvites: maxInvites || 0,
-        dietaryRestrictions: dietaryRestrictions || null,
-        accessibilityInfo: accessibilityInfo || null,
-        comments: comments || null,
-        songRequests: songRequests || null,
+        isAttending, // can be boolean or undefined if your schema is Boolean?
+        maxInvites: validMaxInvites,
+        dietaryRestrictions: dietaryRestrictions ?? null,
+        accessibilityInfo: accessibilityInfo ?? null,
+        comments: comments ?? null,
+        songRequests: songRequests ?? null,
       },
     });
 
@@ -52,59 +69,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function PUT(
-  req: NextRequest,
-  context: { params: Promise<{ token: string }> }
-) {
-  try {
-    const { token } = await context.params;
-
-    if (!token) {
-      return new NextResponse("Token is required", { status: 400 });
-    }
-
-    const {
-      isAttending,
-      guests,
-      dietaryRestrictions,
-      accessibilityInfo,
-      comments,
-      songRequests,
-    } = await req.json();
-
-    if (isAttending === undefined && guests === undefined) {
-      return new NextResponse("isAttending or guests are required", {
-        status: 400,
-      });
-    }
-    
-
-    const updatedInvitee = await prisma.invitee.update({
-      where: { token },
-      data: {
-        isAttending,
-        guests,
-        dietaryRestrictions: dietaryRestrictions || null,
-        accessibilityInfo: accessibilityInfo || null,
-        comments: comments || null,
-        songRequests: songRequests || null,
-        respondedAt: new Date(),
-      },
-    });
-
-    return NextResponse.json(updatedInvitee);
-  } catch (error) {
-    console.error("Error updating invitee:", error);
-
-    if (error instanceof Error && error.message.includes("No record found")) {
-      return new NextResponse("Invitee not found", { status: 404 });
-    }
-
-    return new NextResponse("Error updating invitee", { status: 500 });
-  }
-}
-
-
+// Delete an invitee by ID
 export async function DELETE(req: NextRequest) {
   try {
     const { id } = await req.json();
@@ -115,9 +80,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Delete the invitee by ID
-    await prisma.invitee.delete({
-      where: { id },
-    });
+    await prisma.invitee.delete({ where: { id } });
 
     return new NextResponse("Invitee deleted successfully", { status: 200 });
   } catch (error) {

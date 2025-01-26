@@ -1,43 +1,36 @@
-"use client"; // Marks this file as a client component
+// app/management/components/AdminTiles.tsx
+
+"use client";
 
 import { useEffect, useState } from "react";
 import { FaTrash, FaEdit } from "react-icons/fa";
-import EditInviteeForm from "./EditInviteeForm"; // Correct path for EditInviteeForm component
+import EditInviteeForm from "./EditInviteeForm";
+import { Invitee, EditFormInvitee } from "@/app/types"; 
 
-// Define the Invitee type
-type Invitee = {
-  id: number;
-  name: string;
-  email: string;
-  isAttending: boolean;
-  guests: number;
-  token: string;
-  maxInvites: number;
-  respondedAt: string | null; // Optional field
-  dietaryRestrictions: string | null; // Optional field
-  accessibilityInfo: string | null; // Optional field
-  comments: string | null; // Optional field
-  songRequests: string | null; // Optional field
-};
+// Import the external CSS file
+import "./AdminTiles.css";
 
-export default function AdminPage() {
+export default function AdminTiles() {
   const [invitees, setInvitees] = useState<Invitee[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // State for editing
-  const [editingInvitee, setEditingInvitee] = useState<Invitee | null>(null);
+  // We'll store the "editing invitee" as the form type (EditFormInvitee), 
+  // since the form omits createdAt
+  const [editingInvitee, setEditingInvitee] = useState<EditFormInvitee | null>(null);
 
   useEffect(() => {
     const fetchInvitees = async () => {
       try {
-        const response = await fetch("/api/invitees");
-        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
-        const data: Invitee[] = await response.json();
+        const res = await fetch("/api/invitees");
+        if (!res.ok) {
+          throw new Error(`Error: ${res.statusText}`);
+        }
+        const data: Invitee[] = await res.json();
         setInvitees(data);
-        setLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
         setLoading(false);
       }
     };
@@ -55,100 +48,134 @@ export default function AdminPage() {
         body: JSON.stringify({ id }),
       });
 
-      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
 
-      // Update the UI by removing the invitee
-      const updatedInvitees = invitees.filter((_, i) => i !== index);
-      setInvitees(updatedInvitees);
+      // remove from local state
+      const updated = invitees.filter((_, i) => i !== index);
+      setInvitees(updated);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete invitee.");
     }
   };
 
-  const handleEditClick = (invitee: Invitee) => {
-    setEditingInvitee(invitee); // Open the editing form with the selected invitee
+  /**
+   * The user wants to edit a full Invitee (with createdAt),
+   * but the form expects an EditFormInvitee (omitting createdAt).
+   */
+  const handleEditClick = (fullInvitee: Invitee) => {
+    // Destructure out 'createdAt' so the form doesn't see it
+    const { createdAt, ...formSafe } = fullInvitee;
+    setEditingInvitee(formSafe);
   };
 
-  const handleEditSubmit = async (updatedInvitee: Invitee) => {
+  /**
+   * The form calls onSubmit(updatedInvitee),
+   * which is an EditFormInvitee (missing createdAt).
+   */
+  const handleEditSubmit = async (updatedInvitee: EditFormInvitee) => {
     try {
-      const response = await fetch("/api/invitees", {
+      // 1. Merge back the 'createdAt' from our local array if we want to keep it
+      const original = invitees.find((iv) => iv.id === updatedInvitee.id);
+      if (!original) {
+        throw new Error("Invitee not found in local state.");
+      }
+      // Combine them to get a full object that matches 'Invitee'
+      const merged: Invitee = { ...original, ...updatedInvitee };
+
+      // 2. PUT to the dynamic route with the full object
+      const response = await fetch(`/api/invitees/${merged.token}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedInvitee),
+        body: JSON.stringify(merged),
       });
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
 
-      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+      // Optionally, read the updated record from the response
+      const updatedFromServer: Invitee = await response.json();
 
-      // Update the invitee list in the UI
-      const updatedInvitees = invitees.map((i) =>
-        i.id === updatedInvitee.id ? updatedInvitee : i
+      // 3. Update local state
+      const updatedData = invitees.map((iv) =>
+        iv.id === updatedFromServer.id ? updatedFromServer : iv
       );
-      setInvitees(updatedInvitees);
-      setEditingInvitee(null); // Close the editing form
+      setInvitees(updatedData);
+
+      setEditingInvitee(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to edit invitee.");
     }
   };
 
-  if (loading) return <div className="text-center">Loading...</div>;
-  if (error) return <div className="text-center text-red-500">{error}</div>;
+  if (loading) {
+    return <div className="text-center">Loading...</div>;
+  }
+  if (error) {
+    return <div className="text-center text-red-500">{error}</div>;
+  }
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-center mb-6">Admin View - Invitees</h1>
+    <div className="admin-container">
+      <h1 className="admin-title">Admin View - Invitees</h1>
+
       {invitees.length === 0 ? (
         <p className="text-center text-gray-500">No invitees found.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {invitees.map((i, index) => (
-            <div key={i.id} className="bg-white p-4 rounded shadow">
+        <div className="grid-container">
+          {invitees.map((invitee, index) => (
+            <div key={invitee.id} className="tile">
               <div className="tile-header">
-                <strong>{i.name}</strong>
+                <strong>{invitee.name}</strong>
                 <div className="actions">
                   <FaEdit
                     className="edit-icon"
-                    onClick={() => handleEditClick(i)}
+                    onClick={() => handleEditClick(invitee)}
                   />
                   <FaTrash
                     className="trash-icon"
-                    onClick={() => handleRemovePerson(i.id, index)}
+                    onClick={() => handleRemovePerson(invitee.id, index)}
                   />
                 </div>
               </div>
               <p>
-                <strong>Email:</strong> {i.email}
+                <strong>Email:</strong> {invitee.email}
               </p>
               <p>
                 <strong>Attending:</strong>{" "}
-                {i.isAttending === null ? "No Response" : i.isAttending ? "Yes" : "No"}
+                {invitee.isAttending === null
+                  ? "No Response"
+                  : invitee.isAttending
+                  ? "Yes"
+                  : "No"}
               </p>
               <p>
-                <strong>Guests:</strong> {i.guests}/{i.maxInvites}
+                <strong>Guests:</strong> {invitee.guests}/{invitee.maxInvites}
               </p>
               <p>
                 <strong>Dietary Restrictions:</strong>{" "}
-                {i.dietaryRestrictions || "None"}
+                {invitee.dietaryRestrictions || "None"}
               </p>
               <p>
                 <strong>Accessibility Info:</strong>{" "}
-                {i.accessibilityInfo || "None"}
+                {invitee.accessibilityInfo || "None"}
               </p>
               <p>
-                <strong>Song Requests:</strong> {i.songRequests || "None"}
+                <strong>Song Requests:</strong> {invitee.songRequests || "None"}
               </p>
               <p>
-                <strong>Comments:</strong> {i.comments || "None"}
+                <strong>Comments:</strong> {invitee.comments || "None"}
               </p>
               <p>
-                <strong>Token:</strong> {i.token || "None"}
+                <strong>Token:</strong> {invitee.token}
               </p>
               <p>
                 <strong>Invite Link:</strong>{" "}
                 <a
-                  href={`${window.location.origin}/invited#${i.token}`}
+                  href={`${window.location.origin}/invited#${invitee.token}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-500 underline"
                 >
                   View Invite
                 </a>
@@ -160,37 +187,11 @@ export default function AdminPage() {
 
       {editingInvitee && (
         <EditInviteeForm
-          invitee={editingInvitee}
+          invitee={editingInvitee} // type: EditFormInvitee
           onSubmit={handleEditSubmit}
           onCancel={() => setEditingInvitee(null)}
         />
       )}
-
-      <style jsx>{`
-    .tile {
-      position: relative;
-    }
-    .tile-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .actions {
-      display: flex;
-      gap: 10px;
-    }
-    .trash-icon,
-    .edit-icon {
-      cursor: pointer;
-    }
-    .trash-icon {
-      color: red;
-    }
-    .edit-icon {
-      color: blue;
-    }
-  `}</style>
     </div>
-
   );
 }

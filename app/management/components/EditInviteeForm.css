@@ -1,149 +1,134 @@
+/* Force a dark overlay behind the form, not green. */
 .modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6); /* Dark overlay */
+  inset: 0; /* shorthand for top:0; right:0; bottom:0; left:0 */
+  background-color: rgba(0, 0, 0, 0.5); /* semi-transparent black overlay */
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1050;
-  padding: 1rem; /* Add padding for smaller screens */
+  z-index: 9999;
+  padding: 1rem; /* allow space on small screens */
 }
 
+/* Main container for the form.
+   Ensures a WHITE background, maximum height, and vertical scrolling. */
 .modal-form {
-  background-color: var(--color-background); /* Global background color */
-  color: var(--color-text-primary); /* Global text color */
-  padding: 20px;
-  border-radius: 8px;
+  background-color: #fff; /* Force white background so no green shows through. */
+  color: #333;
   width: 100%;
-  max-width: 600px;
-  max-height: 90%; /* Ensure it doesn't exceed the screen height */
-  overflow-y: auto; /* Enable scrolling for overflow content */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  animation: fadeIn 0.3s ease-in-out; /* Optional animation for smoother appearance */
-}
-
-.modal-form h2 {
-  font-family: var(--font-wedding); /* Global font for headings */
-  font-size: 2rem;
-  text-align: center;
-  color: var(--color-accent); /* Accent color */
-  margin-bottom: 20px;
-}
-
-.modal-form .form-group {
-  margin-bottom: 20px;
-  padding: 15px;
-  background-color: var(--color-secondary-accent); /* Subtle highlight */
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.modal-form label {
-  font-family: var(--font-body); /* Global body font */
-  font-size: 1.25rem;
-  color: var(--color-text-primary);
-  margin-bottom: 10px;
-  display: block;
-}
-
-.modal-form input,
-.modal-form select {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--color-border); /* Global border color */
-  border-radius: 5px;
-  font-size: 1rem;
-  font-family: var(--font-body); /* Consistent font */
-  color: var(--color-text-primary); /* Text color */
-  background-color: var(--color-background); /* Background for inputs */
-}
-
-.modal-form input:focus,
-.modal-form select:focus {
-  outline: none;
-  border-color: var(--color-accent); /* Accent color for focus */
-  box-shadow: 0 0 4px var(--color-accent); /* Subtle glow */
-}
-
-.modal-form .form-actions {
+  max-width: 500px; /* narrower form */
+  max-height: 90vh; /* keep some space top/bottom */
+  overflow-y: auto; /* scroll if content is too tall */
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.25s ease-out forwards;
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-}
-.modal-form .btn-save,
-.modal-form .btn-cancel {
-  font-family: var(--font-body); /* Global body font */
-  font-size: 1rem;
-  border-radius: 2rem;
-  padding: 0.5rem 2rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  border: 1px solid var(--color-text-primary); /* Consistent with sectionButton */
+  flex-direction: column;
 }
 
-/* Save Button */
-.modal-form .btn-save {
-  background-color: transparent; /* Match sectionButton */
-  color: var(--color-text-primary); /* Primary text color */
+/* Optional fade-in animation */
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(-10px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
-.modal-form .btn-save:hover {
-  background-color: var(--color-accent); /* Global accent color */
-  color: #fff; /* White text for contrast */
+/* Form title area */
+.modal-form h2 {
+  margin: 0;
+  padding: 1rem;
+  font-size: 1.25rem;
+  text-align: center;
+  background-color: #f0f0f0; /* light gray header bar */
+  border-bottom: 1px solid #ccc;
 }
 
-/* Cancel Button */
-.modal-form .btn-cancel {
-  background-color: transparent; /* Match sectionButton */
-  color: var(--color-text-primary); /* Primary text color */
+/* Remove any green backgrounds from .form-group */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  margin: 0;
+  border: none; /* remove extra borders/shadows if you had them */
+  background-color: transparent; /* ensure no leftover green or other color */
 }
 
-.modal-form .btn-cancel:hover {
-  background-color: var(--color-accent); /* Global accent color */
-  color: #fff; /* White text for contrast */
+/* Label + Input styling */
+.form-group label {
+  margin-bottom: 0.3rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
 }
 
+.form-group input,
+.form-group select {
+  font-size: 0.95rem;
+  color: #333;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+/* Basic focus style */
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #66a;
+  box-shadow: 0 0 3px #66a;
+}
+
+/* Error text if present */
+.text-red-500 {
+  color: #d9534f;
+  margin: 0.5rem 1rem;
+}
+
+/* Form action buttons row at bottom */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  border-top: 1px solid #ccc;
+  padding: 1rem;
+  background-color: #f0f0f0; /* match the header bar for consistency */
+}
+
+/* Base button styles */
 .sectionButton {
+  padding: 0.4rem 1.2rem;
+  border-radius: 20px;
+  border: 1px solid #333;
   background-color: transparent;
-  border: 1px solid var(--color-text-primary);
-  padding: 0.5rem 2rem;
-  font-family: var(--font-body);
-  font-size: 1rem;
-  border-radius: 2rem;
+  color: #333;
   cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  margin-bottom: 1rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  font-size: 0.9rem;
+  margin: 0;
 }
 
+/* Hover states */
 .sectionButton:hover {
-  background-color: var(--color-accent);
+  background-color: #66a;
   color: #fff;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Save (if you want a different style) */
+.btn-save {
+  border-color: #66a;
+  color: #66a;
+}
+.btn-save:hover {
+  background-color: #66a;
+  color: #fff;
 }
 
-@media (min-width: 768px) {
-  .modal-form {
-    padding: 40px;
-  }
-
-  .modal-form .form-group {
-    padding: 30px;
-  }
-
-  .modal-form label {
-    font-size: 1.5rem;
-  }
+/* Cancel (slightly different shade) */
+.btn-cancel {
+  border-color: #666;
+  color: #666;
+}
+.btn-cancel:hover {
+  background-color: #666;
+  color: #fff;
 }
