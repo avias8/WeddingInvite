@@ -24,17 +24,6 @@ const airportInfo = [
   },
 ];
 
-const directions = [
-  {
-    mode: "By Car from Calgary",
-    details: `Start by taking the QE2 Highway (Highway 2) northbound from Calgary. Continue for approximately 150 kilometers until you reach Exit 401 for Highway 11A towards Sylvan Lake. Take this exit and proceed west on Highway 11A for about 10 kilometers. Turn right onto Highway 20 North and continue for approximately 2 kilometers. Look for Blue Sign 39145; the Hilltop Wedding Center will be on your left. ([rockymountainbride.com](https://www.rockymountainbride.com/vendors/hilltop-wedding-center/))`,
-  },
-  {
-    mode: "By Car from Edmonton",
-    details: `Begin by taking the QE2 Highway (Highway 2) southbound from Edmonton. Continue for approximately 150 kilometers until you reach Exit 401 for Highway 11A towards Sylvan Lake. Take this exit and proceed west on Highway 11A for about 10 kilometers. Turn right onto Highway 20 North and continue for approximately 2 kilometers. Look for Blue Sign 39145; the Hilltop Wedding Center will be on your left. ([rockymountainbride.com](https://www.rockymountainbride.com/vendors/hilltop-wedding-center/))`,
-  },
-];
-
 export default function TravelInfo() {
   return (
     <div className={styles.travelInfoWrapper}>

@@ -49,7 +49,7 @@ export default function AirportInfoPane({
             <h2 className={styles.airportName}>{name}</h2>
             <p className={styles.description}>{description}</p>
             <a href={link} target="_blank" rel="noopener noreferrer" className={styles.link}>
-              Visit {name}'s Website
+              Visit {name}&apos;s Website
             </a>
           </div>
           <div className={styles.mapContainer}>

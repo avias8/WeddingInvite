@@ -3,24 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import styles from "./DressCode.module.css";
-import ColorPicker from "./ColorPicker";
-
-const swatchColors = [
-  { hex: "#A52A2A", name: "Deep Red" },
-  { hex: "#FF8C00", name: "Marigold Orange" },
-  { hex: "#E0115F", name: "Rani Pink" },
-  { hex: "#FFD700", name: "Royal Gold" },
-  { hex: "#228B22", name: "Emerald Green" },
-  { hex: "#40E0D0", name: "Turquoise Blue" },
-  { hex: "#800080", name: "Purple" },
-  { hex: "#0F52BA", name: "Deep Sapphire" },
-  { hex: "#F7E7CE", name: "Champagne Beige" },
-  { hex: "#B76E79", name: "Rose Gold" },
-  { hex: "#FA8072", name: "Salmon Pink" },
-  { hex: "#FF4500", name: "Burnt Orange" },
-  { hex: "#DAA520", name: "Goldenrod Yellow" },
-  { hex: "#2E8B57", name: "Sea Green" },
-];
+import ColorPicker from "./ColorPicker"; // Import the ColorPicker component
 
 const dressImages = [
   {
@@ -47,7 +30,6 @@ const dressImages = [
 
 export default function DressCode() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(swatchColors[0]);
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % dressImages.length);
@@ -65,14 +47,11 @@ export default function DressCode() {
     <div className={styles.dressCodeWrapper}>
       <h1 className={styles.title}>Interactive Dress Code</h1>
       <p className={styles.blurb}>
-      We invite our guests to embrace vibrant and bold colors to reflect the joyous spirit of an Indian wedding! While our decor features a neutral palette, we encourage you to stand out with rich, colorful attire that adds a festive and celebratory flair. Feel free to mix and match from the palette below to create your unique look!
+        We invite our guests to embrace vibrant and bold colors to reflect the joyous spirit of an Indian wedding! While our decor features a neutral palette, we encourage you to stand out with rich, colorful attire that adds a festive and celebratory flair. Feel free to mix and match from the palette below to create your unique look!
       </p>
 
-      {/* Color Picker */}
-      <ColorPicker
-        swatchColors={swatchColors}
-        onColorSelect={(color) => setSelectedColor(color)}
-      />
+      {/* Color Picker Section */}
+      <ColorPicker />
 
       {/* Slideshow Section */}
       <div className={styles.slideshowContainer}>
