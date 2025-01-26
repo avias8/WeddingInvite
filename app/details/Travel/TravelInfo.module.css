@@ -32,14 +32,7 @@
     gap: 0.5rem;
   }
   
-  .subtitle::before {
-    content: "";
-    display: inline-block;
-    width: 30px;
-    height: 30px;
-    background-color: var(--color-accent);
-    border-radius: 50%;
-  }
+  
   
   .list {
     list-style: none;

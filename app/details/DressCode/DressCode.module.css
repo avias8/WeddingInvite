@@ -30,7 +30,7 @@
 }
 
 .image {
-  width: 300px; /* Fixed width */
+  width: 200px; /* Fixed width */
   height: 400px; /* Fixed height */
   border-radius: 8px;
   object-fit: cover;

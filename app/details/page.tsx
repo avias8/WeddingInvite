@@ -3,7 +3,6 @@ import HeroSection from "../components/HeroSection";
 import styles from "./details.module.css";
 import DressCode from "./DressCode/DressCode";
 import TravelInfo from "./Travel/TravelInfo";
-import Restaurants from "./Restaurants";
 
 export default function DetailsPage() {
   return (
@@ -37,17 +36,13 @@ export default function DetailsPage() {
 
           {/* Section: Dress Code */}
           <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>Dressing for a Hindu Wedding</h2>
             <DressCode />
           </section>
 
           {/* Section: Travel Information */}
           <section className={styles.section}>
             <TravelInfo />
-          </section>
-
-          {/* Section: Nearby Restaurants */}
-          <section className={styles.section}>
-            <Restaurants />
           </section>
 
           {/* Section: Schedule */}

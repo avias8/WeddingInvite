@@ -5,6 +5,7 @@ import styles from "./TravelInfo.module.css";
 import HotelInfoPane from "./HotelInfo";
 import AirportInfoPane from "./AirportInfoPane";
 import Directions from "./Directions";
+import Restaurants from "./Restaurants";
 
 
 const airportInfo = [
@@ -27,8 +28,6 @@ const airportInfo = [
 export default function TravelInfo() {
   return (
     <div className={styles.travelInfoWrapper}>
-      <h1 className={styles.title}>Travel Information</h1>
-
       {/* Airport Info Section */}
       <section className={styles.section}>
         <h2 className={styles.subtitle}>
@@ -76,6 +75,14 @@ export default function TravelInfo() {
             <span role="img" aria-label="Directions">🗺️</span> Directions
         </h2>
         <Directions />
+      </section>
+
+      {/* Restauraunts */}
+      <section className={styles.section}>
+        <h2 className={styles.subtitle}>
+            <span role="img" aria-label="Restaurants">🍽️</span> Restauraunts
+        </h2>
+        <Restaurants />
       </section>
     </div>
   );
