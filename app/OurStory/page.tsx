@@ -59,8 +59,8 @@ export default function OurStory() {
         <div className="pageContainer">
             {/* Hero Section */}
             <HeroSection
-                mp4Src="Videos/Rokha.mp4"
-                webmSrc="Videos/Rokha.webm"
+                mp4Src="https://storage.googleapis.com/my-wedding-assets/Rokha.mp4"
+                webmSrc="https://storage.googleapis.com/my-wedding-assets/Rokha.webm"
                 heroText="AVI AND SHAKTHI'S WEDDING"
                 subText="06 • 29 • 2025"
             />

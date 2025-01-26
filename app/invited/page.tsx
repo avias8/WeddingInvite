@@ -58,8 +58,8 @@ export default function BigInvitePage() {
       <div className={styles.pageContainer}>
         {/* Hero Section */}
         <HeroSection
-          mp4Src="Videos/Sandwitchsnatch.mp4"
-          webmSrc="Videos/Sandwitchsnatch.webm"
+          mp4Src="https://storage.googleapis.com/my-wedding-assets/Sandwitchsnatch.mp4"
+          webmSrc="https://storage.googleapis.com/my-wedding-assets/Sandwitchsnatch.webm"
           heroText="AVI AND SHAKTHI'S WEDDING"
         />
 

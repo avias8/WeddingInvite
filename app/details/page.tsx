@@ -13,8 +13,8 @@ export default function DetailsPage() {
       {/* The outer container with consistent padding */}
       <div className={styles.pageContainer}>
         <HeroSection
-          mp4Src="Videos/Caramellovercrop.mp4"
-          webmSrc="Videos/Caramellovercrop.webm"
+          mp4Src="https://storage.googleapis.com/my-wedding-assets/CaramelloverCrop.mp4"
+          webmSrc="https://storage.googleapis.com/my-wedding-assets/Caramellovercrop.webm"
           heroText="Wedding Details"
         />
 
