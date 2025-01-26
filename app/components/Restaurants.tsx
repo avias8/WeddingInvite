@@ -7,32 +7,32 @@ const restaurants = [
   {
     name: "Major Tom",
     description: "Fine dining with stunning city views.",
-    image: "https://storage.googleapis.com/my-wedding-assets/Images/major-tom.jpg",
+    image: "https://cdn.avivarma.ca/Images/major-tom.jpg",
   },
   {
     name: "Soul Pocha",
     description: "Korean comfort food at its finest.",
-    image: "https://storage.googleapis.com/my-wedding-assets/Images/soul-pocha.jpeg",
+    image: "https://cdn.avivarma.ca/Images/soul-pocha.jpeg",
   },
   {
     name: "Dosa Garden",
     description: "Authentic South Indian flavors.",
-    image: "https://storage.googleapis.com/my-wedding-assets/Images/dosa-garden.webp",
+    image: "https://cdn.avivarma.ca/Images/dosa-garden.webp",
   },
   {
     name: "Banzai",
     description: "Fresh sushi and Japanese cuisine.",
-    image: "https://storage.googleapis.com/my-wedding-assets/Images/banzai.jpg",
+    image: "https://cdn.avivarma.ca/Images/banzai.jpg",
   },
   {
     name: "Chairman’s",
     description: "Modern Fine Dining.",
-    image: "https://storage.googleapis.com/my-wedding-assets/Images/chairmans.jpg",
+    image: "https://cdn.avivarma.ca/Images/chairmans.jpg",
   },
   {
     name: "Baladi Shawarma",
     description: "Middle Eastern street food specialties.",
-    image: "https://storage.googleapis.com/my-wedding-assets/Images/baladi-shawarma.jpg",
+    image: "https://cdn.avivarma.ca/Images/baladi-shawarma.jpg",
   },
 ];
 
