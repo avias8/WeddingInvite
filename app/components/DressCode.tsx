@@ -3,19 +3,23 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import styles from "./DressCode.module.css";
+import ColorPicker from "./ColorPicker";
 
 const swatchColors = [
-  { hex: "#E63946", name: "Red" },
-  { hex: "#F76C5E", name: "Coral" },
-  { hex: "#FF9F1C", name: "Orange" },
-  { hex: "#2A9D8F", name: "Teal" },
-  { hex: "#264653", name: "Deep Blue" },
-  { hex: "#FFC300", name: "Yellow" },
-  { hex: "#8AB17D", name: "Sage" },
-  { hex: "#344E41", name: "Forest Green" },
-  { hex: "#D62828", name: "Crimson" },
-  { hex: "#F4A261", name: "Peach" },
-  { hex: "#F4D35E", name: "Goldenrod" },
+  { hex: "#A52A2A", name: "Deep Red" },
+  { hex: "#FF8C00", name: "Marigold Orange" },
+  { hex: "#E0115F", name: "Rani Pink" },
+  { hex: "#FFD700", name: "Royal Gold" },
+  { hex: "#228B22", name: "Emerald Green" },
+  { hex: "#40E0D0", name: "Turquoise Blue" },
+  { hex: "#800080", name: "Purple" },
+  { hex: "#0F52BA", name: "Deep Sapphire" },
+  { hex: "#F7E7CE", name: "Champagne Beige" },
+  { hex: "#B76E79", name: "Rose Gold" },
+  { hex: "#FA8072", name: "Salmon Pink" },
+  { hex: "#FF4500", name: "Burnt Orange" },
+  { hex: "#DAA520", name: "Goldenrod Yellow" },
+  { hex: "#2E8B57", name: "Sea Green" },
 ];
 
 const dressImages = [
@@ -41,32 +45,9 @@ const dressImages = [
   },
 ];
 
-const clothingStores = [
-  {
-    name: "Utsav Fashion",
-    url: "https://www.utsavfashion.com/",
-    location: "Online",
-  },
-  {
-    name: "Bombay Boutique",
-    url: "https://www.bombayboutique.com/",
-    location: "Calgary, Alberta",
-  },
-  {
-    name: "Manyavar",
-    url: "https://www.manyavar.com/",
-    location: "Vancouver, BC",
-  },
-];
-
 export default function DressCode() {
-  const [selectedColor, setSelectedColor] = useState(swatchColors[0]);
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  const handleCopy = (hex: string) => {
-    navigator.clipboard.writeText(hex);
-    alert(`Copied ${hex} to clipboard!`);
-  };
+  const [selectedColor, setSelectedColor] = useState(swatchColors[0]);
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % dressImages.length);
@@ -84,33 +65,14 @@ export default function DressCode() {
     <div className={styles.dressCodeWrapper}>
       <h1 className={styles.title}>Interactive Dress Code</h1>
       <p className={styles.blurb}>
-        We encourage our guests to wear vibrant and bold colors that reflect the joyous spirit of an Indian wedding! Choose from the rich palette below and feel free to mix and match. Avoid wearing black or white, as they are traditionally not worn at such celebrations.
+      We invite our guests to embrace vibrant and bold colors to reflect the joyous spirit of an Indian wedding! While our decor features a neutral palette, we encourage you to stand out with rich, colorful attire that adds a festive and celebratory flair. Feel free to mix and match from the palette below to create your unique look!
       </p>
 
-      {/* Interactive Swatch Section */}
-      <div className={styles.swatchWrapper}>
-        <div
-          className={styles.previewBox}
-          style={{ backgroundColor: selectedColor.hex }}
-        >
-          <p className={styles.previewText}>
-            {selectedColor.name}
-          </p>
-        </div>
-
-        <div className={styles.swatchGrid}>
-          {swatchColors.map((color, index) => (
-            <div
-              key={index}
-              className={styles.swatch}
-              style={{ backgroundColor: color.hex }}
-              onMouseEnter={() => setSelectedColor(color)}
-              onClick={() => handleCopy(color.hex)}
-              title={`Click to copy ${color.name}`}
-            ></div>
-          ))}
-        </div>
-      </div>
+      {/* Color Picker */}
+      <ColorPicker
+        swatchColors={swatchColors}
+        onColorSelect={(color) => setSelectedColor(color)}
+      />
 
       {/* Slideshow Section */}
       <div className={styles.slideshowContainer}>
@@ -135,26 +97,6 @@ export default function DressCode() {
       <div className={styles.attireDetails}>
         <h2 className={styles.attireTitle}>{currentDress.title}</h2>
         <p className={styles.attireDescription}>{currentDress.description}</p>
-      </div>
-
-      {/* Store Recommendations */}
-      <div className={styles.storeList}>
-        <h3 className={styles.subtitle}>Where to Get These</h3>
-        <ul>
-          {clothingStores.map((store, index) => (
-            <li key={index} className={styles.storeItem}>
-              <a
-                href={store.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.storeLink}
-              >
-                {store.name}
-              </a>{" "}
-              - {store.location}
-            </li>
-          ))}
-        </ul>
       </div>
     </div>
   );

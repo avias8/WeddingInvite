@@ -1,58 +1,156 @@
-/* Improve vertical rhythm by standardizing spacing */
+/* Global Page Container */
 .pageContainer {
+  background-color: var(--color-background); /* Use a soft background */
+  color: var(--color-text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 2rem 1rem;
+  font-family: var(--font-wedding); /* Use the wedding-specific font */
+  width: 100%;
 }
 
-.detailsContainer {
-  padding: 3rem 1rem;
-  gap: 2rem; /* Add spacing between sections */
+/* Hero Section */
+.hero {
+  position: relative;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 3rem;
+  overflow: hidden;
+  border-radius: 16px;
 }
 
+.videoContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.heroVideo {
+  width: 100%;
+  height: auto;
+  object-fit: cover; /* Ensures the video fills the area */
+  filter: grayscale(100%);
+  transition: filter 0.3s ease-in-out;
+}
+
+.videoContainer:hover .heroVideo {
+  filter: grayscale(0%);
+}
+
+.heroOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 1;
+  width: 100%;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.heroOverlay h1 span {
+  font-size: clamp(3rem, 10vw, 8rem); /* Responsive scaling */
+  font-family: var(--font-wedding);
+  font-weight: bold;
+  color: var(--color-accent);
+  text-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Enhance readability */
+  text-transform: uppercase;
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* Section Styles */
 .section {
-  margin: 3rem 0;
-  padding: 2rem 1rem;
-  background-color: var(--color-background-light);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  margin-bottom: 3rem;
+  max-width: 900px;
+  background-color: var(--color-background-light); /* Section background */
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Elevation effect */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .sectionTitle {
   font-size: 2rem;
+  color: var(--color-heading);
   text-transform: uppercase;
-  color: var(--color-accent);
   margin-bottom: 1rem;
   border-bottom: 2px solid var(--color-accent);
   display: inline-block;
 }
 
 .sectionText {
-  text-align: left; /* Align longer text blocks to the left */
-  padding: 0 1rem;
+  font-size: 1.2rem;
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  margin-bottom: 1rem;
 }
 
-/* Schedule List Styling */
+/* Schedule Styling */
 .scheduleList {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
+  margin: 2rem auto;
 }
 
 .scheduleList li {
   font-size: 1.1rem;
-  padding: 0.5rem;
+  padding: 1rem;
   background-color: var(--color-background);
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: var(--color-text-primary);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.scheduleList li:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .scheduleList strong {
-  font-weight: bold;
   color: var(--color-accent);
+  font-weight: bold;
 }
 
-/* Section Borders or Dividers */
-.section:not(:last-child) {
-  border-bottom: 2px solid var(--color-border);
-  padding-bottom: 2rem;
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 2rem 0;
+  font-size: 1.2rem;
+  color: var(--color-text-primary);
 }
 
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .pageContainer {
+      padding: 1.5rem;
+  }
+
+  .heroOverlay h1 span {
+      font-size: clamp(2.5rem, 8vw, 6rem); /* Smaller screens */
+  }
+
+  .section {
+      padding: 1.5rem;
+  }
+
+  .scheduleList li {
+      padding: 0.75rem;
+  }
+}

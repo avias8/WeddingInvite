@@ -2,7 +2,7 @@ import Header from "../components/Header"; // <--- Adjust path if needed
 import HeroSection from "../components/HeroSection";
 import styles from "./details.module.css";
 import DressCode from "../components/DressCode";
-import TravelInfo from "../components/TravelInfo";
+import TravelInfo from "./Travel/TravelInfo";
 import Restaurants from "../components/Restaurants";
 
 export default function DetailsPage() {
@@ -28,6 +28,10 @@ export default function DetailsPage() {
               It typically involves the seven steps around the sacred fire (Saptapadi),
               symbolizing the vows taken by the couple. The ceremony is rich in symbolism,
               celebrating the union of two souls.
+            </p>
+            <br></br>
+            <p className={styles.sectionText}>
+              We invite you to join us in celebrating our love and the beginning of our journey together.
             </p>
           </section>
 

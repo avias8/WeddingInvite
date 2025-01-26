@@ -1,4 +1,3 @@
-//app/components/HotelInfo.tsx
 "use client";
 
 import { useState } from "react";
@@ -8,7 +7,6 @@ interface HotelInfoProps {
   name: string;
   address: string;
   description: string;
-  image: string; // URL to the hotel image
   mapEmbedUrl: string; // Google Maps Embed URL
 }
 
@@ -16,10 +14,23 @@ export default function HotelInfoPane({
   name,
   address,
   description,
-  image,
   mapEmbedUrl,
 }: HotelInfoProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Define a mapping of hotel names to images
+  const hotelImages: Record<string, string> = {
+    "Best Western Plus Chateau Inn":
+      "https://cdn.avivarma.ca/Images/hotel1.jpg",
+    "Prairie Moon Inn":
+      "https://cdn.avivarma.ca/Images/hotel2.webp",
+    "Sylvan Lake Lodge":
+      "https://cdn.avivarma.ca/Images/hotel3.jpg",
+    // Add more hotel mappings as needed
+  };
+
+  // Get the image URL based on the hotel name, or use a fallback
+  const backgroundImage = hotelImages[name] || "https://cdn.avivarma.ca/Images/default-hotel.jpg";
 
   const togglePane = () => setIsExpanded(!isExpanded);
 
@@ -28,27 +39,34 @@ export default function HotelInfoPane({
       {/* Collapsed View */}
       {!isExpanded ? (
         <div
-          className={styles["collapsed-pane"]}
-          style={{
-            backgroundImage: `url(${image})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-          onClick={togglePane}
-        >
-          <div className={styles["collapsed-content"]}>
-            <h2 className={styles["hotel-name"]}>{name}</h2>
-            <button className={styles["expand-btn"]} aria-label="Expand">
-              +
-            </button>
-          </div>
+        className={styles["collapsed-pane"]}
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+        onClick={togglePane}
+      >
+        <div className={styles["collapsed-content"]}>
+          <h2 className={styles["hotel-name"]}>{name}</h2>
+          <button
+            className={styles["expand-btn"]}
+            aria-label="Expand"
+          >
+            +
+          </button>
         </div>
+      </div>
       ) : (
         // Expanded View
         <div className={styles["expanded-pane"]}>
           <div className={styles.content}>
             <div className={styles["image-container"]}>
-              <img src={image} alt={name} className={styles["hotel-image"]} />
+              <img
+                src={backgroundImage}
+                alt={`Image of ${name}`}
+                className={styles["hotel-image"]}
+              />
             </div>
             <div className={styles.details}>
               <h2>{name}</h2>
