@@ -1,13 +1,29 @@
 "use client";
 
 import { useState } from "react";
+import { animated, useSpring, config, SpringValue } from "@react-spring/web";
+import Image from "next/image";
 import styles from "./HotelInfo.module.css";
+
+type AnimatedDivProps = {
+  style?: {
+    backgroundImage?: string;
+    backgroundSize?: string;
+    backgroundPosition?: string;
+    backgroundBlendMode?: string;
+    height?: SpringValue<string> | string;
+  };
+  children?: React.ReactNode;
+  className?: string;
+};
+
+const AnimatedDiv = animated.div as React.ComponentType<AnimatedDivProps>;
 
 interface HotelInfoProps {
   name: string;
   address: string;
   description: string;
-  mapEmbedUrl: string; // Google Maps Embed URL
+  mapEmbedUrl: string;
 }
 
 export default function HotelInfoPane({
@@ -18,79 +34,79 @@ export default function HotelInfoPane({
 }: HotelInfoProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Define a mapping of hotel names to images
   const hotelImages: Record<string, string> = {
-    "Best Western Plus Chateau Inn":
-      "https://cdn.avivarma.ca/Images/hotel1.jpg",
-    "Prairie Moon Inn":
-      "https://cdn.avivarma.ca/Images/hotel2.webp",
-    "Sylvan Lake Lodge":
-      "https://cdn.avivarma.ca/Images/hotel3.jpg",
-    // Add more hotel mappings as needed
+    "Best Western Plus Chateau Inn": "https://cdn.avivarma.ca/Images/hotel1.jpg",
+    "Prairie Moon Inn": "https://cdn.avivarma.ca/Images/hotel2.webp",
+    "Sylvan Lake Lodge": "https://cdn.avivarma.ca/Images/hotel3.jpg",
   };
 
-  // Get the image URL based on the hotel name, or use a fallback
   const backgroundImage = hotelImages[name] || "https://cdn.avivarma.ca/Images/default-hotel.jpg";
 
   const togglePane = () => setIsExpanded(!isExpanded);
 
+  const animatedHeight = useSpring({
+    height: isExpanded ? "800px" : "200px",
+    config: config.gentle,
+  });
+
   return (
-    <div className={styles["hotel-info-pane"]}>
-      {/* Collapsed View */}
+    <AnimatedDiv
+      className={styles.hotelInfoPane}
+      style={{
+        height: animatedHeight.height,
+        backgroundImage: isExpanded 
+          ? `linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)), url(${backgroundImage})`
+          : `linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent), url(${backgroundImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundBlendMode: isExpanded ? "overlay" : "multiply",
+      }}
+    >
       {!isExpanded ? (
-        <div
-        className={styles["collapsed-pane"]}
-        style={{
-          backgroundImage: `url(${backgroundImage})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-        onClick={togglePane}
-      >
-        <div className={styles["collapsed-content"]}>
-          <h2 className={styles["hotel-name"]}>{name}</h2>
-          <button
-            className={styles["expand-btn"]}
-            aria-label="Expand"
-          >
+        <div className={styles.collapsedContent} onClick={togglePane}>
+          <h2 className={styles.hotelName}>{name}</h2>
+          <button className={styles.toggleButton} aria-label="Expand">
             +
           </button>
         </div>
-      </div>
       ) : (
-        // Expanded View
-        <div className={styles["expanded-pane"]}>
+        <div className={styles.expandedContent}>
           <div className={styles.content}>
-            <div className={styles["image-container"]}>
-              <img
+            <div className={styles.imageContainer}>
+              <Image
                 src={backgroundImage}
-                alt={`Image of ${name}`}
-                className={styles["hotel-image"]}
+                alt={name}
+                className={styles.hotelImage}
+                width={400}
+                height={300}
+                priority
               />
             </div>
             <div className={styles.details}>
-              <h2>{name}</h2>
+              <h2 className={styles.hotelName}>{name}</h2>
               <p className={styles.address}>{address}</p>
               <p className={styles.description}>{description}</p>
             </div>
           </div>
-          <div className={styles["map-container"]}>
+          <div className={styles.mapContainer}>
             <iframe
               src={mapEmbedUrl}
               title={`${name} Location`}
               allowFullScreen
-              loading="lazy"
+              loading="eager"
             />
           </div>
-          <button
-            className={styles["collapse-btn"]}
-            onClick={togglePane}
-            aria-label="Collapse"
-          >
-            -
-          </button>
+          <div className={styles.centeredButtonWrapper}>
+            <button
+              className={styles.toggleButton}
+              onClick={togglePane}
+              aria-label="Collapse"
+            >
+              -
+            </button>
+          </div>
         </div>
       )}
-    </div>
+    </AnimatedDiv>
   );
 }

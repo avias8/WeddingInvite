@@ -1,7 +1,6 @@
 //app/details/DressCode/DressCode.tsx
 "use client";
 
-import React, { useState } from "react";
 import styles from "./DressCode.module.css";
 import ColorPicker from "./ColorPicker"; // Import the ColorPicker component
 import Slideshow from "../../components/Slideshow";
@@ -28,52 +27,72 @@ const dressImages = [
   {
     src: "https://cdn.avivarma.ca/Images/Attire1.JPG",
     title: "Radiant Pink Silk Saree",
-    description: "A luxurious magenta-pink silk saree with a lustrous finish, paired with a matching blouse. Perfect for weddings and festive celebrations, it radiates elegance and grace with its timeless design.",
+    description: "A luxurious magenta-pink silk saree...",
+    width: 1920,
+    height: 1080
   },
   {
     src: "https://cdn.avivarma.ca/Images/Attire2.JPG",
     title: "Golden Green Kanjivaram Saree",
-    description: "A captivating golden-green Kanjivaram silk saree with an exquisite sheen, paired with a contrasting maroon blouse. This timeless piece is perfect for weddings, receptions, and cultural festivities, radiating sophistication and grace."
+    description: "A captivating golden-green Kanjivaram...",
+    width: 1920,
+    height: 1080
   },
   {
     src: "https://cdn.avivarma.ca/Images/Attire3.JPG",
     title: "Regal Orange and Purple Lehenga",
-    description: "An enchanting orange silk lehenga with rich purple borders featuring intricate golden motifs, paired with a royal purple dupatta and a metallic blouse. This outfit is a stunning choice for weddings, receptions, and festive events, showcasing traditional grandeur.",
+    description: "An enchanting orange silk lehenga...",
+    width: 1920,
+    height: 1080
   },
   {
     src: "https://cdn.avivarma.ca/Images/Attire4.JPG",
     title: "Emerald Green Ensemble Trio",
-    description: "A stunning trio of emerald green outfits, featuring an elegant gown with ruching details and two intricately embellished lehengas with matching dupattas. Perfect for evening receptions, cocktail parties, or festive celebrations, these outfits exude glamour and sophistication."
+    description: "A stunning trio of emerald green outfits...",
+    width: 1920,
+    height: 1080
   },
   {
     src: "https://cdn.avivarma.ca/Images/Attire5.jpeg",
     title: "Lavender Embellished Lehenga",
-    description: "A dreamy lavender lehenga adorned with intricate sequin and thread embroidery, paired with a delicate matching blouse and a sheer dupatta. Perfect for receptions, engagements, and special occasions, this ensemble radiates elegance and charm."
+    description: "A dreamy lavender lehenga...",
+    width: 1080,
+    height: 1350
   },
   {
     src: "https://cdn.avivarma.ca/Images/Attire6.jpeg",
     title: "Lilac Embroidered Anarkali Gown",
-    description: "A graceful lilac Anarkali gown featuring delicate floral embroidery and a flowing silhouette. With its intricate sequin detailing and sheer dupatta, this ensemble is perfect for engagements, sangeet ceremonies, and evening celebrations."
+    description: "A graceful lilac Anarkali gown...",
+    width: 1080,
+    height: 1350
   },
   {
     src: "https://cdn.avivarma.ca/Images/Attire7.JPG",
     title: "Pastel Sherwani Trio",
-    description: "A stunning collection of pastel sherwanis in sky blue, blush pink, and mint green, adorned with intricate embroidery. Perfect for groomsmen or festive events, these sherwanis exude elegance and charm."
+    description: "A stunning collection of pastel sherwanis...",
+    width: 1920,
+    height: 1080
   },
   {
     src: "https://cdn.avivarma.ca/Images/Attire8.JPG",
     title: "Maroon Kurta Pajama",
-    description: "A classic maroon kurta with subtle diamond-pattern embroidery, paired with white pajama trousers. Ideal for festive occasions or casual traditional gatherings, offering timeless sophistication."
+    description: "A classic maroon kurta...",
+    width: 1080,
+    height: 1350
   },
   {
     src: "https://cdn.avivarma.ca/Images/Attire9.JPG",
     title: "Pink Shirt with Dhoti",
-    description: "A light pink short-sleeve shirt paired with a traditional white dhoti featuring a golden border. Perfect for casual cultural events, combining comfort and tradition effortlessly."
+    description: "A light pink short-sleeve shirt...",
+    width: 1080,
+    height: 1350
   },
   {
     src: "https://cdn.avivarma.ca/Images/Attire10.JPG",
     title: "Black Shirt with Kerala Dhoti",
-    description: "A stylish black shirt paired with a crisp white Kerala dhoti featuring a golden border. A modern take on traditional attire, perfect for cultural ceremonies and casual gatherings."
+    description: "A stylish black shirt...",
+    width: 1920,
+    height: 1080
   }
 ];
 

@@ -38,10 +38,9 @@ const restaurants = [
 
 export default function Restaurants() {
   return (
-    <div className={styles.restaurantsWrapper}>
-      <h1 className={styles.title}>Restaurants to Eat At</h1>
-      <p className={styles.subtitle}>
-        A few of Avi & Shakthi&apos;s favorite spots to try!
+    <div>
+      <p className={styles.sectionText}>
+        A few of Avi & Shakthi&apos;s favorite spots to try in Calgary!
       </p>
       <div className={styles.grid}>
         {restaurants.map((restaurant, index) => (

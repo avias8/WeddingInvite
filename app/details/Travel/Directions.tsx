@@ -43,7 +43,6 @@ export default function Directions() {
           </li>
         ))}
       </ul>
-      {/* Get Directions Button */}
       <div className={styles.buttonWrapper}>
         <a
           href="https://www.google.com/maps/dir/?api=1&destination=Hilltop+Wedding+Center,+Sylvan+Lake,+AB"

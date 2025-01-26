@@ -77,7 +77,7 @@ export default function VenueSection({
                         height="200"
                         style={{ border: 0 }}
                         allowFullScreen
-                        loading="lazy"
+                        loading="eager"
                         referrerPolicy="no-referrer-when-downgrade"
                     />
                 </div>

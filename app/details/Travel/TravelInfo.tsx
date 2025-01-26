@@ -63,7 +63,7 @@ export default function TravelInfo() {
           <HotelInfoPane
             name="Prairie Moon Inn"
             address="13 Beju Ind. Drive, Sylvan Lake, Alberta, Canada, T4S 2J4"
-            description="Be sure to mention the booking under 'Shakthi & Avi’s wedding' for special rates and offers"
+            description="Be sure to mention the booking under 'Shakthi & Avi&apos;s wedding' for special rates"
             mapEmbedUrl="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2439.3492405226584!2d-114.0743869233765!3d52.30966497200679!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x5375b2bb309a2a0d%3A0xdc2991c288cca035!2sPrairie%20Moon%20Inn%20Sylvan%20Lake!5e0!3m2!1sen!2sca!4v1737887504117!5m2!1sen!2sca"
           />
         </div>

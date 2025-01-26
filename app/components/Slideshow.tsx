@@ -2,13 +2,16 @@
 
 import React, { useState } from "react";
 import { Carousel } from "react-responsive-carousel";
-import "react-responsive-carousel/lib/styles/carousel.min.css"; // Import default styles
+import Image from "next/image";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 import styles from "./Slideshow.module.css";
 
 interface Slide {
   src: string;
   title: string;
   description: string;
+  width: number;  // Required property
+  height: number; // Required property
 }
 
 interface SlideshowProps {
@@ -32,11 +35,24 @@ export default function Slideshow({ slides }: SlideshowProps) {
         autoPlay={true}
         interval={5000}
         transitionTime={800}
-        onChange={handleSlideChange} // Track slide change
+        onChange={handleSlideChange}
       >
         {slides.map((slide, index) => (
           <div key={index} className={styles.carouselImageWrapper}>
-            <img src={slide.src} alt={slide.title} />
+            <Image
+              src={slide.src}
+              alt={slide.title}
+              width={slide.width}    // Now properly set
+              height={slide.height}  // Now properly set
+              quality={80}
+              priority={index === 0}
+              className={styles.carouselImage}
+              sizes="(max-width: 768px) 100vw, 80vw"
+              style={{
+                objectFit: "cover",
+                objectPosition: "center",
+              }}
+            />
           </div>
         ))}
       </Carousel>

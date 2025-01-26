@@ -1,69 +1,108 @@
 .directionsWrapper {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 1.5rem;
-    font-family: 'Georgia', serif;
-  }
-  
-  .title {
-    font-size: 2.5rem;
-    color: #5a5a5a;
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-  
-  .directionsList {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  font-family: 'Georgia', serif;
+}
+
+.directionsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.directionItem {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: #ffffff;
+  border-left: 6px solid #2a9d8f;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.directionItem:hover {
+  transform: translateY(-5px);
+}
+
+.mode {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #264653;
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+.bullets {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 0;
+}
+
+.detail {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #5a5a5a;
+  margin-bottom: 0.5rem;
+}
+
+.buttonWrapper {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.getDirectionsButton {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: #2a9d8f;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.getDirectionsButton:hover {
+  background-color: #21867a;
+}
+
+/* Mobile Styling */
+@media screen and (max-width: 768px) {
   .directionItem {
-    margin-bottom: 2rem;
-    padding: 1.5rem 2rem;
-    background-color: #ffffff;
-    border-left: 6px solid #2a9d8f;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
   }
-  
+
   .mode {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #264653;
-    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    text-align: center; /* Center-align the title for smaller screens */
   }
-  
+
   .bullets {
-    list-style-type: disc;
-    padding-left: 1.5rem;
-    margin: 0;
+    padding-left: 1rem;
   }
-  
+
   .detail {
-    font-size: 1rem;
-    line-height: 1.8;
-    color: #5a5a5a;
-    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
   }
-  
-  .buttonWrapper {
-    text-align: center;
-    margin-top: 2rem;
+}
+
+@media screen and (max-width: 480px) {
+  .directionsWrapper {
+    padding: 1rem;
   }
-  
+
+  .mode {
+    font-size: 1.1rem;
+  }
+
+  .detail {
+    font-size: 0.85rem;
+  }
+
   .getDirectionsButton {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    background-color: #2a9d8f;
-    color: #ffffff;
-    text-decoration: none;
-    font-size: 1rem;
-    font-weight: bold;
-    border-radius: 8px;
-    transition: background-color 0.3s ease;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
   }
-  
-  .getDirectionsButton:hover {
-    background-color: #21867a;
-  }
+}

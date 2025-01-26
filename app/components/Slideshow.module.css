@@ -82,6 +82,18 @@
     color: var(--color-text-primary);
   }
   
+  .carouselImageWrapper {
+    position: relative;
+    aspect-ratio: 16/9;
+    width: 100%;
+  }
+  
+  .carouselImage {
+    width: 100%;
+    height: auto;
+    max-height: 80vh;
+  }
+  
   /* Mobile Styling */
   @media screen and (max-width: 768px) {
     .slideshowContainer {
