@@ -44,7 +44,7 @@ export default function TravelInfo() {
             image={airport.image}
           />
         ))}
-      </section>;
+      </section>
 
       {/* Lodging Options */}
       <section className={styles.section}>
@@ -72,6 +72,9 @@ export default function TravelInfo() {
 
       {/* Directions */}
       <section className={styles.section}>
+        <h2 className={styles.subtitle}>
+          <span role="img" aria-label="Directions">🏨</span> Directions
+        </h2>
         <Directions />
       </section>
     </div>

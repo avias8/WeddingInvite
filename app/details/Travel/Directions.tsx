@@ -29,7 +29,6 @@ const directions = [
 export default function Directions() {
   return (
     <div className={styles.directionsWrapper}>
-      <h2 className={styles.title}>Directions</h2>
       <ul className={styles.directionsList}>
         {directions.map((direction, index) => (
           <li key={index} className={styles.directionItem}>

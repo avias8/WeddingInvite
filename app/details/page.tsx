@@ -3,7 +3,7 @@ import HeroSection from "../components/HeroSection";
 import styles from "./details.module.css";
 import DressCode from "./DressCode/DressCode";
 import TravelInfo from "./Travel/TravelInfo";
-import Restaurants from "../components/Restaurants";
+import Restaurants from "./Restaurants";
 
 export default function DetailsPage() {
   return (
