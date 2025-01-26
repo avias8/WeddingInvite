@@ -73,7 +73,7 @@ export default function TravelInfo() {
       {/* Directions */}
       <section className={styles.section}>
         <h2 className={styles.subtitle}>
-          <span role="img" aria-label="Directions">🏨</span> Directions
+            <span role="img" aria-label="Directions">🗺️</span> Directions
         </h2>
         <Directions />
       </section>
