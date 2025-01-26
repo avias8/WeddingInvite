@@ -31,12 +31,12 @@ export default function ColorPicker({ swatchColors, onColorSelect }: ColorPicker
         <p className={styles.previewText}>{selectedColor.name}</p>
       </div>
 
-      {/* Color Swatches */}
+      {/* Swatches Grid */}
       <div className={styles.swatchGrid}>
         {swatchColors.map((color, index) => (
           <div
             key={index}
-            className={styles.swatch}
+            className={`${styles.swatch} ${selectedColor.hex === color.hex ? styles.activeSwatch : ""}`}
             style={{ backgroundColor: color.hex }}
             onMouseEnter={() => {
               setSelectedColor(color);
@@ -44,7 +44,7 @@ export default function ColorPicker({ swatchColors, onColorSelect }: ColorPicker
             }}
             onClick={() => handleCopy(color.hex)}
             title={`Click to copy ${color.name}`}
-          ></div>
+          />
         ))}
       </div>
     </div>

@@ -112,7 +112,7 @@ export default function OurStory() {
                 phoneNumber="403-896-8673"
                 email="info@hilltopweddingcenter.com"
                 venueDescription="We're excited to celebrate with you at Syvlan Lake's Hilltop Wedding Center - a charming venue overlooking the Lake surrounded by nature. The perfect setting for a day of love and joy."
-                imageUrl="/Images/Venue.jpg"
+                imageUrl="https://storage.googleapis.com/my-wedding-assets/Images/Venue.jpg"
                 mapLink="https://www.google.com/maps/dir/?api=1&destination=Blue%20Sign%2039145,%20Sylvan%20Lake,%20AB%20T0M%200H0,%20Canada"
             />
 

@@ -1,9 +1,10 @@
+//app/details/DressCode/DressCode.tsx
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import styles from "./DressCode.module.css";
 import ColorPicker from "./ColorPicker"; // Import the ColorPicker component
+import Slideshow from "../../components/Slideshow";
 
 const swatchColors = [
   { hex: "#E63946", name: "Red" },
@@ -20,6 +21,7 @@ const swatchColors = [
   { hex: "#457B9D", name: "Slate Blue" },
   { hex: "#1D3557", name: "Navy" },
   { hex: "#90BE6D", name: "Mint" },
+  { hex: "#F9C74F", name: "Mustard" },
 ];
 
 const dressImages = [
@@ -76,23 +78,8 @@ const dressImages = [
 ];
 
 export default function DressCode() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % dressImages.length);
-  };
-
-  const handlePrevious = () => {
-    setCurrentIndex((prev) =>
-      prev === 0 ? dressImages.length - 1 : prev - 1
-    );
-  };
-
-  const currentDress = dressImages[currentIndex];
-
   return (
-    <div className={styles.dressCodeWrapper}>
-      <h1 className={styles.title}>Dress Code</h1>
+    <div>
 
       {/* Color Picker Section */}
       <ColorPicker
@@ -104,32 +91,8 @@ export default function DressCode() {
         We invite our guests to embrace vibrant and bold colors to reflect the joyous spirit of an Indian wedding! While our decor features a neutral palette, we encourage you to stand out with rich, colorful attire that adds a festive and celebratory flair. Feel free to mix and match from the palette below to create your unique look!
       </p>
 
-      <br></br>
-
-      {/* Slideshow Section */}
-      <div className={styles.slideshowContainer}>
-        <button className={styles.navButton} onClick={handlePrevious}>
-          &#8592;
-        </button>
-        <div className={styles.imageWrapper}>
-          <Image
-            src={currentDress.src}
-            alt={currentDress.title}
-            width={300}
-            height={400}
-            className={styles.image}
-          />
-        </div>
-        <button className={styles.navButton} onClick={handleNext}>
-          &#8594;
-        </button>
-      </div>
-
-      {/* Attire Description */}
-      <div className={styles.attireDetails}>
-        <h2 className={styles.attireTitle}>{currentDress.title}</h2>
-        <p className={styles.attireDescription}>{currentDress.description}</p>
-      </div>
+      {/* Slideshow Component */}
+      <Slideshow slides={dressImages} />
     </div>
   );
 }

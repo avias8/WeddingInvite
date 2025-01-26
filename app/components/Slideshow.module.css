@@ -1,0 +1,103 @@
+/* Override react-responsive-carousel styles */
+.carousel .slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: none; /* Remove default background */
+    padding: 0; /* Remove padding */
+  }
+  
+  .carousel .control-dots {
+    bottom: -20px; /* Adjust position of dots */
+  }
+  
+  .carousel .control-dots .dot {
+    background-color: var(--color-accent);
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+  }
+  
+  .carousel .control-dots .dot:hover,
+  .carousel .control-dots .dot.selected {
+    opacity: 1;
+  }
+  
+  .carousel .control-arrow {
+    background: none; /* Remove background from arrows */
+    color: var(--color-accent); /* Use accent color for arrows */
+    font-size: 2rem;
+    z-index: 10;
+    opacity: 0.8;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  
+  .carousel .control-arrow:hover {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  
+  .carousel .control-arrow:before {
+    border: none; /* Remove default arrow style */
+  }
+  
+  .slideshowContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    max-width: 100%;
+    margin: 2rem auto;
+    padding: 1rem;
+    background-color: var(--color-background-light);
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .carouselImageWrapper img {
+    width: 100%;
+    max-width: 600px;
+    aspect-ratio: 3 / 4; /* Consistent image ratio */
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .carouselCaptionContainer {
+    text-align: center;
+    margin-top: 1rem;
+  }
+  
+  .carouselCaptionContainer h2 {
+    font-family: var(--font-wedding);
+    font-size: 1.8rem;
+    color: var(--color-accent);
+    margin-bottom: 0.5rem;
+  }
+  
+  .carouselCaptionContainer p {
+    font-family: var(--font-body);
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    line-height: 1.6;
+    color: var(--color-text-primary);
+  }
+  
+  /* Mobile Styling */
+  @media screen and (max-width: 768px) {
+    .slideshowContainer {
+      padding: 1rem;
+    }
+  
+    .carouselImageWrapper img {
+      max-width: 100%;
+    }
+  
+    .carouselCaptionContainer h2 {
+      font-size: 1.5rem;
+    }
+  
+    .carouselCaptionContainer p {
+      font-size: 1rem;
+    }
+  }
+  
