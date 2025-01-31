@@ -45,25 +45,6 @@ export default function DetailsPage() {
             <TravelInfo />
           </section>
 
-          {/* Section: Schedule */}
-          {/* <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Schedule</h2>
-            <ul className={styles.scheduleList}>
-              <li>
-                <strong>10:00 AM</strong> - Guests Arrival
-              </li>
-              <li>
-                <strong>11:00 AM</strong> - Ceremony Begins (Saptapadi)
-              </li>
-              <li>
-                <strong>12:30 PM</strong> - Vows & Blessings
-              </li>
-              <li>
-                <strong>1:00 PM</strong> - Lunch Reception
-              </li>
-            </ul>
-          </section> */}
-
           {/* Section: Food */}
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Food</h2>
