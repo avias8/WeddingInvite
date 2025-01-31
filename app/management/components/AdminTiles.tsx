@@ -88,7 +88,7 @@ export default function AdminTiles() {
   const handleSendInvite = async (invitee: Invitee) => {
     const inviteLink = `${window.location.origin}/invited#${invitee.token}`;
     const emailBody = generateInviteHTML(invitee.name, inviteLink, invitee.token);
-
+  
     try {
       const response = await fetch("/api/sendEmail", {
         method: "POST",
@@ -97,14 +97,22 @@ export default function AdminTiles() {
           to: invitee.email,
           subject: "You're Invited!",
           htmlContent: emailBody,
+          token: invitee.token, // ✅ Pass token to update emailSentAt
         }),
       });
-
+  
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
-
+  
       alert(`✅ Invite sent to ${invitee.email}!`);
+  
+      // ✅ Update local state to reflect email sent time
+      setInvitees((prev) =>
+        prev.map((iv) =>
+          iv.id === invitee.id ? { ...iv, emailSentAt: new Date().toISOString() } : iv
+        )
+      );
     } catch (err) {
       console.error("❌ Error sending invite:", err);
       alert("❌ Failed to send invite.");
@@ -182,6 +190,9 @@ export default function AdminTiles() {
                 >
                   View Invite
                 </a>
+              </p>
+              <p>
+                <strong>Email Sent:</strong> {invitee.emailSentAt ? new Date(invitee.emailSentAt).toLocaleString() : "Not Sent"}
               </p>
               <p>
                 <strong>Email Opened:</strong> {invitee.emailOpenedAt ? new Date(invitee.emailOpenedAt).toLocaleString() : "Not Opened"}

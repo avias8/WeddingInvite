@@ -40,4 +40,8 @@ export type Invitee = {
      * Prisma: DateTime? => can be null, or an ISO datetime string
      */
     emailOpenedAt: string | null;
+    /**
+     * Prisma: DateTime? => can be null, or an ISO datetime string
+     */
+    emailSentAt: string | null;
   };
