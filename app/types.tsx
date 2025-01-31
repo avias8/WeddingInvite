@@ -36,4 +36,8 @@ export type Invitee = {
     accessibilityInfo: string | null;
     comments: string | null;
     songRequests: string | null;
+    /**
+     * Prisma: DateTime? => can be null, or an ISO datetime string
+     */
+    emailOpenedAt: string | null;
   };

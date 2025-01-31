@@ -27,4 +27,5 @@ model Invitee {
   accessibilityInfo    String?
   comments             String?
   songRequests         String?
+  emailOpenedAt        DateTime?
 }

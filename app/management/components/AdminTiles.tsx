@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaTrash, FaEdit } from "react-icons/fa";
+import { FaTrash, FaEdit, FaEnvelope } from "react-icons/fa"; // Envelope icon for sending invites
 import EditInviteeForm from "./EditInviteeForm";
 import { Invitee } from "@/app/types";
+import generateInviteHTML from "@/app/components/InviteTemplate"; // Import email template
 
 export default function AdminTiles() {
   const [invitees, setInvitees] = useState<Invitee[]>([]);
@@ -52,7 +53,7 @@ export default function AdminTiles() {
   };
 
   const handleEditClick = (invitee: Invitee) => {
-    setEditingInvitee(invitee); // Use the full Invitee object, including createdAt
+    setEditingInvitee(invitee);
   };
 
   const handleEditSubmit = async (updatedInvitee: Invitee) => {
@@ -79,6 +80,37 @@ export default function AdminTiles() {
     }
   };
 
+  /**
+   * ✅ Send Invite Email
+   * Calls the API to send an email to the invitee.
+   */
+
+  const handleSendInvite = async (invitee: Invitee) => {
+    const inviteLink = `${window.location.origin}/invited#${invitee.token}`;
+    const emailBody = generateInviteHTML(invitee.name, inviteLink, invitee.token);
+
+    try {
+      const response = await fetch("/api/sendEmail", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: invitee.email,
+          subject: "You're Invited!",
+          htmlContent: emailBody,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      alert(`✅ Invite sent to ${invitee.email}!`);
+    } catch (err) {
+      console.error("❌ Error sending invite:", err);
+      alert("❌ Failed to send invite.");
+    }
+  };
+
   if (loading) return <div className="text-center">Loading...</div>;
   if (error) return <div className="text-center text-red-500">{error}</div>;
 
@@ -94,6 +126,11 @@ export default function AdminTiles() {
               <div className="tile-header">
                 <strong>{invitee.name}</strong>
                 <div className="actions">
+                  <FaEnvelope
+                    className="invite-icon"
+                    onClick={() => handleSendInvite(invitee)}
+                    title="Send Invite"
+                  />
                   <FaEdit
                     className="edit-icon"
                     onClick={() => handleEditClick(invitee)}
@@ -112,8 +149,8 @@ export default function AdminTiles() {
                 {invitee.isAttending === null
                   ? "No Response"
                   : invitee.isAttending
-                  ? "Yes"
-                  : "No"}
+                    ? "Yes"
+                    : "No"}
               </p>
               <p>
                 <strong>Guests:</strong> {invitee.guests}/{invitee.maxInvites}
@@ -146,6 +183,9 @@ export default function AdminTiles() {
                   View Invite
                 </a>
               </p>
+              <p>
+                <strong>Email Opened:</strong> {invitee.emailOpenedAt ? new Date(invitee.emailOpenedAt).toLocaleString() : "Not Opened"}
+              </p>
             </div>
           ))}
         </div>
@@ -168,7 +208,8 @@ export default function AdminTiles() {
           gap: 10px;
         }
         .trash-icon,
-        .edit-icon {
+        .edit-icon,
+        .invite-icon {
           cursor: pointer;
         }
         .trash-icon {
@@ -176,6 +217,9 @@ export default function AdminTiles() {
         }
         .edit-icon {
           color: blue;
+        }
+        .invite-icon {
+          color: green;
         }
       `}</style>
     </div>

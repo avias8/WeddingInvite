@@ -22,7 +22,7 @@ const ProtectedPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const correctPassword = process.env.NEXT_PUBLIC_MANAGEMENT_PASSWORD || "";
+    const correctPassword = process.env.NEXT_PUBLIC_MANAGEMENT_PASSWORD || "eW9zZGZlZGJhcg==";
     if (password === correctPassword) {
       setIsAuthenticated(true);
       sessionStorage.setItem("isAuthenticated", "true");
