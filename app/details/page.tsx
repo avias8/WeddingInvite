@@ -1,63 +1,60 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Header from "../components/Header"; // <--- Adjust path if needed
+import Header from "../components/Header"; 
 import HeroSection from "../components/HeroSection";
 import styles from "./details.module.css";
 import DressCode from "./DressCode/DressCode";
 import TravelInfo from "./Travel/TravelInfo";
 
 export default function DetailsPage() {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Create a media query list that matches if the viewport is 768px or less
     const mediaQuery = window.matchMedia("(max-width: 768px)");
-
-    // Define a handler that will update the state based on the media query's match
-    interface MediaQueryListEvent {
-      matches: boolean;
-    }
 
     const handleMediaQueryChange = (e: MediaQueryListEvent) => {
       setIsMobile(e.matches);
     };
 
-    // Set the initial value
+    // Set initial value
     setIsMobile(mediaQuery.matches);
 
-    // Listen for changes to the media query
+    // Listen for changes
     mediaQuery.addEventListener("change", handleMediaQueryChange);
 
-    // Cleanup listener on component unmount
     return () => {
       mediaQuery.removeEventListener("change", handleMediaQueryChange);
     };
   }, []);
 
-  // Choose video sources based on the viewport width
-  const mp4Src = isMobile
-    ? "https://storage.googleapis.com/my-wedding-assets/Caramellover.mp4"
-    : "https://storage.googleapis.com/my-wedding-assets/CaramelloverCrop.mp4";
-  const webmSrc = isMobile
-    ? "https://storage.googleapis.com/my-wedding-assets/Caramellover.webm"
-    : "https://storage.googleapis.com/my-wedding-assets/Caramellovercrop.webm";
+  // Avoid mismatch by delaying video selection until after hydration
+  const mp4Src =
+    isMobile === null
+      ? "" // Avoids preloading an incorrect video on SSR
+      : isMobile
+      ? "https://storage.googleapis.com/my-wedding-assets/Caramellover.mp4"
+      : "https://storage.googleapis.com/my-wedding-assets/CaramelloverCrop.mp4";
+
+  const webmSrc =
+    isMobile === null
+      ? "" // Avoids preloading an incorrect video on SSR
+      : isMobile
+      ? "https://storage.googleapis.com/my-wedding-assets/Caramellover.webm"
+      : "https://storage.googleapis.com/my-wedding-assets/Caramellovercrop.webm";
 
   return (
     <div>
       <Header />
 
-      {/* The outer container with consistent padding */}
       <div className={styles.pageContainer}>
-        <HeroSection
-          mp4Src={mp4Src}
-          webmSrc={webmSrc}
-          heroText="Wedding Details"
-        />
+        {isMobile !== null ? ( // Only render the video after hydration to avoid mismatch
+          <HeroSection mp4Src={mp4Src} webmSrc={webmSrc} heroText="Wedding Details" />
+        ) : (
+          <div style={{ height: "300px", backgroundColor: "#f3f3f3" }} />
+        )}
 
-        {/* Main content container */}
         <div className={styles.detailsContainer}>
-          {/* Section: About the Hindu Wedding */}
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>About the Hindu Wedding</h2>
             <p className={styles.sectionText}>
@@ -72,18 +69,15 @@ export default function DetailsPage() {
             </p>
           </section>
 
-          {/* Section: Dress Code */}
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Dressing for a Hindu Wedding</h2>
             <DressCode />
           </section>
 
-          {/* Section: Travel Information */}
           <section className={styles.section}>
             <TravelInfo />
           </section>
 
-          {/* Section: Food */}
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Food</h2>
             <p className={styles.sectionText}>
@@ -93,7 +87,6 @@ export default function DetailsPage() {
             </p>
           </section>
 
-          {/* Section: Parking Details */}
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Parking Details</h2>
             <p className={styles.sectionText}>
