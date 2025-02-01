@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Header from "../components/Header"; // <--- Adjust path if needed
 import HeroSection from "../components/HeroSection";
 import styles from "./details.module.css";
@@ -5,6 +8,41 @@ import DressCode from "./DressCode/DressCode";
 import TravelInfo from "./Travel/TravelInfo";
 
 export default function DetailsPage() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Create a media query list that matches if the viewport is 768px or less
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
+
+    // Define a handler that will update the state based on the media query's match
+    interface MediaQueryListEvent {
+      matches: boolean;
+    }
+
+    const handleMediaQueryChange = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches);
+    };
+
+    // Set the initial value
+    setIsMobile(mediaQuery.matches);
+
+    // Listen for changes to the media query
+    mediaQuery.addEventListener("change", handleMediaQueryChange);
+
+    // Cleanup listener on component unmount
+    return () => {
+      mediaQuery.removeEventListener("change", handleMediaQueryChange);
+    };
+  }, []);
+
+  // Choose video sources based on the viewport width
+  const mp4Src = isMobile
+    ? "https://storage.googleapis.com/my-wedding-assets/Caramellover.mp4"
+    : "https://storage.googleapis.com/my-wedding-assets/CaramelloverCrop.mp4";
+  const webmSrc = isMobile
+    ? "https://storage.googleapis.com/my-wedding-assets/Caramellover.webm"
+    : "https://storage.googleapis.com/my-wedding-assets/Caramellovercrop.webm";
+
   return (
     <div>
       <Header />
@@ -12,8 +50,8 @@ export default function DetailsPage() {
       {/* The outer container with consistent padding */}
       <div className={styles.pageContainer}>
         <HeroSection
-          mp4Src="https://storage.googleapis.com/my-wedding-assets/CaramelloverCrop.mp4"
-          webmSrc="https://storage.googleapis.com/my-wedding-assets/Caramellovercrop.webm"
+          mp4Src={mp4Src}
+          webmSrc={webmSrc}
           heroText="Wedding Details"
         />
 
@@ -28,7 +66,7 @@ export default function DetailsPage() {
               symbolizing the vows taken by the couple. The ceremony is rich in symbolism,
               celebrating the union of two souls.
             </p>
-            <br></br>
+            <br />
             <p className={styles.sectionText}>
               We invite you to join us in celebrating our love and the beginning of our journey together.
             </p>
@@ -70,6 +108,6 @@ export default function DetailsPage() {
           </section>
         </div>
       </div>
-    </div >
+    </div>
   );
 }

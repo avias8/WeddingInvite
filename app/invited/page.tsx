@@ -61,6 +61,7 @@ export default function BigInvitePage() {
           mp4Src="https://storage.googleapis.com/my-wedding-assets/Sandwitchsnatch.mp4"
           webmSrc="https://storage.googleapis.com/my-wedding-assets/Sandwitchsnatch.webm"
           heroText="AVI AND SHAKTHI'S WEDDING"
+          subText="06 • 29 • 2025"
         />
 
         {/* To: Guest Section */}
