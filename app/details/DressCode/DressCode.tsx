@@ -25,70 +25,70 @@ const swatchColors = [
 
 const dressImages = [
   {
-    src: "https://cdn.avivarma.ca/Images/Attire1.JPG",
+    src: "https://storage.googleapis.com/my-wedding-assets/Images/Attire1.JPG",
     title: "Radiant Pink Silk Saree",
     description: "A luxurious magenta-pink silk saree...",
     width: 1920,
     height: 1080
   },
   {
-    src: "https://cdn.avivarma.ca/Images/Attire2.JPG",
+    src: "https://storage.googleapis.com/my-wedding-assets/Images/Attire2.JPG",
     title: "Golden Green Kanjivaram Saree",
     description: "A captivating golden-green Kanjivaram...",
     width: 1920,
     height: 1080
   },
   {
-    src: "https://cdn.avivarma.ca/Images/Attire3.JPG",
+    src: "https://storage.googleapis.com/my-wedding-assets/Images/Attire3.JPG",
     title: "Regal Orange and Purple Lehenga",
     description: "An enchanting orange silk lehenga...",
     width: 1920,
     height: 1080
   },
   {
-    src: "https://cdn.avivarma.ca/Images/Attire4.JPG",
+    src: "https://storage.googleapis.com/my-wedding-assets/Images/Attire4.JPG",
     title: "Emerald Green Ensemble Trio",
     description: "A stunning trio of emerald green outfits...",
     width: 1920,
     height: 1080
   },
   {
-    src: "https://cdn.avivarma.ca/Images/Attire5.jpeg",
+    src: "https://storage.googleapis.com/my-wedding-assets/Images/Attire5.jpeg",
     title: "Lavender Embellished Lehenga",
     description: "A dreamy lavender lehenga...",
     width: 1080,
     height: 1350
   },
   {
-    src: "https://cdn.avivarma.ca/Images/Attire6.jpeg",
+    src: "https://storage.googleapis.com/my-wedding-assets/Images/Attire6.jpeg",
     title: "Lilac Embroidered Anarkali Gown",
     description: "A graceful lilac Anarkali gown...",
     width: 1080,
     height: 1350
   },
   {
-    src: "https://cdn.avivarma.ca/Images/Attire7.JPG",
+    src: "https://storage.googleapis.com/my-wedding-assets/Images/Attire7.JPG",
     title: "Pastel Sherwani Trio",
     description: "A stunning collection of pastel sherwanis...",
     width: 1920,
     height: 1080
   },
   {
-    src: "https://cdn.avivarma.ca/Images/Attire8.JPG",
+    src: "https://storage.googleapis.com/my-wedding-assets/Images/Attire8.JPG",
     title: "Maroon Kurta Pajama",
     description: "A classic maroon kurta...",
     width: 1080,
     height: 1350
   },
   {
-    src: "https://cdn.avivarma.ca/Images/Attire9.JPG",
+    src: "https://storage.googleapis.com/my-wedding-assets/Images/Attire9.JPG",
     title: "Pink Shirt with Dhoti",
     description: "A light pink short-sleeve shirt...",
     width: 1080,
     height: 1350
   },
   {
-    src: "https://cdn.avivarma.ca/Images/Attire10.JPG",
+    src: "https://storage.googleapis.com/my-wedding-assets/Images/Attire10.JPG",
     title: "Black Shirt with Kerala Dhoti",
     description: "A stylish black shirt...",
     width: 1920,

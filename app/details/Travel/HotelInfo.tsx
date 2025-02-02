@@ -35,12 +35,12 @@ export default function HotelInfoPane({
   const [isExpanded, setIsExpanded] = useState(false);
 
   const hotelImages: Record<string, string> = {
-    "Best Western Plus Chateau Inn": "https://cdn.avivarma.ca/Images/hotel1.jpg",
-    "Prairie Moon Inn": "https://cdn.avivarma.ca/Images/hotel2.webp",
-    "Sylvan Lake Lodge": "https://cdn.avivarma.ca/Images/hotel3.jpg",
+    "Best Western Plus Chateau Inn": "https://storage.googleapis.com/my-wedding-assets/Images/hotel1.jpg",
+    "Prairie Moon Inn": "https://storage.googleapis.com/my-wedding-assets/Images/hotel2.webp",
+    "Sylvan Lake Lodge": "https://storage.googleapis.com/my-wedding-assets/Images/hotel3.jpg",
   };
 
-  const backgroundImage = hotelImages[name] || "https://cdn.avivarma.ca/Images/default-hotel.jpg";
+  const backgroundImage = hotelImages[name] || "https://storage.googleapis.com/my-wedding-assets/Images/default-hotel.jpg";
 
   const togglePane = () => setIsExpanded(!isExpanded);
 

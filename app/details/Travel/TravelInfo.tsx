@@ -14,14 +14,14 @@ const airportInfo = [
     description: "The airport we reccomend, in the city of Calgary, approximately 90 minutes from the venue.",
     link: "https://www.yyc.com/",
     mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10015.11691416996!2d-114.01669712729024!3d51.130980147679374!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x5371640f7bf63b77%3A0xdbe9871f5cbc7457!2sCalgary%20International%20Airport!5e0!3m2!1sen!2sca!4v1737888071801!5m2!1sen!2sca",
-    image: "https://cdn.avivarma.ca/Images/YYC.png",
+    image: "https://storage.googleapis.com/my-wedding-assets/Images/YYC.png",
   },
   {
     name: "Edmonton International Airport (YEG)",
     description: "Another option, located in Edmonton, approximately 2 hours from the venue.",
     link: "https://flyeia.com/",
     mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2384.267271658254!2d-113.5814959148082!3d53.30265951100569!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x539ff7617591b075%3A0xf9847601ed3d84b7!2sEdmonton%20International%20Airport!5e0!3m2!1sen!2sca!4v1737888117395!5m2!1sen!2sca",
-    image: "https://cdn.avivarma.ca/Images/YEG.webp",
+    image: "https://storage.googleapis.com/my-wedding-assets/Images/YEG.webp",
   },
 ];
 
