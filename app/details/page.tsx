@@ -1,25 +1,60 @@
-import Header from "../components/Header"; // <--- Adjust path if needed
+"use client";
+
+import { useState, useEffect } from "react";
+import Header from "../components/Header"; 
 import HeroSection from "../components/HeroSection";
 import styles from "./details.module.css";
 import DressCode from "./DressCode/DressCode";
 import TravelInfo from "./Travel/TravelInfo";
 
 export default function DetailsPage() {
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
+
+    const handleMediaQueryChange = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches);
+    };
+
+    // Set initial value
+    setIsMobile(mediaQuery.matches);
+
+    // Listen for changes
+    mediaQuery.addEventListener("change", handleMediaQueryChange);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleMediaQueryChange);
+    };
+  }, []);
+
+  // Avoid mismatch by delaying video selection until after hydration
+  const mp4Src =
+    isMobile === null
+      ? "" // Avoids preloading an incorrect video on SSR
+      : isMobile
+      ? "https://storage.googleapis.com/my-wedding-assets/Caramellover.mp4"
+      : "https://storage.googleapis.com/my-wedding-assets/CaramelloverCrop.mp4";
+
+  const webmSrc =
+    isMobile === null
+      ? "" // Avoids preloading an incorrect video on SSR
+      : isMobile
+      ? "https://storage.googleapis.com/my-wedding-assets/Caramellover.webm"
+      : "https://storage.googleapis.com/my-wedding-assets/Caramellovercrop.webm";
+
   return (
     <div>
       <Header />
 
-      {/* The outer container with consistent padding */}
       <div className={styles.pageContainer}>
-        <HeroSection
-          mp4Src="https://storage.googleapis.com/my-wedding-assets/CaramelloverCrop.mp4"
-          webmSrc="https://storage.googleapis.com/my-wedding-assets/Caramellovercrop.webm"
-          heroText="Wedding Details"
-        />
+        {isMobile !== null ? ( // Only render the video after hydration to avoid mismatch
+          <HeroSection mp4Src={mp4Src} webmSrc={webmSrc} heroText="Wedding Details" />
+        ) : (
+          <div style={{ height: "300px", backgroundColor: "#f3f3f3" }} />
+        )}
 
-        {/* Main content container */}
         <div className={styles.detailsContainer}>
-          {/* Section: About the Hindu Wedding */}
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>About the Hindu Wedding</h2>
             <p className={styles.sectionText}>
@@ -28,24 +63,21 @@ export default function DetailsPage() {
               symbolizing the vows taken by the couple. The ceremony is rich in symbolism,
               celebrating the union of two souls.
             </p>
-            <br></br>
+            <br />
             <p className={styles.sectionText}>
               We invite you to join us in celebrating our love and the beginning of our journey together.
             </p>
           </section>
 
-          {/* Section: Dress Code */}
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Dressing for a Hindu Wedding</h2>
             <DressCode />
           </section>
 
-          {/* Section: Travel Information */}
           <section className={styles.section}>
             <TravelInfo />
           </section>
 
-          {/* Section: Food */}
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Food</h2>
             <p className={styles.sectionText}>
@@ -55,7 +87,6 @@ export default function DetailsPage() {
             </p>
           </section>
 
-          {/* Section: Parking Details */}
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Parking Details</h2>
             <p className={styles.sectionText}>
@@ -70,6 +101,6 @@ export default function DetailsPage() {
           </section>
         </div>
       </div>
-    </div >
+    </div>
   );
 }
