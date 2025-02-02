@@ -6,6 +6,9 @@ import AdminInvite from "./AdminInvite";
 import "./ManagementPage.css";
 import Header from "../../components/Header";
 import AdminTiles from "./AdminTiles";
+import RsvpDashboard from "./RSVPDashboard" // ✅ Import the new dashboard
+import SeatingAssignment from "./SeatingAssignment";
+
 
 
 const ProtectedPage: React.FC = () => {
@@ -38,6 +41,16 @@ const ProtectedPage: React.FC = () => {
         <Header />
         <div className="management-container flex-grow">
           <h1 className="text-5xl font-bold mb-6">Manage Invitees</h1>
+          {/* ✅ Add the RSVP Dashboard */}
+          <div className="management-section">
+            <h2 className="text-3xl font-bold mb-6">RSVP Overview</h2>
+            <RsvpDashboard />
+          </div>
+          {/* ✅ Add the Seating Assignment */}
+          <div className="management-section">
+            <h2 className="text-3xl font-bold mb-6">Seating Overview</h2>
+            <SeatingAssignment />
+          </div>
           <div className="management-section">
             <h2 className="text-3xl font-bold mb-6">Send Invite</h2>
             <AdminInvite />
@@ -66,6 +79,7 @@ const ProtectedPage: React.FC = () => {
           className="w-full p-2 border rounded mb-4"
           placeholder="Enter password"
         />
+        
         {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
         <button
           type="submit"

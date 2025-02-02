@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -29,4 +23,36 @@ model Invitee {
   songRequests         String?
   emailSentAt          DateTime?  
   emailOpenedAt        DateTime?  
+  guestsList           Guest[]  // Relation to individual guests
+}
+
+model Guest {
+  id         Int       @id @default(autoincrement())
+  name       String
+  inviteeId  Int       @map("invitee_id")
+  invitee    Invitee   @relation(fields: [inviteeId], references: [id])
+  dietaryRestrictions String?
+  accessibilityInfo String?
+  isAttending Boolean?
+  
+  tableId    Int?      @map("table_id")  
+  table      Table?    @relation(fields: [tableId], references: [id])
+
+  seatingAssignment SeatingAssignment? @relation("GuestToSeatingAssignment") // ✅ Removed `references`
+}
+
+model Table {
+  id          Int       @id @default(autoincrement())
+  name        String
+  capacity    Int
+  guests      Guest[]
+  assignments SeatingAssignment[]
+}
+
+model SeatingAssignment {
+  id        Int    @id @default(autoincrement())
+  guestId   Int    @unique @map("guest_id") 
+  guest     Guest  @relation("GuestToSeatingAssignment", fields: [guestId], references: [id]) // ✅ `references` only on this side
+  tableId   Int    @map("table_id")
+  table     Table  @relation(fields: [tableId], references: [id])
 }
