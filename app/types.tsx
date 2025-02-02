@@ -45,3 +45,16 @@ export type Invitee = {
      */
     emailSentAt: string | null;
   };
+
+  // types.ts
+export interface Guest {
+  id: number;
+  name: string;
+  tableId: number | null; // null if unassigned
+}
+
+export interface Table {
+  id: number;
+  name: string;
+  capacity: number;
+}
