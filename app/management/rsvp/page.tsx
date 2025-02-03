@@ -5,6 +5,8 @@ import RsvpDashboard from "./RSVPDashboard";
 import ConfirmedInviteeGuests from "./ConfirmedInviteeGuests";
 import ManageTables from "./ManageTables";
 import SeatingAssignment from "./SeatingAssignment";
+import "./rsvp.css";
+
 
 export default function RsvpPage() {
   return (

@@ -1,0 +1,35 @@
+/* Management Page Styles */
+.management-container {
+    padding: 20px;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Allow this container to grow and fill the remaining space */
+  }
+  
+  .management-title {
+    font-size: 2rem;
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .management-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex-grow: 1; /* Allow sections to expand evenly */
+  }
+  
+  /* Ensure the body and HTML span the full height */
+  body {
+    height: 108vh;
+    padding-bottom: 10;
+  }
