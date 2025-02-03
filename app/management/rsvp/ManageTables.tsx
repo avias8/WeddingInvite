@@ -3,13 +3,15 @@
 import React, { useEffect, useState } from "react";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import styles from "./ManageTables.module.css";
+// Import the Guest type from your shared types
+import type { Guest } from "@/app/types";
 
 interface Table {
   id: number;
   name: string;
   capacity: number;
-  // Assuming the table object includes an array of assigned guests:
-  guests: any[]; // Replace 'any' with your Guest type if available
+  // Use the imported Guest type instead of any[]
+  guests: Guest[];
 }
 
 export default function ManageTables() {
@@ -83,7 +85,7 @@ export default function ManageTables() {
       console.error("Error deleting table:", error);
       alert("Error deleting table");
     }
-  };  
+  };
 
   const handleEditTable = (table: Table) => {
     setEditingTable(table);

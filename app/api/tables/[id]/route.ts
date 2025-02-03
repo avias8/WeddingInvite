@@ -1,6 +1,6 @@
 // app/api/tables/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma"; // Ensure the path is correct
+import { prisma } from "@/lib/prisma";
 
 /**
  * GET /api/tables/[id]
@@ -8,10 +8,12 @@ import { prisma } from "@/lib/prisma"; // Ensure the path is correct
  */
 export async function GET(
   req: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const tableId = parseInt(context.params.id, 10);
+    // Await the params promise to extract the id.
+    const { id } = await context.params;
+    const tableId = parseInt(id, 10);
     const table = await prisma.table.findUnique({
       where: { id: tableId },
       include: { guests: true, assignments: true },
@@ -38,10 +40,11 @@ export async function GET(
  */
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const tableId = parseInt(context.params.id, 10);
+    const { id } = await context.params;
+    const tableId = parseInt(id, 10);
     const { name, capacity } = await req.json();
 
     const updatedTable = await prisma.table.update({
@@ -62,10 +65,11 @@ export async function PUT(
  */
 export async function DELETE(
   req: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const tableId = parseInt(context.params.id, 10);
+    const { id } = await context.params;
+    const tableId = parseInt(id, 10);
     await prisma.table.delete({
       where: { id: tableId },
     });

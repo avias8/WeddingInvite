@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import styles from "./AddGuestForm.module.css"; // Create this CSS module for styling
+import styles from "./AddGuestForm.module.css";
+// Import the Guest type from your shared types file (adjust the path as needed)
+import type { Guest } from "@/app/types";
 
 interface AddGuestFormProps {
   inviteeId: number;
   inviteeName: string;
   onClose: () => void;
-  onGuestAdded: (newGuest: any) => void; // You can replace "any" with a more specific type if desired
+  onGuestAdded: (newGuest: Guest) => void; // Use the specific Guest type instead of any
 }
 
 export default function AddGuestForm({

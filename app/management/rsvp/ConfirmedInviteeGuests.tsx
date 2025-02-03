@@ -185,13 +185,17 @@ export default function ConfirmedInviteeGuests() {
           inviteeName={activeInvitee.name}
           onClose={() => setActiveInvitee(null)}
           onGuestAdded={(newGuest) => {
+            // Convert newGuest to type Guest by adding inviteeId from activeInvitee.
+            const guestWithInviteeId = { ...newGuest, inviteeId: activeInvitee.id };
             // Update the confirmedInvitees state to reflect the added guest.
             setConfirmedInvitees((prev) =>
               prev.map((inv) => {
                 if (inv.id === activeInvitee.id) {
                   return {
                     ...inv,
-                    guestsList: inv.guestsList ? [...inv.guestsList, newGuest] : [newGuest],
+                    guestsList: inv.guestsList
+                      ? [...inv.guestsList, guestWithInviteeId]
+                      : [guestWithInviteeId],
                   };
                 }
                 return inv;
