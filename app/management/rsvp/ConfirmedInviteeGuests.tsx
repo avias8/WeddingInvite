@@ -3,41 +3,44 @@
 import React, { useEffect, useState } from "react";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import styles from "./ConfirmedInviteeGuests.module.css";
-import AddGuestForm from "./AddGuestForm"; // Modal form for adding a guest
+import AddGuestForm from "./AddGuestForm";
+import type { Invitee, Guest } from "@/app/types";
 
-// Define the types for Invitee and Guest based on your Prisma schema.
-interface Guest {
-  id: number;
-  name: string;
-  inviteeId: number;
-  // Additional fields if needed.
-}
-
-export interface Invitee {
-  id: number;
-  name: string;
-  email: string;
-  isAttending: boolean | null;
-  guests: number; // Expected number of guest records for this invitee
-  guestsList?: Guest[]; // The actual guest records (should be returned from your API)
+// Extend the Invitee type to include guestsList
+interface ExtendedInvitee extends Invitee {
+  guestsList?: Guest[];
 }
 
 export default function ConfirmedInviteeGuests() {
-  const [confirmedInvitees, setConfirmedInvitees] = useState<Invitee[]>([]);
+  const [confirmedInvitees, setConfirmedInvitees] = useState<ExtendedInvitee[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeInvitee, setActiveInvitee] = useState<Invitee | null>(null);
+  const [activeInvitee, setActiveInvitee] = useState<ExtendedInvitee | null>(null);
 
   useEffect(() => {
     async function fetchInvitees() {
       try {
-        const res = await fetch("/api/invitees"); // Ensure this endpoint includes guestsList
+        const res = await fetch("/api/invitees");
         if (!res.ok) {
           throw new Error(`Error: ${res.statusText}`);
         }
         const data: Invitee[] = await res.json();
-        // Filter to only include confirmed invitees (those with isAttending true)
-        const confirmed = data.filter((invitee) => invitee.isAttending === true);
+        // Cast fetched data to ExtendedInvitee[]
+        const extendedData = data as ExtendedInvitee[];
+        const confirmed: ExtendedInvitee[] = extendedData
+          .filter((invitee) => invitee.isAttending === true)
+          .map((invitee) => ({
+            ...invitee,
+            guestsList: invitee.guestsList
+              ? invitee.guestsList.map((guest: any) => ({
+                  id: guest.id,
+                  name: guest.name,
+                  tableId: guest.tableId,
+                  inviteeId: invitee.id,
+                }))
+              : [],
+          }));
+        
         setConfirmedInvitees(confirmed);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
@@ -59,11 +62,8 @@ export default function ConfirmedInviteeGuests() {
       ) : (
         <ul className={styles.inviteeList}>
           {confirmedInvitees.map((invitee) => {
-            // Determine how many guest records currently exist.
             const currentGuestCount = invitee.guestsList ? invitee.guestsList.length : 0;
-            // Calculate how many guest records are missing.
             const missingGuests = invitee.guests - currentGuestCount;
-
             return (
               <li key={invitee.id} className={styles.inviteeItem}>
                 <div className={styles.inviteeInfo}>
@@ -80,7 +80,6 @@ export default function ConfirmedInviteeGuests() {
                     </span>
                   )}
                 </div>
-                {/* List out each guest with edit and delete icons */}
                 {invitee.guestsList && invitee.guestsList.length > 0 && (
                   <ul className={styles.guestList}>
                     {invitee.guestsList.map((guest) => (
@@ -91,7 +90,6 @@ export default function ConfirmedInviteeGuests() {
                           onClick={() => {
                             const newName = prompt("Edit guest name:", guest.name);
                             if (newName && newName !== guest.name) {
-                              // Update guest logic: call API to update guest
                               fetch(`/api/guests/${guest.id}`, {
                                 method: "PUT",
                                 headers: { "Content-Type": "application/json" },
@@ -104,14 +102,14 @@ export default function ConfirmedInviteeGuests() {
                                   return res.json();
                                 })
                                 .then((updatedGuest) => {
-                                  // Update local state
+                                  const fixedGuest: Guest = { ...updatedGuest, inviteeId: invitee.id };
                                   setConfirmedInvitees((prev) =>
                                     prev.map((inv) => {
                                       if (inv.id === invitee.id && inv.guestsList) {
                                         return {
                                           ...inv,
                                           guestsList: inv.guestsList.map((g) =>
-                                            g.id === guest.id ? updatedGuest : g
+                                            g.id === guest.id ? fixedGuest : g
                                           ),
                                         };
                                       }
@@ -138,15 +136,12 @@ export default function ConfirmedInviteeGuests() {
                                 if (!res.ok) {
                                   throw new Error("Failed to delete guest");
                                 }
-                                // Remove the guest from state
                                 setConfirmedInvitees((prev) =>
                                   prev.map((inv) => {
                                     if (inv.id === invitee.id) {
                                       return {
                                         ...inv,
-                                        guestsList: inv.guestsList?.filter(
-                                          (g) => g.id !== guest.id
-                                        ),
+                                        guestsList: inv.guestsList?.filter((g) => g.id !== guest.id),
                                       };
                                     }
                                     return inv;
@@ -178,24 +173,19 @@ export default function ConfirmedInviteeGuests() {
         </ul>
       )}
 
-      {/* Conditionally render the AddGuestForm modal */}
       {activeInvitee && (
         <AddGuestForm
           inviteeId={activeInvitee.id}
           inviteeName={activeInvitee.name}
           onClose={() => setActiveInvitee(null)}
           onGuestAdded={(newGuest) => {
-            // Convert newGuest to type Guest by adding inviteeId from activeInvitee.
-            const guestWithInviteeId = { ...newGuest, inviteeId: activeInvitee.id };
-            // Update the confirmedInvitees state to reflect the added guest.
+            const guestWithInviteeId: Guest = { ...newGuest, inviteeId: activeInvitee.id };
             setConfirmedInvitees((prev) =>
               prev.map((inv) => {
                 if (inv.id === activeInvitee.id) {
                   return {
                     ...inv,
-                    guestsList: inv.guestsList
-                      ? [...inv.guestsList, guestWithInviteeId]
-                      : [guestWithInviteeId],
+                    guestsList: inv.guestsList ? [...inv.guestsList, guestWithInviteeId] : [guestWithInviteeId],
                   };
                 }
                 return inv;
