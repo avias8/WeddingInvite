@@ -1,0 +1,91 @@
+/* RSVP Dashboard Styles */
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+  
+  .card {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .card h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .card p {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #4CAF50;
+  }
+  
+  .chart-container {
+  width: 100%;
+  height: 450px; /* Increased height to provide extra space */
+  position: relative; /* Ensures proper canvas positioning */
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+  animation: fadeIn 0.5s ease-in-out;
+}
+  
+  .chart-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #555;
+  }
+  
+  /* Hover effects */
+  .card:hover {
+    transform: translateY(-3px);
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .container {
+      padding: 1rem;
+    }
+    .card p {
+      font-size: 1.2rem;
+    }
+  }
+  
+  /* Animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .chart-container {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  

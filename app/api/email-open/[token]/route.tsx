@@ -1,7 +1,6 @@
+//app/api/email-open/[token]/route.tsx
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma"; // Adjust the path if needed
 
 /**
  * ✅ API Route: Track Email Opens via an Invisible 1x1 Pixel Image.
