@@ -44,8 +44,10 @@ function DraggableGuest({ guest }: GuestProps) {
 
   return (
     <div
-      // Wrap the callback in a block to ensure it returns void
-      ref={(node) => { dragRef(node); return; }}
+      ref={(node) => {
+        dragRef(node);
+        return;
+      }}
       className={`${styles.guest} ${isDragging ? styles.dragging : ""}`}
     >
       {guest.name}
@@ -65,14 +67,19 @@ function TableDropZone({ table, onDropGuest }: TableProps) {
   const [, dropRef] = useDrop(() => ({
     accept: ITEM_TYPE,
     drop: (item: { id: number; currentTableId: number | null }) => {
-      onDropGuest(item.id, table.id);
+      // Only update if the guest isn't already on this table
+      if (item.currentTableId !== table.id) {
+        onDropGuest(item.id, table.id);
+      }
     },
   }));
 
   return (
     <div
-      // Use a callback ref that returns void explicitly
-      ref={(node) => { dropRef(node); return; }}
+      ref={(node) => {
+        dropRef(node);
+        return;
+      }}
       className={styles.table}
     >
       <h3 className={styles.tableTitle}>
@@ -105,8 +112,10 @@ function UnassignedGuests({ guests, onDropGuest }: UnassignedGuestsProps) {
 
   return (
     <div
-      // Use a callback ref that explicitly returns void
-      ref={(node) => { dropRef(node); return; }}
+      ref={(node) => {
+        dropRef(node);
+        return;
+      }}
       className={styles.unassigned}
     >
       <h3>Unassigned Guests</h3>
@@ -127,6 +136,8 @@ export default function SeatingAssignment() {
   const [tables, setTables] = useState<Table[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  // New state for assignment errors
+  const [assignError, setAssignError] = useState<string>("");
 
   // Fetch guests and tables data from your API endpoints.
   useEffect(() => {
@@ -163,7 +174,9 @@ export default function SeatingAssignment() {
     fetchData();
   }, []);
 
+  // ---------------------------
   // Function to assign a guest to a table.
+  // ---------------------------
   const assignGuest = async (guestId: number, tableId: number) => {
     try {
       const res = await fetch("/api/tables/assign", {
@@ -171,28 +184,41 @@ export default function SeatingAssignment() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ guestId, tableId }),
       });
-      if (!res.ok) throw new Error("Failed to assign guest");
+      if (!res.ok) {
+        // Capture and show the error message returned by the API
+        const errData = await res.json();
+        throw new Error(errData.error || "Failed to assign guest");
+      }
       const updatedGuest = await res.json();
 
       // Remove guest from unassigned list.
       setGuests((prev) => prev.filter((g) => g.id !== guestId));
 
-      // Add the guest to the appropriate table.
+      // Remove the guest from any table and add to the new one.
       setTables((prev) =>
         prev.map((table) => {
+          const updatedGuests = table.guests.filter((g) => g.id !== guestId);
           if (table.id === tableId) {
-            return { ...table, guests: [...table.guests, updatedGuest] };
+            return { ...table, guests: [...updatedGuests, updatedGuest] };
           }
-          return table;
+          return { ...table, guests: updatedGuests };
         })
       );
+      // Clear any assignment error if assignment is successful.
+      setAssignError("");
     } catch (error) {
       console.error("Error assigning guest:", error);
-      alert("Error assigning guest");
+      const errMsg =
+        error instanceof Error ? error.message : "Error assigning guest";
+      setAssignError(errMsg);
+      // Clear error after 3 seconds.
+      setTimeout(() => setAssignError(""), 3000);
     }
   };
 
+  // ---------------------------
   // Function to unassign a guest (remove from table).
+  // ---------------------------
   const unassignGuest = async (guestId: number) => {
     try {
       const res = await fetch("/api/tables/unassign", {
@@ -225,6 +251,17 @@ export default function SeatingAssignment() {
     <DndProvider backend={HTML5Backend}>
       <div className={styles.seatingAssignment}>
         <h1 className={styles.heading}>Seating Assignment</h1>
+
+        {/* Animated Error Message */}
+        {assignError && (
+          <div className={styles.errorAnimation}>
+            <span role="img" aria-label="error">
+              😢
+            </span>{" "}
+            {assignError}
+          </div>
+        )}
+
         <div className={styles.layout}>
           <UnassignedGuests guests={guests} onDropGuest={unassignGuest} />
           <div className={styles.tablesContainer}>

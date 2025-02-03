@@ -97,6 +97,37 @@
     flex-direction: column;
     gap: 0.5rem;
   }
+
+  .errorAnimation {
+    background-color: #ffebee;  /* light red background */
+    color: #c62828;             /* dark red text */
+    padding: 0.75rem 1rem;
+    margin: 0.5rem auto;
+    border-radius: 8px;
+    text-align: center;
+    width: fit-content;
+    animation: bounce 0.5s ease;
+  }
+  
+  /* A simple bounce animation */
+@keyframes bounce {
+    0% {
+      transform: translateY(0);
+    }
+    30% {
+      transform: translateY(-10px);
+    }
+    50% {
+      transform: translateY(0);
+    }
+    70% {
+      transform: translateY(-5px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
   
   /* Responsive adjustments */
   @media (min-width: 768px) {
