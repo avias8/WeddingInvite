@@ -1,7 +1,6 @@
 //app/api/sendEmail/route.tsx
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma"; // Adjust the path if needed
-import type { Prisma } from "@prisma/client"; // Only import types if needed
 
 import nodemailer from "nodemailer";
 

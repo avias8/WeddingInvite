@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import styles from "./RSVPDashboard.module.css";
-import { Bar, Line } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import "chart.js/auto";
 import { ChartOptions } from "chart.js";
 

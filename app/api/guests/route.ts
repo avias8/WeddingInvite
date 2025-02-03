@@ -1,7 +1,6 @@
 // app/api/guests/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma"; // Using our centralized prisma instance
-import type { Prisma } from "@prisma/client"; // Importing types if needed
 
 // (Optional) Log the keys of the Prisma client for debugging purposes.
 console.log("Prisma client keys:", Object.keys(prisma));
