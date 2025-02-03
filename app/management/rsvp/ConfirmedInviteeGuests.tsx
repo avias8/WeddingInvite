@@ -32,7 +32,7 @@ export default function ConfirmedInviteeGuests() {
           .map((invitee) => ({
             ...invitee,
             guestsList: invitee.guestsList
-              ? invitee.guestsList.map((guest: any) => ({
+              ? invitee.guestsList.map((guest: Guest) => ({
                   id: guest.id,
                   name: guest.name,
                   tableId: guest.tableId,
@@ -40,7 +40,7 @@ export default function ConfirmedInviteeGuests() {
                 }))
               : [],
           }));
-        
+
         setConfirmedInvitees(confirmed);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");

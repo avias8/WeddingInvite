@@ -52,7 +52,8 @@ function DraggableGuest({ guest }: GuestProps) {
     >
       {guest.name}
     </div>
-  );  
+  );
+  
 }
 
 // ---------------------------
@@ -137,8 +138,7 @@ function UnassignedGuests({ guests, onDropGuest }: UnassignedGuestsProps) {
         ))}
       </div>
     </div>
-  );
-  
+  );  
 }
 
 // ---------------------------
