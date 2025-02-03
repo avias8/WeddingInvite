@@ -1,0 +1,91 @@
+/* ConfirmedInviteeGuests.module.css */
+
+.container {
+    padding: 1rem;
+    margin-top: 2rem;
+    border-top: 1px solid #ddd;
+  }
+  
+  .inviteeList {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .inviteeItem {
+    padding: 0.75rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .inviteeInfo {
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+  
+  .guestSummary {
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  .missing {
+    color: #f44336;
+    font-weight: bold;
+  }
+  
+  .guestList {
+    list-style-type: none;
+    padding-left: 1rem;
+    margin: 0.5rem 0 0 0;
+  }
+  
+  .guestItem {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    padding: 0.25rem 0;
+    font-size: 0.9rem;
+  }
+  
+  .editIcon {
+    color: blue;
+    cursor: pointer;
+    margin-left: 8px;
+    font-size: 1.1rem;
+    transition: color 0.2s ease;
+  }
+  
+  .editIcon:hover {
+    color: darkblue;
+  }
+  
+  .deleteIcon {
+    color: red;
+    cursor: pointer;
+    margin-left: 8px;
+    font-size: 1.1rem;
+    transition: color 0.2s ease;
+  }
+  
+  .deleteIcon:hover {
+    color: darkred;
+  }
+  
+  .addGuestButton {
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    align-self: flex-start;
+    transition: background-color 0.2s ease;
+  }
+  
+  .addGuestButton:hover {
+    background-color: #45a049;
+  }
+  

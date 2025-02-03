@@ -7,6 +7,8 @@ import "./ManagementPage.css";
 import Header from "../../components/Header";
 import AdminTiles from "./AdminTiles";
 import RsvpDashboard from "./RSVPDashboard" // ✅ Import the new dashboard
+import ConfirmedInviteeGuests from "./ConfirmedInviteeGuests";
+import ManageTables from "./ManageTables";
 
 
 
@@ -44,6 +46,8 @@ const ProtectedPage: React.FC = () => {
           <div className="management-section">
             <h2 className="text-3xl font-bold mb-6">RSVP Overview</h2>
             <RsvpDashboard />
+            <ConfirmedInviteeGuests />
+            <ManageTables />
           </div>
           <div className="management-section">
             <h2 className="text-3xl font-bold mb-6">Send Invite</h2>

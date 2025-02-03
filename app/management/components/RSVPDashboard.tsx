@@ -75,10 +75,9 @@ export default function RsvpDashboard() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col">
       <div className={styles.container}>
         <h1 className={styles.title}>RSVP Dashboard</h1>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div className={styles.card}>
             <h2>Total Invitees</h2>
@@ -93,7 +92,6 @@ export default function RsvpDashboard() {
             <p>{pending}</p>
           </div>
         </div>
-
         <div className={styles["chart-container"]}>
           <h2 className={styles["chart-title"]}>RSVP Status Breakdown</h2>
           <Bar data={chartData} options={chartOptions} />

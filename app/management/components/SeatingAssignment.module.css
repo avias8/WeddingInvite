@@ -1,0 +1,113 @@
+/* SeatingAssignment.module.css */
+
+.seatingAssignment {
+    padding: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .heading {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+  
+  /* Layout for unassigned guests and tables */
+  .layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  /* Unassigned guests style */
+  .unassigned {
+    background: #f0f0f0;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+  
+  .unassigned h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+    color: #333;
+  }
+  
+  .guestList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .guest {
+    padding: 0.5rem 0.75rem;
+    background: #4caf50;
+    color: #fff;
+    border-radius: 4px;
+    cursor: grab;
+    transition: opacity 0.2s ease;
+  }
+  
+  .dragging {
+    opacity: 0.5;
+  }
+  
+  /* Tables container styling */
+  .tablesContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+  }
+  
+  /* Each table drop zone */
+  .table {
+    background: #fff;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 1rem;
+    width: 280px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    transition: background-color 0.2s ease;
+  }
+  
+  .table:hover {
+    background-color: #f9f9f9;
+  }
+  
+  .tableTitle {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  
+  .capacity {
+    font-size: 0.9rem;
+    color: #888;
+  }
+  
+  .tableGuestList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  /* Responsive adjustments */
+  @media (min-width: 768px) {
+    .layout {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+  
+    .unassigned {
+      width: 250px;
+      flex-shrink: 0;
+    }
+  }
+  

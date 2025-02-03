@@ -3,10 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma"; // Adjust the path if needed
 import type { Prisma } from "@prisma/client"; // Only import types if needed
 
-// GET all invitees
+// GET all invitees (including their guest records)
 export async function GET() {
   try {
-    const invitees = await prisma.invitee.findMany();
+    // Update the query to include guestsList
+    const invitees = await prisma.invitee.findMany({
+      include: { guestsList: true },
+    });
     return NextResponse.json(invitees);
   } catch (error) {
     console.error("GET invitees error:", error);
@@ -34,14 +37,10 @@ export async function POST(req: NextRequest) {
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
-    // If your Prisma schema says maxInvites is an Int, 
-    // ensure it's a number on the server side.
-    // You can either fail or default to zero if not provided.
     let validMaxInvites = 0;
     if (typeof maxInvites === "number") {
       validMaxInvites = maxInvites;
     } else if (maxInvites === undefined) {
-      // If you want a default, do so here:
       validMaxInvites = 0;
     } else {
       return new NextResponse("Invalid 'maxInvites' field", { status: 400 });
@@ -52,7 +51,7 @@ export async function POST(req: NextRequest) {
         name,
         email,
         guests,
-        isAttending, // can be boolean or undefined if your schema is Boolean?
+        isAttending,
         maxInvites: validMaxInvites,
         dietaryRestrictions: dietaryRestrictions ?? null,
         accessibilityInfo: accessibilityInfo ?? null,
@@ -73,12 +72,10 @@ export async function DELETE(req: NextRequest) {
   try {
     const { id } = await req.json();
 
-    // Validate the ID
     if (!id || typeof id !== "number") {
       return new NextResponse("Invalid or missing ID", { status: 400 });
     }
 
-    // Delete the invitee by ID
     await prisma.invitee.delete({ where: { id } });
 
     return new NextResponse("Invitee deleted successfully", { status: 200 });
