@@ -1,8 +1,9 @@
+//app/api/sendEmail/route.tsx
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import nodemailer from "nodemailer";
+import { prisma } from "@/lib/prisma"; // Adjust the path if needed
+import type { Prisma } from "@prisma/client"; // Only import types if needed
 
-const prisma = new PrismaClient();
+import nodemailer from "nodemailer";
 
 // Force dynamic execution (not static caching)
 export const dynamic = "force-dynamic";

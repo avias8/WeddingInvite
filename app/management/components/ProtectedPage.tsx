@@ -7,7 +7,6 @@ import "./ManagementPage.css";
 import Header from "../../components/Header";
 import AdminTiles from "./AdminTiles";
 import RsvpDashboard from "./RSVPDashboard" // ✅ Import the new dashboard
-import SeatingAssignment from "./SeatingAssignment";
 
 
 
@@ -45,11 +44,6 @@ const ProtectedPage: React.FC = () => {
           <div className="management-section">
             <h2 className="text-3xl font-bold mb-6">RSVP Overview</h2>
             <RsvpDashboard />
-          </div>
-          {/* ✅ Add the Seating Assignment */}
-          <div className="management-section">
-            <h2 className="text-3xl font-bold mb-6">Seating Overview</h2>
-            <SeatingAssignment />
           </div>
           <div className="management-section">
             <h2 className="text-3xl font-bold mb-6">Send Invite</h2>

@@ -1,13 +1,18 @@
+// app/api/guests/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma"; // Adjust the path if needed
+import type { Prisma } from "@prisma/client"; // Only import types if needed
 
-const prisma = new PrismaClient();
+
+// (Optional) Log the keys of the prisma client for debugging.
+console.log("Prisma client keys:", Object.keys(prisma));
 
 /**
- * ✅ GET: Fetch all guests
+ * GET: Fetch all guests with their related invitee and table details.
  */
 export async function GET() {
   try {
+    // Make sure to use `prisma.guest` (lowercase)
     const guests = await prisma.guest.findMany({
       include: { invitee: true, table: true },
     });
@@ -19,14 +24,33 @@ export async function GET() {
 }
 
 /**
- * ✅ POST: Add a new guest under an invitee
+ * POST: Create a new guest record.
+ *
+ * Expected JSON body:
+ * {
+ *   "name": "Guest Name",
+ *   "inviteeId": 1,
+ *   "dietaryRestrictions": "None",
+ *   "accessibilityInfo": "N/A",
+ *   "isAttending": true
+ * }
  */
 export async function POST(req: NextRequest) {
   try {
-    const { name, inviteeId, dietaryRestrictions, accessibilityInfo, isAttending } = await req.json();
+    const {
+      name,
+      inviteeId,
+      dietaryRestrictions,
+      accessibilityInfo,
+      isAttending,
+    } = await req.json();
 
+    // Validate required fields.
     if (!name || !inviteeId) {
-      return new NextResponse("Missing required fields", { status: 400 });
+      return new NextResponse(
+        "Missing required fields: name and inviteeId are required.",
+        { status: 400 }
+      );
     }
 
     const newGuest = await prisma.guest.create({

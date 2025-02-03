@@ -10,7 +10,7 @@
     "migrate": "prisma migrate deploy"
   },
   "dependencies": {
-    "@prisma/client": "^6.2.1",
+    "@prisma/client": "^6.3.0",
     "@react-spring/web": "^9.7.5",
     "chart.js": "^4.4.7",
     "js-cookie": "^3.0.5",

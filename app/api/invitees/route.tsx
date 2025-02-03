@@ -1,8 +1,7 @@
-// app/api/route.tsx
+// app/api/invitees/route.tsx
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma"; // Adjust the path if needed
+import type { Prisma } from "@prisma/client"; // Only import types if needed
 
 // GET all invitees
 export async function GET() {
