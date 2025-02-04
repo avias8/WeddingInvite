@@ -45,7 +45,10 @@ function DraggableGuest({ guest, onClick }: GuestProps) {
 
   return (
     <div
-      ref={drag as unknown as React.Ref<HTMLDivElement>}
+      ref={(node) => {
+        // Use callback ref to pass the DOM node to drag
+        drag(node);
+      }}
       className={`${styles.guest} ${isDragging ? styles.dragging : ""}`}
       aria-label={`Draggable guest: ${guest.name}`}
       onClick={(e) => onClick && onClick(e, guest)}
@@ -61,9 +64,10 @@ function DraggableGuest({ guest, onClick }: GuestProps) {
 interface UnassignedGuestsProps {
   guests: Guest[];
   onDropGuest: (guestId: number) => void;
+  onGuestClick: (e: React.MouseEvent, guest: Guest) => void;
 }
 
-function UnassignedGuests({ guests, onDropGuest }: UnassignedGuestsProps) {
+function UnassignedGuests({ guests, onDropGuest, onGuestClick }: UnassignedGuestsProps) {
   const [{ isOver, canDrop }, dropRef] = useDrop(() => ({
     accept: ITEM_TYPE,
     drop: (item: { id: number }) => onDropGuest(item.id),
@@ -78,6 +82,7 @@ function UnassignedGuests({ guests, onDropGuest }: UnassignedGuestsProps) {
   return (
     <div
       ref={(node) => {
+        // Use callback ref to pass the DOM node to dropRef
         dropRef(node);
       }}
       className={`${styles.unassigned} ${isActive ? styles.activeUnassigned : ""}`}
@@ -85,7 +90,7 @@ function UnassignedGuests({ guests, onDropGuest }: UnassignedGuestsProps) {
       <h3>Unassigned Guests</h3>
       <div className={styles.guestList}>
         {guests.map((guest) => (
-          <DraggableGuest key={guest.id} guest={guest} />
+          <DraggableGuest key={guest.id} guest={guest} onClick={onGuestClick} />
         ))}
       </div>
     </div>
@@ -95,22 +100,13 @@ function UnassignedGuests({ guests, onDropGuest }: UnassignedGuestsProps) {
 // ---------------------------
 // TableDropZone and TableCircle Components
 // ---------------------------
-
-/**
- * The TableCircle component handles the drop logic and displays the table details
- * along with the list of guests currently assigned.
- */
 interface TableProps {
   table: Table;
   onDropGuest: (guestId: number, tableId: number) => void;
+  onGuestClick: (e: React.MouseEvent, guest: Guest) => void;
 }
 
-/**
- * The TableCircle component now uses the `.table` CSS class to apply the
- * rectangular style and hover effects. We also collect the drop state to conditionally
- * add the active hover style.
- */
-function TableCircle({ table, onDropGuest }: TableProps) {
+function TableCircle({ table, onDropGuest, onGuestClick }: TableProps) {
   const [{ isOver, canDrop }, dropRef] = useDrop(() => ({
     accept: ITEM_TYPE,
     drop: (item: { id: number; currentTableId: number | null }) => {
@@ -124,10 +120,7 @@ function TableCircle({ table, onDropGuest }: TableProps) {
     }),
   }));
 
-  // Compute capacity text for the table header.
   const capacityText = `${table.guests.length}/${table.capacity}`;
-
-  // When the table is hovered (and can accept drops), apply the activeTable class.
   const activeClass = isOver && canDrop ? styles.activeTable : "";
 
   return (
@@ -138,61 +131,74 @@ function TableCircle({ table, onDropGuest }: TableProps) {
       className={`${styles.table} ${activeClass}`}
     >
       <h3 className={styles.tableTitle}>
-        {table.name}{" "}
-        <span className={styles.capacity}>({capacityText})</span>
+        {table.name} <span className={styles.capacity}>({capacityText})</span>
       </h3>
       <div className={styles.tableGuestList}>
         {table.guests.map((guest) => (
-          <DraggableGuest key={guest.id} guest={guest} />
+          <DraggableGuest key={guest.id} guest={guest} onClick={onGuestClick} />
         ))}
       </div>
     </div>
   );
 }
 
-/**
- * The TableDropZone component is a simple wrapper for the TableCircle.
- * It applies layout styling (e.g., grid) and passes the props through.
- */
-function TableDropZone({ table, onDropGuest }: TableProps) {
+function TableDropZone({ table, onDropGuest, onGuestClick }: TableProps) {
   return (
     <div className={styles.tableContainer}>
-      <TableCircle table={table} onDropGuest={onDropGuest} />
+      <TableCircle table={table} onDropGuest={onDropGuest} onGuestClick={onGuestClick} />
     </div>
   );
 }
 
-// New GuestOverlay component rendered inside SeatingAssignment.
-function GuestOverlay({
-  guest,
-  position,
-  onClose,
-  onAssign,
-  onMove,
-}: {
+// ---------------------------
+// GuestModal Component with Dropdown
+// ---------------------------
+interface GuestModalProps {
   guest: Guest;
-  position: { top: number; left: number };
+  tables: Table[];
+  onConfirm: (tableId: number) => void;
   onClose: () => void;
-  onAssign: () => void;
-  onMove: () => void;
-}) {
+}
+
+function GuestModal({ guest, tables, onConfirm, onClose }: GuestModalProps) {
+  // For unassigned guests, show all tables.
+  // For assigned guests (moving), filter out the current table.
+  const availableTables =
+    guest.tableId === null ? tables : tables.filter((table) => table.id !== guest.tableId);
+
+  const [selectedTableId, setSelectedTableId] = useState<number>(
+    availableTables.length > 0 ? availableTables[0].id : 0
+  );
+
   return (
-    <div
-      style={{
-        position: "absolute",
-        top: position.top - 40, // 40px above guest element
-        left: position.left,
-        background: "#fff",
-        border: "1px solid #ccc",
-        padding: "0.5rem",
-        borderRadius: "4px",
-        zIndex: 1000,
-      }}
-    >
-      <p>{guest.name}</p>
-      <button onClick={onAssign}>Assign</button>
-      {guest.tableId !== null && <button onClick={onMove}>Move</button>}
-      <button onClick={onClose}>Cancel</button>
+    <div className={styles.modalBackground} onClick={onClose}>
+      <div
+        className={styles.modalContent}
+        onClick={(e) => e.stopPropagation()} // Prevent modal from closing when clicking inside
+      >
+        <h2>{guest.name}</h2>
+        <p>
+          {guest.tableId === null
+            ? "Assign guest to table:"
+            : "Move guest to table:"}
+        </p>
+        <select
+          value={selectedTableId}
+          onChange={(e) => setSelectedTableId(parseInt(e.target.value, 10))}
+        >
+          {availableTables.map((table) => (
+            <option key={table.id} value={table.id}>
+              {table.name}
+            </option>
+          ))}
+        </select>
+        <div className={styles.modalButtons}>
+          <button onClick={() => onConfirm(selectedTableId)}>
+            {guest.tableId === null ? "Assign" : "Move"}
+          </button>
+          <button onClick={onClose}>Cancel</button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -206,9 +212,9 @@ export default function SeatingAssignment() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [assignError, setAssignError] = useState<string>("");
-  // New overlay-related state
+
+  // Modal-related state
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
-  const [overlayPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
   useEffect(() => {
     async function fetchData() {
@@ -267,7 +273,8 @@ export default function SeatingAssignment() {
       setAssignError("");
     } catch (error) {
       console.error("Error assigning guest:", error);
-      const errMsg = error instanceof Error ? error.message : "Error assigning guest";
+      const errMsg =
+        error instanceof Error ? error.message : "Error assigning guest";
       setAssignError(errMsg);
       setTimeout(() => setAssignError(""), 3000);
     }
@@ -296,26 +303,26 @@ export default function SeatingAssignment() {
     }
   };
 
-  const handleAssign = () => {
+  // New handler for confirming assignment or move via the dropdown modal.
+  const handleConfirm = (tableId: number) => {
     if (selectedGuest) {
-      const input = prompt("Enter table id to assign this guest:");
-      const tableId = input ? parseInt(input) : NaN;
-      if (!isNaN(tableId)) {
-        assignGuest(selectedGuest.id, tableId);
+      // If the guest is already assigned and the selected table is the same, alert the user.
+      if (selectedGuest.tableId !== null && selectedGuest.tableId === tableId) {
+        alert("Guest is already assigned to this table.");
+        return;
       }
+      assignGuest(selectedGuest.id, tableId);
       setSelectedGuest(null);
     }
   };
 
-  const handleMove = () => {
-    if (selectedGuest && selectedGuest.tableId !== null) {
-      unassignGuest(selectedGuest.id);
-      setSelectedGuest(null);
-    }
-  };
-
-  const closeOverlay = () => {
+  const closeModal = () => {
     setSelectedGuest(null);
+  };
+
+  // Opens modal when a guest is clicked.
+  const handleGuestClick = (e: React.MouseEvent, guest: Guest) => {
+    setSelectedGuest(guest);
   };
 
   if (loading) return <p className="text-center">Loading seating data...</p>;
@@ -323,36 +330,47 @@ export default function SeatingAssignment() {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className={styles.seatingAssignment} style={{ position: "relative" }}>
+      <div className={styles.seatingAssignment}>
         <h1 className={styles.heading}>Seating Assignment</h1>
 
         {assignError && (
           <div className={styles.errorAnimation}>
-            <span role="img" aria-label="error">😢</span> {assignError}
+            <span role="img" aria-label="error">
+              😢
+            </span>{" "}
+            {assignError}
           </div>
         )}
 
         <div className={styles.layout}>
           {/* Sidebar for unassigned guests */}
           <div className={styles.sidebar}>
-            <UnassignedGuests guests={guests} onDropGuest={unassignGuest} />
+            <UnassignedGuests
+              guests={guests}
+              onDropGuest={unassignGuest}
+              onGuestClick={handleGuestClick}
+            />
           </div>
 
           {/* Tables container */}
           <div className={styles.tablesContainer}>
             {tables.map((table) => (
-              <TableDropZone key={table.id} table={table} onDropGuest={assignGuest} />
+              <TableDropZone
+                key={table.id}
+                table={table}
+                onDropGuest={assignGuest}
+                onGuestClick={handleGuestClick}
+              />
             ))}
           </div>
         </div>
 
         {selectedGuest && (
-          <GuestOverlay
+          <GuestModal
             guest={selectedGuest}
-            position={overlayPos}
-            onAssign={handleAssign}
-            onMove={handleMove}
-            onClose={closeOverlay}
+            tables={tables}
+            onConfirm={handleConfirm}
+            onClose={closeModal}
           />
         )}
       </div>
