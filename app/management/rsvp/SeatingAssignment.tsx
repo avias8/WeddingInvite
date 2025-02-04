@@ -53,55 +53,6 @@ function DraggableGuest({ guest }: GuestProps) {
       {guest.name}
     </div>
   );
-  
-}
-
-// ---------------------------
-// Table as a Drop Zone Component
-// ---------------------------
-interface TableProps {
-  table: Table;
-  onDropGuest: (guestId: number, tableId: number) => void;
-}
-
-function TableDropZone({ table, onDropGuest }: TableProps) {
-  const [{ isOver, canDrop }, dropRef] = useDrop(() => ({
-    accept: ITEM_TYPE,
-    drop: (item: { id: number; currentTableId: number | null }) => {
-      if (item.currentTableId !== table.id) {
-        onDropGuest(item.id, table.id);
-      }
-    },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-      canDrop: monitor.canDrop(),
-    }),
-  }));
-
-  // Calculate if the drop zone is active (hovered and can accept)
-  const isActive = isOver && canDrop;
-  
-  // Capacity text
-  const capacityText = `${table.guests.length}/${table.capacity}`;
-
-  return (
-    <div
-      ref={(node) => {
-        dropRef(node);
-      }}
-      className={`${styles.table} ${isActive ? styles.activeTable : ""}`}
-    >
-      <h3 className={styles.tableTitle}>
-        {table.name} <span className={styles.capacity}>({capacityText})</span>
-      </h3>
-      <div className={styles.tableGuestList}>
-        {table.guests.map((guest) => (
-          <DraggableGuest key={guest.id} guest={guest} />
-        ))}
-      </div>
-    </div>
-  );
-  
 }
 
 // ---------------------------
@@ -138,7 +89,77 @@ function UnassignedGuests({ guests, onDropGuest }: UnassignedGuestsProps) {
         ))}
       </div>
     </div>
-  );  
+  );
+}
+
+// ---------------------------
+// TableDropZone and TableCircle Components
+// ---------------------------
+
+/**
+ * The TableCircle component handles the drop logic and displays the table details
+ * along with the list of guests currently assigned.
+ */
+interface TableProps {
+  table: Table;
+  onDropGuest: (guestId: number, tableId: number) => void;
+}
+
+/**
+ * The TableCircle component now uses the `.table` CSS class to apply the
+ * rectangular style and hover effects. We also collect the drop state to conditionally
+ * add the active hover style.
+ */
+function TableCircle({ table, onDropGuest }: TableProps) {
+  const [{ isOver, canDrop }, dropRef] = useDrop(() => ({
+    accept: ITEM_TYPE,
+    drop: (item: { id: number; currentTableId: number | null }) => {
+      if (item.currentTableId !== table.id) {
+        onDropGuest(item.id, table.id);
+      }
+    },
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+      canDrop: monitor.canDrop(),
+    }),
+  }));
+
+  // Compute capacity text for the table header.
+  const capacityText = `${table.guests.length}/${table.capacity}`;
+
+  // When the table is hovered (and can accept drops), apply the activeTable class.
+  const activeClass = isOver && canDrop ? styles.activeTable : "";
+
+  return (
+    <div
+      ref={(node) => {
+        dropRef(node);
+      }}
+      className={`${styles.table} ${activeClass}`}
+    >
+      <h3 className={styles.tableTitle}>
+        {table.name}{" "}
+        <span className={styles.capacity}>({capacityText})</span>
+      </h3>
+      <div className={styles.tableGuestList}>
+        {table.guests.map((guest) => (
+          <DraggableGuest key={guest.id} guest={guest} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The TableDropZone component is a simple wrapper for the TableCircle.
+ * It applies layout styling (e.g., grid) and passes the props through.
+ */
+function TableDropZone({ table, onDropGuest }: TableProps) {
+  return (
+    <div className={styles.tableContainer}>
+      <TableCircle table={table} onDropGuest={onDropGuest} />
+    </div>
+  );
 }
 
 // ---------------------------
@@ -208,8 +229,7 @@ export default function SeatingAssignment() {
       setAssignError("");
     } catch (error) {
       console.error("Error assigning guest:", error);
-      const errMsg =
-        error instanceof Error ? error.message : "Error assigning guest";
+      const errMsg = error instanceof Error ? error.message : "Error assigning guest";
       setAssignError(errMsg);
       setTimeout(() => setAssignError(""), 3000);
     }
@@ -248,22 +268,20 @@ export default function SeatingAssignment() {
 
         {assignError && (
           <div className={styles.errorAnimation}>
-            <span role="img" aria-label="error">
-              😢
-            </span>{" "}
-            {assignError}
+            <span role="img" aria-label="error">😢</span> {assignError}
           </div>
         )}
 
         <div className={styles.layout}>
-          <UnassignedGuests guests={guests} onDropGuest={unassignGuest} />
+          {/* Sidebar for unassigned guests */}
+          <div className={styles.sidebar}>
+            <UnassignedGuests guests={guests} onDropGuest={unassignGuest} />
+          </div>
+
+          {/* Tables container */}
           <div className={styles.tablesContainer}>
             {tables.map((table) => (
-              <TableDropZone
-                key={table.id}
-                table={table}
-                onDropGuest={assignGuest}
-              />
+              <TableDropZone key={table.id} table={table} onDropGuest={assignGuest} />
             ))}
           </div>
         </div>

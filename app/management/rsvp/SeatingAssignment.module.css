@@ -1,147 +1,171 @@
+/* ---------------------------
+   Base Container & Layout
+--------------------------- */
 .seatingAssignment {
-  padding: 1rem;
-  max-width: 1200px;
+  padding: 0.125rem;
+  max-width: 800px;
   margin: 0 auto;
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .heading {
   text-align: center;
-  font-size: 2rem;
-  margin-bottom: 1rem;
+  font-size: 0.75rem;
+  margin-bottom: 0.125rem;
   color: #333;
 }
 
-/* Layout */
 .layout {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.125rem;
 }
 
-/* Unassigned guests */
+/* ---------------------------
+   Unassigned Guests (Sticky)
+--------------------------- */
 .unassigned {
   background: #f0f0f0;
-  padding: 1rem;
-  border-radius: 8px;
+  padding: 0.125rem;
+  border-radius: 4px;
   transition: background 0.3s ease;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .unassigned:hover {
   background: #e9e9e9;
 }
-
 .activeUnassigned {
   background: #d1ecf1;
 }
-
 .unassigned h3 {
-  margin-bottom: 0.5rem;
-  font-size: 1.2rem;
+  margin-bottom: 0.1rem;
+  font-size: 0.6rem;
   color: #333;
 }
-
 .guestList {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.1rem;
 }
 
+/* ---------------------------
+   Guest Element Styling
+--------------------------- */
 .guest {
-  padding: 0.5rem 0.75rem;
+  padding: 0.1rem 0.2rem;
   background: #4caf50;
   color: #fff;
-  border-radius: 4px;
+  border-radius: 3px;
   cursor: grab;
+  font-size: 0.5rem;
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
-
 .guest:active {
   transform: scale(0.98);
 }
-
 .dragging {
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
-/* Tables container */
+/* ---------------------------
+   Tables & Table Drop Zones
+--------------------------- */
 .tablesContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Force three columns */
+  gap: 0.5rem; /* Adjust gap as needed */
+  justify-items: center;
+}
+
+.tableContainer {
+  width: 100%; /* Allow it to fill the grid cell */
   display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
   justify-content: center;
 }
 
-/* Table drop zone */
 .table {
   background: #fff;
-  border: 2px dashed #ccc;
-  border-radius: 8px;
-  padding: 1rem;
-  width: 280px;
-  min-height: 200px;
+  border: 1px dashed #bbb;
+  border-radius: 4px;
+  padding: 0.125rem;
+  /* Remove or adjust the fixed width if necessary */
+  /* width: 120px; */
+  min-height: 80px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .table:hover {
   background-color: #f9f9f9;
 }
-
 .activeTable {
   background-color: #d1ecf1;
-  box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+  box-shadow: 0 0 3px rgba(0, 123, 255, 0.3);
 }
-
 .tableTitle {
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
+  font-size: 0.6rem;
+  margin-bottom: 0.1rem;
   text-align: center;
 }
-
 .capacity {
-  font-size: 0.9rem;
+  font-size: 0.5rem;
   color: #888;
 }
-
 .tableGuestList {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.1rem;
 }
 
-/* Error message styling */
+/* ---------------------------
+   Error Message Styling
+--------------------------- */
 .errorAnimation {
   background-color: #ffebee;
   color: #c62828;
-  padding: 0.75rem 1rem;
-  margin: 0.5rem auto;
-  border-radius: 8px;
+  padding: 0.125rem 0.25rem;
+  margin: 0.1rem auto;
+  border-radius: 4px;
   text-align: center;
+  font-size: 0.5rem;
   width: fit-content;
-  animation: bounce 0.5s ease;
+  animation: bounce 0.4s ease;
 }
-
 @keyframes bounce {
-  0% { transform: translateY(0); }
-  30% { transform: translateY(-10px); }
-  50% { transform: translateY(0); }
-  70% { transform: translateY(-5px); }
-  100% { transform: translateY(0); }
+  0% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-3px);
+  }
+  50% {
+    transform: translateY(0);
+  }
+  70% {
+    transform: translateY(-1.5px);
+  }
+  100% {
+    transform: translateY(0);
+  }
 }
 
-/* Responsive adjustments */
+/* ---------------------------
+   Responsive Adjustments
+--------------------------- */
 @media (min-width: 768px) {
   .layout {
     flex-direction: row;
     align-items: flex-start;
   }
   .unassigned {
-    width: 250px;
+    width: 120px;
     flex-shrink: 0;
   }
 }
