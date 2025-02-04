@@ -56,7 +56,7 @@ export default function BannerSection() {
         "Shakthi and Avi will have been legally married for 7 months before this ceremony!",
         "Shakthi has seen all 100+ of SuperStar Rajinikanth's movies (Now she's making Avi watch them with her!).",
         "Avi and Shakthi's first date was at a themed Rainforest Dosa restaurant (Complete with a fake waterfall and jungle noises).",
-        "Shakthi's favourite movie is 'Tangled' and Avi's is 'Pacific Rim'!",
+        "Shakthi's favourite movie is 'Shrek' and Avi's is 'Pacific Rim'!",
     ];
 
     const ourStory = `
