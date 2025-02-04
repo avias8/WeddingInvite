@@ -28,8 +28,7 @@
     flex-grow: 1; /* Allow sections to expand evenly */
   }
   
-  /* Ensure the body and HTML span the full height */
-  body {
-    height: 108vh;
-    padding-bottom: 10;
+  html, body {
+    background-color: var(--color-background) !important;
+    height: auto !important;
   }

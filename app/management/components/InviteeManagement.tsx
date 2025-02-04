@@ -8,8 +8,8 @@ import Link from "next/link";
 
 export default function InviteeManagement() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="management-container flex-grow">
+    <div className="flex flex-col">
+      <div className="management-container">
         <h1 className="text-5xl font-bold mb-6">Manage Invitees</h1>
         <div className="management-section">
           <h2 className="text-3xl font-bold mb-6">Send Invite</h2>
