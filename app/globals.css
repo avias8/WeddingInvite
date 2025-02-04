@@ -28,7 +28,7 @@ html, body {
   height: auto;
   background-color: var(--color-background);
   color: var(--color-text-primary);
-  font-family: var(--font-body);
+  font-family: var(--font-body), Georgia, serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -37,10 +37,22 @@ html, body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-wedding);
   color: var(--color-text-primary);
+  text-shadow: 1px 1px 2px var(--color-shadow);
 }
 
 p {
   font-family: var(--font-body);
+}
+
+a {
+  color: var(--color-secondary-accent);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+a:hover {
+  color: var(--color-accent);
+  text-decoration: underline;
 }
 
 /* Ensure main content fills the viewport */
@@ -117,4 +129,10 @@ button.active {
   display: flex;
   justify-content: center;
   gap: 1.5rem;
+}
+
+/* New Global Management Navigation Styles */
+.management-nav {
+  background: linear-gradient(to right, var(--color-secondary-accent), var(--color-accent));
+  padding: 1rem;
 }

@@ -31,10 +31,11 @@ const ITEM_TYPE = "GUEST";
 // ---------------------------
 interface GuestProps {
   guest: Guest;
+  onClick?: (e: React.MouseEvent, guest: Guest) => void;
 }
 
-function DraggableGuest({ guest }: GuestProps) {
-  const [{ isDragging }, dragRef] = useDrag(() => ({
+function DraggableGuest({ guest, onClick }: GuestProps) {
+  const [{ isDragging }, drag] = useDrag(() => ({
     type: ITEM_TYPE,
     item: { id: guest.id, currentTableId: guest.tableId },
     collect: (monitor) => ({
@@ -44,11 +45,10 @@ function DraggableGuest({ guest }: GuestProps) {
 
   return (
     <div
-      ref={(node) => {
-        dragRef(node);
-      }}
+      ref={drag as unknown as React.Ref<HTMLDivElement>}
       className={`${styles.guest} ${isDragging ? styles.dragging : ""}`}
       aria-label={`Draggable guest: ${guest.name}`}
+      onClick={(e) => onClick && onClick(e, guest)}
     >
       {guest.name}
     </div>
@@ -162,6 +162,41 @@ function TableDropZone({ table, onDropGuest }: TableProps) {
   );
 }
 
+// New GuestOverlay component rendered inside SeatingAssignment.
+function GuestOverlay({
+  guest,
+  position,
+  onClose,
+  onAssign,
+  onMove,
+}: {
+  guest: Guest;
+  position: { top: number; left: number };
+  onClose: () => void;
+  onAssign: () => void;
+  onMove: () => void;
+}) {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: position.top - 40, // 40px above guest element
+        left: position.left,
+        background: "#fff",
+        border: "1px solid #ccc",
+        padding: "0.5rem",
+        borderRadius: "4px",
+        zIndex: 1000,
+      }}
+    >
+      <p>{guest.name}</p>
+      <button onClick={onAssign}>Assign</button>
+      {guest.tableId !== null && <button onClick={onMove}>Move</button>}
+      <button onClick={onClose}>Cancel</button>
+    </div>
+  );
+}
+
 // ---------------------------
 // Main SeatingAssignment Component
 // ---------------------------
@@ -171,6 +206,9 @@ export default function SeatingAssignment() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [assignError, setAssignError] = useState<string>("");
+  // New overlay-related state
+  const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
+  const [overlayPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
   useEffect(() => {
     async function fetchData() {
@@ -258,12 +296,34 @@ export default function SeatingAssignment() {
     }
   };
 
+  const handleAssign = () => {
+    if (selectedGuest) {
+      const input = prompt("Enter table id to assign this guest:");
+      const tableId = input ? parseInt(input) : NaN;
+      if (!isNaN(tableId)) {
+        assignGuest(selectedGuest.id, tableId);
+      }
+      setSelectedGuest(null);
+    }
+  };
+
+  const handleMove = () => {
+    if (selectedGuest && selectedGuest.tableId !== null) {
+      unassignGuest(selectedGuest.id);
+      setSelectedGuest(null);
+    }
+  };
+
+  const closeOverlay = () => {
+    setSelectedGuest(null);
+  };
+
   if (loading) return <p className="text-center">Loading seating data...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className={styles.seatingAssignment}>
+      <div className={styles.seatingAssignment} style={{ position: "relative" }}>
         <h1 className={styles.heading}>Seating Assignment</h1>
 
         {assignError && (
@@ -285,6 +345,16 @@ export default function SeatingAssignment() {
             ))}
           </div>
         </div>
+
+        {selectedGuest && (
+          <GuestOverlay
+            guest={selectedGuest}
+            position={overlayPos}
+            onAssign={handleAssign}
+            onMove={handleMove}
+            onClose={closeOverlay}
+          />
+        )}
       </div>
     </DndProvider>
   );

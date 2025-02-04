@@ -72,13 +72,21 @@ export default function ManagementLayout({
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <nav className="bg-gray-200 p-4 flex gap-4">
-        <Link href="/management" className="text-blue-500 underline">
-          Invitee List
-        </Link>
-        <Link href="/management/rsvp" className="text-blue-500 underline">
-          RSVP Dashboard
-        </Link>
+      <nav className="management-nav">
+        <div className="container mx-auto flex gap-6 justify-center">
+          <Link
+            href="/management"
+            className="text-white font-medium hover:underline"
+          >
+            Invitee List
+          </Link>
+          <Link
+            href="/management/rsvp"
+            className="text-white font-medium hover:underline"
+          >
+            RSVP Dashboard
+          </Link>
+        </div>
       </nav>
       <main className="management-container flex-grow p-4">{children}</main>
     </div>
