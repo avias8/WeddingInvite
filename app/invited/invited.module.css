@@ -43,6 +43,10 @@
 .section {
   text-align: center;
   margin-bottom: 3rem;
+  width: 100%; /* Ensure sections take full width */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center content within the full-width section */
 }
 
 .sectionTitle {
@@ -50,12 +54,17 @@
   font-size: 1.5rem;
   color: var(--color-accent);
   margin-bottom: 1rem;
+  width: 100%; /* Ensure title can span full width if needed */
+  text-align: center; /* Keep title centered */
 }
 
 .sectionText {
   font-size: 1rem;
   color: var(--color-text-primary);
   margin-bottom: 1rem;
+  width: 80%; /* Adjust text width for better readability */
+  max-width: 600px; /* Limit maximum text width */
+  text-align: center; /* Keep text centered */
 }
 
 .sectionButton {
@@ -205,6 +214,21 @@
   margin-bottom: 1rem; /* Space below the container */
 }
 
+/* Divider Style - Matches the one after "To: Guest" */
+.sectionDivider {
+  width: 100%; /* Make it span the section */
+  border-top: 1.5px solid var(--color-border);
+}
+
+/* Registry Section - Ensure it spans full width */
+.registrySection {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .eventDetails {
@@ -252,7 +276,7 @@
     align-items: center;
     box-sizing: border-box; /* Prevent padding from overflowing */
   }
-  
+
   .heroOverlay h1 span {
     font-size: clamp(3rem, 12vw, 8rem); /* Responsive font size for portrait UI */
     font-family: var(--font-wedding);
@@ -265,5 +289,4 @@
     text-align: center;
     display: block;
   }
-  
 }

@@ -6,7 +6,7 @@ import InvitedGuest from "../components/InviteForm";
 import Cookies from "js-cookie";
 import styles from "./invited.module.css";
 import Header from "../components/Header";
-import HeroSection from "../components/HeroSection"; 
+import HeroSection from "../components/HeroSection";
 
 Modal.setAppElement("#__next"); // For react-modal accessibility
 
@@ -15,6 +15,8 @@ export default function BigInvitePage() {
   const [inviteeName, setInviteeName] = useState<string | null>(null);
   const [isAttending, setIsAttending] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const registryUrl = "https://www.myregistry.com/wedding-registry/avi-varma-and-shakthi-ganesh-calgary-ab/4727770";
 
   // Fetch invitee data
   const fetchInvitee = useCallback(async (token: string) => {
@@ -90,6 +92,20 @@ export default function BigInvitePage() {
           <button className={styles.sectionButton} onClick={openModal}>
             Respond to Host
           </button>
+          <div className={styles.sectionDivider}></div> {/* Using a div with the existing style */}
+        </section>
+
+        {/* Registry Button Section */}
+        <section className={`${styles.section} ${styles.registrySection}`}>
+          <h3 className={styles.sectionTitle}>Our Registry</h3>
+          <p className={styles.sectionText}>
+            Your presence is the greatest gift, but if you wish to celebrate with a gift, we have created a registry.
+          </p>
+          <a href={registryUrl} target="_blank" rel="noopener noreferrer">
+            <button className={styles.sectionButton}>
+              View Our Registry
+            </button>
+          </a>
         </section>
 
         {/* Event Details Section */}
