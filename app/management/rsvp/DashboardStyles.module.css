@@ -1,0 +1,165 @@
+/* DashboardStyles.module.css */
+/* Unified styles for RSVP and Guest Dashboards */
+
+.container {
+    max-width: 1200px;
+    margin: 2rem auto 0 auto; /* Added top margin for separation */
+    padding: 1.5rem;
+    background-color: #f9f9f9; /* Consistent light background */
+    border-radius: 12px; /* Slightly larger radius */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Softer shadow */
+  }
+  
+  .title {
+    text-align: center;
+    font-size: clamp(1.8rem, 5vw, 2.2rem); /* Responsive font size */
+    font-weight: bold;
+    margin-bottom: 2rem; /* Increased spacing */
+    color: var(--color-text-primary); /* Use theme variable */
+    font-family: var(--font-wedding); /* Use theme variable */
+  }
+  
+  /* Style for the grid holding the cards */
+  .cardGrid {
+     display: grid;
+     grid-template-columns: 1fr; /* Default: single column */
+     gap: 1.5rem; /* Consistent gap */
+     margin-bottom: 2rem; /* Spacing below cards */
+  }
+  
+  /* Responsive grid columns */
+  @media (min-width: 640px) { /* Small screens and up */
+    .cardGrid {
+      grid-template-columns: repeat(2, 1fr); /* 2 columns */
+    }
+  }
+  
+  @media (min-width: 1024px) { /* Large screens and up */
+    .cardGrid {
+      /* Adjust based on the number of cards per dashboard (3 or 5) */
+      /* For 3 cards: */
+       grid-template-columns: repeat(3, 1fr);
+      /* For 5 cards (if used): grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); or keep 3 and let it wrap */
+    }
+  }
+  
+  
+  .card {
+    background: white;
+    padding: 1.25rem; /* Slightly more padding */
+    border-radius: 10px; /* Consistent radius */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    border-left: 5px solid transparent; /* Base for hover/accent */
+  }
+  
+  .card h2 {
+    font-size: 1.1rem; /* Slightly smaller heading */
+    font-weight: 600;
+    margin-bottom: 0.75rem; /* Adjusted spacing */
+    color: #555;
+    font-family: var(--font-body); /* Consistent font */
+  }
+  
+  .card p {
+    font-size: 1.8rem; /* Larger number */
+    font-weight: bold;
+    /* Colors are set inline or via specific classes if needed */
+    color: var(--color-text-primary); /* Default color */
+    margin: 0;
+  }
+  
+  /* Specific colors for paragraph text in cards */
+  /* Apply these classes in the component JSX if needed */
+  .inviteeCountColor p {
+      color: var(--color-secondary-accent); /* e.g., Forest Green */
+  }
+  .guestCountColor p {
+      color: #007BFF; /* e.g., Blue */
+  }
+  .pendingCountColor p {
+      color: #E6A100; /* e.g., Amber/Gold */
+  }
+  
+  
+  /* Hover effects */
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    border-left-color: var(--color-accent); /* Use theme accent on hover */
+  }
+  
+  .chart-container {
+    width: 100%;
+    height: 450px;
+    position: relative;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px; /* Consistent radius */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+    animation: fadeIn 0.6s ease-in-out; /* Slightly slower fade */
+  }
+  
+  .chart-title {
+    font-size: 1.3rem; /* Slightly larger chart title */
+    font-weight: 600;
+    margin-bottom: 1.5rem; /* More space */
+    color: #444;
+    text-align: center;
+    font-family: var(--font-wedding);
+  }
+  
+  /* Responsive Design Adjustments */
+  @media (max-width: 768px) {
+    .container {
+      padding: 1rem;
+      margin-top: 1.5rem;
+    }
+    .title {
+        font-size: clamp(1.6rem, 4.5vw, 2rem);
+        margin-bottom: 1.5rem;
+    }
+    .card {
+        padding: 1rem;
+    }
+    .card p {
+      font-size: 1.5rem; /* Adjust number size */
+    }
+    .chart-container {
+      height: 400px; /* Consistent mobile chart height */
+      padding: 1rem;
+    }
+     .chart-title {
+       font-size: 1.1rem;
+       margin-bottom: 1rem;
+     }
+  }
+  
+  @media (max-width: 480px) {
+      /* Further adjustments for very small screens if needed */
+      .card h2 {
+          font-size: 1rem;
+      }
+      .card p {
+          font-size: 1.4rem;
+      }
+      .chart-container {
+          height: 350px;
+      }
+  }
+  
+  
+  /* Animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-15px); /* Slightly more pronounced effect */
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
