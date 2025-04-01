@@ -123,7 +123,7 @@ export default function BigInvitePage() {
 
         {/* Footer */}
         <footer className={styles.footer}>
-          <p className={styles.footerText}>RSVP by March 31, 2025</p>
+          <p className={styles.footerText}>RSVP by April 15, 2025</p>
         </footer>
 
         {/* Modal (RSVP Form) */}
