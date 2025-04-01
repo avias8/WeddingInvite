@@ -16,7 +16,7 @@ export default function BigInvitePage() {
   const [isAttending, setIsAttending] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const registryUrl = "https://www.myregistry.com/wedding-registry/avi-varma-and-shakthi-ganesh-calgary-ab/4727770";
+  // const registryUrl = "https://www.myregistry.com/wedding-registry/avi-varma-and-shakthi-ganesh-calgary-ab/4727770";
 
   // Fetch invitee data
   const fetchInvitee = useCallback(async (token: string) => {
@@ -96,7 +96,7 @@ export default function BigInvitePage() {
         </section>
 
         {/* Registry Button Section */}
-        <section className={`${styles.section} ${styles.registrySection}`}>
+        {/* <section className={`${styles.section} ${styles.registrySection}`}>
           <h3 className={styles.sectionTitle}>Our Registry</h3>
           <p className={styles.sectionText}>
             Your presence is the greatest gift, but if you wish to celebrate with a gift, we have created a registry.
@@ -106,7 +106,7 @@ export default function BigInvitePage() {
               View Our Registry
             </button>
           </a>
-        </section>
+        </section> */}
 
         {/* Event Details Section */}
         <section className={styles.eventDetails}>
