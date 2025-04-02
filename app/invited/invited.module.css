@@ -214,21 +214,6 @@
   margin-bottom: 1rem; /* Space below the container */
 }
 
-/* Divider Style - Matches the one after "To: Guest" */
-.sectionDivider {
-  width: 100%; /* Make it span the section */
-  border-top: 1.5px solid var(--color-border);
-}
-
-/* Registry Section - Ensure it spans full width */
-.registrySection {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .eventDetails {
