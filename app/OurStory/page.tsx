@@ -51,7 +51,7 @@ export default function OurStory() {
         },
         {
             title: "Groomsmen",
-            names: ["Sunith Arlic", "Sim Khinda", "Saffy Swaleh"],
+            names: ["Sunith Arlic", "Sim Khinda", "Saffy Swaleh","Conner Cairns"],
         },
     ];
 
