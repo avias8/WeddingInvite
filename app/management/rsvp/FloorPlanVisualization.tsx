@@ -36,37 +36,38 @@ interface TableLayout {
     capacity: number;
     name: string;       // Database Table Name
     displayName: string;// Label for SVG
+    owner: "Shared" | "Avi" | "Shakthi"; // Table owner
 }
 
 // Layout Coordinates & Data Mapping (Final version based on user DB IDs)
 const TABLE_LAYOUTS: TableLayout[] = [
-    { id: 1, name: "Head Table", displayName: "Head", x: 300, y: 50, width: 400, height: 40, capacity: 16 },
-    { id: 2, name: "Table 1", displayName: "1", x: 820, y: 100, width: 50, height: 150, capacity: 8 },
-    { id: 3, name: "Table 2", displayName: "2", x: 820, y: 250, width: 50, height: 150, capacity: 8 },
-    { id: 4, name: "Table 3", displayName: "3", x: 820, y: 450, width: 50, height: 150, capacity: 8 },
-    { id: 5, name: "Table 4", displayName: "4", x: 820, y: 600, width: 50, height: 150, capacity: 8 },
-    { id: 6, name: "Table 5", displayName: "5", x: 820, y: 750, width: 50, height: 150, capacity: 8 },
-    { id: 7, name: "Table 6", displayName: "6", x: 820, y: 950, width: 50, height: 150, capacity: 8 },
-    { id: 8, name: "Table 7", displayName: "7", x: 820, y: 1100, width: 50, height: 150, capacity: 8 },
-    { id: 14, name: "Table 13", displayName: "13", x: 680, y: 150, width: 50, height: 150, capacity: 9 },
-    { id: 13, name: "Table 12", displayName: "12", x: 680, y: 300, width: 50, height: 150, capacity: 8 },
-    { id: 12, name: "Table 11", displayName: "11", x: 680, y: 450, width: 50, height: 150, capacity: 8 },
-    { id: 11, name: "Table 10", displayName: "10", x: 680, y: 650, width: 50, height: 150, capacity: 8 },
-    { id: 10, name: "Table 9", displayName: "9", x: 680, y: 800, width: 50, height: 150, capacity: 8 },
-    { id: 9, name: "Table 8", displayName: "8", x: 680, y: 1000, width: 50, height: 150, capacity: 8 },
-    { id: 15, name: "Table 14", displayName: "14", x: 510, y: 400, width: 50, height: 150, capacity: 8 },
-    { id: 16, name: "Table 15", displayName: "15", x: 510, y: 550, width: 50, height: 150, capacity: 8 },
-    { id: 17, name: "Table 16", displayName: "16", x: 510, y: 700, width: 50, height: 150, capacity: 8 },
-    { id: 18, name: "Table 17", displayName: "17", x: 510, y: 850, width: 50, height: 150, capacity: 8 },
-    { id: 22, name: "Table 21", displayName: "21", x: 400, y: 400, width: 50, height: 150, capacity: 8 },
-    { id: 21, name: "Table 20", displayName: "20", x: 400, y: 550, width: 50, height: 150, capacity: 8 },
-    { id: 20, name: "Table 19", displayName: "19", x: 400, y: 700, width: 50, height: 150, capacity: 8 },
-    { id: 19, name: "Table 18", displayName: "18", x: 400, y: 850, width: 50, height: 150, capacity: 9 },
-    { id: 27, name: "Table 26", displayName: "26", x: 220, y: 150, width: 50, height: 150, capacity: 9 },
-    { id: 26, name: "Table 25", displayName: "25", x: 220, y: 300, width: 50, height: 150, capacity: 9 },
-    { id: 25, name: "Table 24", displayName: "24", x: 220, y: 450, width: 50, height: 150, capacity: 8 },
-    { id: 24, name: "Table 23", displayName: "23", x: 220, y: 650, width: 50, height: 150, capacity: 9 },
-    { id: 23, name: "Table 22", displayName: "22", x: 220, y: 800, width: 50, height: 150, capacity: 9 },
+    { id: 1, name: "Head Table", displayName: "Head", x: 300, y: 50, width: 400, height: 40, capacity: 17, owner: "Shared" },
+    { id: 2, name: "Table 1", displayName: "1", x: 820, y: 100, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
+    { id: 3, name: "Table 2", displayName: "2", x: 820, y: 250, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
+    { id: 4, name: "Table 3", displayName: "3", x: 820, y: 450, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
+    { id: 5, name: "Table 4", displayName: "4", x: 820, y: 600, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
+    { id: 6, name: "Table 5", displayName: "5", x: 820, y: 750, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
+    { id: 7, name: "Table 6", displayName: "6", x: 820, y: 950, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
+    { id: 8, name: "Table 7", displayName: "7", x: 820, y: 1100, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
+    { id: 14, name: "Table 13", displayName: "13", x: 680, y: 150, width: 50, height: 150, capacity: 9, owner: "Shakthi" },
+    { id: 13, name: "Table 12", displayName: "12", x: 680, y: 300, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
+    { id: 12, name: "Table 11", displayName: "11", x: 680, y: 450, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
+    { id: 11, name: "Table 10", displayName: "10", x: 680, y: 650, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
+    { id: 10, name: "Table 9", displayName: "9", x: 680, y: 800, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
+    { id: 9, name: "Table 8", displayName: "8", x: 680, y: 1000, width: 50, height: 150, capacity: 8, owner: "Avi" },
+    { id: 15, name: "Table 14", displayName: "14", x: 510, y: 400, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
+    { id: 16, name: "Table 15", displayName: "15", x: 510, y: 550, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
+    { id: 17, name: "Table 16", displayName: "16", x: 510, y: 700, width: 50, height: 150, capacity: 8, owner: "Avi" },
+    { id: 18, name: "Table 17", displayName: "17", x: 510, y: 850, width: 50, height: 150, capacity: 8, owner: "Avi" },
+    { id: 22, name: "Table 21", displayName: "21", x: 400, y: 400, width: 50, height: 150, capacity: 8, owner: "Avi" },
+    { id: 21, name: "Table 20", displayName: "20", x: 400, y: 550, width: 50, height: 150, capacity: 8, owner: "Avi" },
+    { id: 20, name: "Table 19", displayName: "19", x: 400, y: 700, width: 50, height: 150, capacity: 8, owner: "Avi" },
+    { id: 19, name: "Table 18", displayName: "18", x: 400, y: 850, width: 50, height: 150, capacity: 9, owner: "Avi" },
+    { id: 27, name: "Table 26", displayName: "26", x: 220, y: 150, width: 50, height: 150, capacity: 9, owner: "Avi" },
+    { id: 26, name: "Table 25", displayName: "25", x: 220, y: 300, width: 50, height: 150, capacity: 9, owner: "Avi" },
+    { id: 25, name: "Table 24", displayName: "24", x: 220, y: 450, width: 50, height: 150, capacity: 8, owner: "Avi" },
+    { id: 24, name: "Table 23", displayName: "23", x: 220, y: 650, width: 50, height: 150, capacity: 9, owner: "Avi" },
+    { id: 23, name: "Table 22", displayName: "22", x: 220, y: 800, width: 50, height: 150, capacity: 9, owner: "Avi" },
 ];
 
 /**
@@ -316,6 +317,56 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
         <div className={containerClassName} style={{ position: 'relative' }}>
             {!fullView && <h2 className={styles.mainTitle}>Floor Plan Visualization</h2>}
 
+            {/* Legend in top right */}
+            <div style={{
+                position: 'absolute',
+                top: 10,
+                right: 10,
+                background: 'rgba(255,255,255,0.95)',
+                border: '1px solid #ccc',
+                borderRadius: 8,
+                padding: '8px 16px',
+                zIndex: 10,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4,
+                minWidth: 120
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{
+                        display: 'inline-block',
+                        width: 18,
+                        height: 18,
+                        borderRadius: 4,
+                        background: '#b3d4fc', // Avi color
+                        border: '1px solid #7bb1e7'
+                    }} />
+                    <span>Avi's Tables</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{
+                        display: 'inline-block',
+                        width: 18,
+                        height: 18,
+                        borderRadius: 4,
+                        background: '#ffd6b3', // Shakthi color
+                        border: '1px solid #e7b97b'
+                    }} />
+                    <span>Shakthi's Tables</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{
+                        display: 'inline-block',
+                        width: 18,
+                        height: 18,
+                        borderRadius: 4,
+                        background: '#e0e0e0', // Shared color
+                        border: '1px solid #bdbdbd'
+                    }} />
+                    <span>Shared Table</span>
+                </div>
+            </div>
+
             {/* Display assignment errors */}
             {assignError && (
                 <div className={styles.assignErrorPopup}>
@@ -355,10 +406,19 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                     const guestsAtTable = currentTableData?.guests || [];
                     const seatPositions = calculateSeatPositions(layout);
 
+                    // Pick color class or inline style based on owner
+                    const tableOwnerClass =
+                        layout.owner === "Avi"
+                            ? styles.tableAvi
+                            : layout.owner === "Shakthi"
+                                ? styles.tableShakthi
+                                : styles.tableShared;
+
                     return (
                         <g key={layout.id} transform={`translate(${layout.x}, ${layout.y})`} className={styles.tableGroup}>
-                            {/* Table Rect - Could potentially add onClick here too */}
-                            <rect x={0} y={0} width={layout.width} height={layout.height} className={styles.tableRect} />
+                            {/* Table Rect - Add owner color class */}
+                            <rect x={0} y={0} width={layout.width} height={layout.height}
+                                className={`${styles.tableRect} ${tableOwnerClass}`} />
                             <text x={layout.width / 2} y={layout.height / 2 + 5} className={styles.tableLabel} textAnchor="middle">
                                 {layout.displayName}
                             </text>
@@ -497,7 +557,7 @@ function AssignmentActionModal({
             return new Date(dateString).toLocaleString(undefined, {
                 year: 'numeric', month: 'short', day: 'numeric',
                 hour: 'numeric', minute: '2-digit', hour12: true
-             });
+            });
         } catch { // *** FIX: Omitted the error variable binding entirely ***
             return 'Invalid Date';
         }

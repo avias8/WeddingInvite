@@ -194,6 +194,21 @@
     -ms-user-select: none;
 }
 
+.tableAvi {
+    fill: #b3d4fc !important;
+    stroke: #7bb1e7 !important;
+}
+
+.tableShakthi {
+    fill: #ffd6b3 !important;
+    stroke: #e7b97b !important;
+}
+
+.tableShared {
+    fill: #e0e0e0 !important;
+    stroke: #bdbdbd !important;
+}
+
 /* --- Custom Tooltip Styles --- */
 .tooltip {
     position: fixed;
