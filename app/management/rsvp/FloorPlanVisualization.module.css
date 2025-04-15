@@ -1,16 +1,25 @@
 /* app/management/rsvp/FloorPlanVisualization.module.css */
 
+/* --- Base Component Container --- */
 .visualizationContainer {
     padding: 1.5rem;
-    /* Use theme background or a slightly contrasting one */
     background-color: #fdfdfd;
     border: 1px solid var(--color-border, #ddd);
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    margin: 1.5rem auto;
-    max-width: 1200px; /* Or adjust as needed */
-    overflow: hidden; /* Hide any SVG overflow */
+    /* Default view is constrained */
+    overflow: hidden;
+    position: relative;
+    width: 100%; /* Takes width of parent, but constrained by constrainedWidth */
+    box-sizing: border-box;
 }
+
+/* --- Class applied for default constrained view --- */
+.constrainedWidth {
+    margin: 1.5rem auto;  /* Centers the container */
+    max-width: 1200px; /* Limits the width */
+}
+
 
 .mainTitle {
     text-align: center;
@@ -36,165 +45,200 @@
     font-weight: bold;
 }
 
+/* --- SVG Canvas --- */
 .floorPlanSvg {
     width: 100%;
     height: auto; /* Maintain aspect ratio */
     display: block; /* Remove extra space below SVG */
-    border: 1px solid var(--color-border, #ccc);
     background-color: #fff; /* White background for the drawing area */
-    border-radius: 8px; /* Optional rounded corners for the SVG area */
 }
 
-/* Static elements */
+/* --- Static SVG Elements --- */
 .venueBackground {
-    fill: #f9f9f9; /* Very light grey for the venue background */
-    stroke: none; /* No border for the overall background */
+    fill: #f9f9f9;
+    stroke: none;
 }
-
-.danceFloor {
-    fill: #e0f2f7; /* Light cyan/blue */
-    stroke: #b3e5fc;
-    stroke-width: 1px;
-}
-
-.djBooth {
-     fill: #fce4ec; /* Light pink */
-     stroke: #f8bbd0;
-     stroke-width: 1px;
-}
-
-.buffetArea {
-    fill: #fff9c4; /* Light yellow */
-    stroke: #fff59d;
-    stroke-width: 1px;
-}
-
-/* --- Style Definitions for New Static Elements --- */
-.drinksArea {
-    fill: #e3f2fd; /* Light blue */
-    stroke: #bbdefb;
-    stroke-width: 1px;
-}
-
-.guestBookArea {
-    fill: #f3e5f5; /* Light purple */
-    stroke: #e1bee7;
-    stroke-width: 1px;
-}
-/* --- End of New Static Element Styles --- */
-
-
-.labelText {
-    font-size: 10px; /* Small labels for static items */
-    font-family: var(--font-body, sans-serif);
-    fill: #666; /* Grey text */
-    text-anchor: middle; /* Center horizontally */
-    dominant-baseline: middle; /* Center vertically */
-    pointer-events: none;
-    font-weight: 500;
-}
-
-/* Table Styles */
-.tableGroup {
-    /* No specific styles needed for the group itself unless transforming */
-    transition: transform 0.3s ease; /* For potential future animations */
-}
-
-.tableRect {
-    /* Use theme colors or specific ones */
-    fill: var(--color-background-light, #fff8e1); /* Light cream/yellow */
-    stroke: var(--color-border, #ffe0b2); /* Soft border */
-    stroke-width: 1.5px;
-    rx: 3; /* Slightly rounded corners */
-    ry: 3;
-}
-
-.tableLabel {
-    font-size: 11px; /* Slightly smaller table number */
-    font-weight: bold;
-    fill: var(--color-text-primary, #444);
-    font-family: var(--font-body, sans-serif);
-    pointer-events: none; /* Don't block interactions */
-    text-anchor: middle;
-    dominant-baseline: middle;
-}
-
-/* Seat Styles */
-.seatEmpty {
-    fill: #f5f5f5; /* Light grey for empty seats */
-    stroke: #e0e0e0;
-    stroke-width: 1px;
-    transition: fill 0.2s ease;
-}
-
-.seatOccupied {
-    /* Use a theme accent color */
-    fill: var(--color-accent-light, #c8e6c9); /* Light green */
-    stroke: var(--color-accent, #81c784); /* Darker green border */
-    stroke-width: 1px;
-    transition: fill 0.2s ease;
-}
-
-/* Seat Initials */
-.seatInitial {
-    font-size: 7px; /* Very small font for initials */
-    font-weight: bold;
-    fill: var(--color-text-secondary, #555); /* Dark text color */
-    font-family: var(--font-body, sans-serif);
-    pointer-events: none; /* Don't interfere with clicks */
-    text-anchor: middle;
-    dominant-baseline: middle; /* Center text in the circle */
-    transition: fill 0.2s ease;
-}
-
-/* Optional: Hide initials on empty seats explicitly if needed */
-.seatEmpty + .seatInitial { /* Select initial text following an empty seat */
-   /* visibility: hidden; */ /* Or set fill to transparent */
-   /* fill: transparent; */
-}
-
-/* Add to FloorPlanVisualization.module.css */
-.catererEntranceArea {
-    fill: #eeeeee; /* Neutral grey */
-    stroke: #bdbdbd;
-    stroke-width: 1px;
-}
-
-/* Add to FloorPlanVisualization.module.css */
-.entranceFrame {
-    fill: none; /* No background fill */
-    stroke: var(--color-border, #ccc); /* Use border color */
-    stroke-width: 1.5px;
-    rx: 4; /* Slightly rounded corners */
-    ry: 4;
-}
-
-/* Add to FloorPlanVisualization.module.css */
-.garbageArea {
-    /* Styles for the group if needed */
-}
-
-.garbageBin {
-    fill: #bdbdbd; /* Grey fill */
-    stroke: #757575; /* Darker grey stroke */
-    stroke-width: 1px;
-}
-
-/* Add to FloorPlanVisualization.module.css */
 
 .outerBorder {
-    fill: none; /* No fill */
-    stroke: var(--color-text-primary, #555); /* Use primary text or a dark color */
-    stroke-width: 2px; /* Make it slightly thicker */
-    rx: 5; /* Optional: slightly rounded corners */
+    fill: none;
+    stroke: var(--color-text-primary, #555);
+    stroke-width: 2px;
+    rx: 5;
     ry: 5;
 }
 
 .wallLabel {
     font-size: 11px;
     font-family: var(--font-body, sans-serif);
-    fill: var(--color-text-secondary, #777); /* Use secondary text color */
+    fill: var(--color-text-secondary, #777);
     font-weight: bold;
-    text-transform: uppercase; /* Match diagram */
+    text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.danceFloor {
+    fill: #e0f2f7;
+    stroke: #b3e5fc;
+    stroke-width: 1px;
+}
+
+.djBooth {
+     fill: #fce4ec;
+     stroke: #f8bbd0;
+     stroke-width: 1px;
+}
+
+.buffetArea {
+    fill: #fff9c4;
+    stroke: #fff59d;
+    stroke-width: 1px;
+}
+
+.drinksArea {
+    fill: #e3f2fd;
+    stroke: #bbdefb;
+    stroke-width: 1px;
+}
+
+.catererEntranceArea {
+    fill: #eeeeee;
+    stroke: #bdbdbd;
+    stroke-width: 1px;
+}
+
+.guestBookArea {
+    fill: #f3e5f5;
+    stroke: #e1bee7;
+    stroke-width: 1px;
+}
+
+.entranceFrame {
+    fill: none;
+    stroke: var(--color-border, #ccc);
+    stroke-width: 1.5px;
+    rx: 4;
+    ry: 4;
+}
+
+.garbageArea {
+    /* Styles for the group if needed */
+}
+
+.garbageBin {
+    fill: #bdbdbd;
+    stroke: #757575;
+    stroke-width: 1px;
+}
+
+.labelText {
+    font-size: 10px;
+    font-family: var(--font-body, sans-serif);
+    fill: #666;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+    font-weight: 500;
+}
+
+/* --- Dynamic Table/Seat Elements --- */
+.tableGroup {
+    transition: transform 0.3s ease;
+}
+
+.tableRect {
+    fill: var(--color-background-light, #fff8e1);
+    stroke: var(--color-border, #ffe0b2);
+    stroke-width: 1.5px;
+    rx: 3;
+    ry: 3;
+}
+
+.tableLabel {
+    font-size: 11px;
+    font-weight: bold;
+    fill: var(--color-text-primary, #444);
+    font-family: var(--font-body, sans-serif);
+    pointer-events: none;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.seatEmpty {
+    fill: #f5f5f5;
+    stroke: #e0e0e0;
+    stroke-width: 1px;
+    transition: fill 0.2s ease;
+}
+
+.seatOccupied {
+    fill: var(--color-accent-light, #c8e6c9);
+    stroke: var(--color-accent, #81c784);
+    stroke-width: 1px;
+    transition: fill 0.2s ease;
+}
+
+.seatInitial {
+    font-size: 7px;
+    font-weight: bold;
+    fill: var(--color-text-secondary, #555);
+    font-family: var(--font-body, sans-serif);
+    pointer-events: none;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    transition: fill 0.2s ease;
+}
+
+/* --- Full View Link (Displayed on non-full-view page) --- */
+.fullViewLinkContainer {
+    margin-top: 1.5rem;
+    text-align: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border, #eee);
+}
+
+.fullViewLinkButton {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    background-color: var(--color-accent, #8fa88c);
+    color: #fff;
+    font-family: var(--font-body, sans-serif);
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 2rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.fullViewLinkButton:hover {
+    background-color: var(--color-secondary-accent, #21701a);
+    transform: translateY(-1px);
+}
+
+.fullViewLinkNote {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary, #666);
+    margin-top: 0.5rem;
+}
+
+/* --- Full View Mode Overrides --- */
+/* Class added to visualizationContainer when fullView=true */
+/* This class is NOT added by default */
+.fullViewContainer {
+    /* Override default constraints */
+    max-width: none;
+    margin: 0;
+    padding: 0.5rem;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    overflow: visible; /* Allow SVG content to potentially overflow if needed */
+}
+
+/* Optional: Adjust SVG style in full view */
+.fullViewContainer .floorPlanSvg {
+   border-radius: 0;
+   border: none;
+   background-color: #f0f0f0; /* Match viewer page background */
 }
