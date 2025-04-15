@@ -112,6 +112,11 @@ type ModalTarget =
     | { type: 'guest'; guest: Guest } // Clicked an occupied seat
     | { type: 'seat'; tableId: number; seatIndex: number }; // Clicked an empty seat
 
+type ModalActionData =
+    | { guestId: number; tableId: number } // For assign
+    | { guestId: number } // For unassign
+    | { guestId: number; newTableId: number }; // For move
+
 /**
  * Renders an SVG floor plan visualization with assigned guest initials,
  * hover tooltips, and click-to-assign/unassign functionality via a modal.
@@ -271,14 +276,17 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
     };
 
     // Handler for actions within the modal
-    const handleModalAction = async (action: 'assign' | 'unassign' | 'move', data: any) => {
-        closeModal(); // Close modal immediately
-        if (action === 'assign') {
+    const handleModalAction = async (action: 'assign' | 'unassign' | 'move', data: ModalActionData) => {
+        closeModal();
+        // Type guards to ensure data matches action
+        if (action === 'assign' && 'tableId' in data) {
             await assignGuest(data.guestId, data.tableId);
-        } else if (action === 'unassign') {
+        } else if (action === 'unassign' && 'guestId' in data && !('tableId' in data) && !('newTableId' in data)) { // Be more specific for unassign
             await unassignGuest(data.guestId);
-        } else if (action === 'move') {
-            await assignGuest(data.guestId, data.newTableId); // Assign handles moving logic
+        } else if (action === 'move' && 'newTableId' in data) {
+            await assignGuest(data.guestId, data.newTableId); // Re-use assignGuest for moving
+        } else {
+            console.error("Invalid action/data combination in handleModalAction", action, data);
         }
     };
 
