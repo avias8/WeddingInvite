@@ -175,7 +175,9 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
             setInvitees(inviteesData);
 
         } catch (err) {
-            // ... error handling ...
+            console.error("Error fetching floor plan data:", err);
+            setError(err instanceof Error ? err.message : "An unknown error occurred");
+
         } finally {
             setLoading(false);
         }
@@ -492,8 +494,13 @@ function AssignmentActionModal({
     const formatDate = (dateString: string | null | undefined) => {
         if (!dateString) return 'N/A';
         try {
-            return new Date(dateString).toLocaleString();
-        } catch (e) {
+            // Format for better readability (e.g., Apr 14, 2025, 10:00 PM)
+            return new Date(dateString).toLocaleString(undefined, {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: 'numeric', minute: '2-digit', hour12: true
+             });
+        } catch (_e) { // *** FIX: Prefixed unused 'e' with '_' ***
+            // Optional: console.error("Error formatting date:", _e);
             return 'Invalid Date';
         }
     };
