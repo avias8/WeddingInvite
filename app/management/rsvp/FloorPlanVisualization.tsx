@@ -1,11 +1,11 @@
 // app/management/rsvp/FloorPlanVisualization.tsx (React-based SVG)
-// Final Consolidated Version incorporating user's layout and fixes
+// Final Consolidated Version + ESLint Fixes
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link'; // Import Link
-import styles from './FloorPlanVisualization.module.css';
-import type { Guest, Table } from '@/app/types';
+import Link from 'next/link'; // Import Link for navigation
+import styles from './FloorPlanVisualization.module.css'; // Import CSS module for styling
+import type { Guest, Table } from '@/app/types'; // Import data types
 
 // Interface for joined Table data including assigned guests
 interface TableWithGuests extends Table {
@@ -49,7 +49,7 @@ const TABLE_LAYOUTS: TableLayout[] = [
     { id: 1, name: "Head Table", displayName: "Head", x: 300, y: 50, width: 400, height: 40, capacity: 16 }, // DB ID: 1
 
     // === Right Side ===
-    // Column 1 (Far Right)
+    // Column 1 (Far Right) - Now 7 tables tall
     { id: 2, name: "Table 1", displayName: "1", x: 820, y: 100, width: 50, height: 150, capacity: 8 }, // DB ID: 2
     { id: 3, name: "Table 2", displayName: "2", x: 820, y: 250, width: 50, height: 150, capacity: 8 }, // DB ID: 3
     { id: 4, name: "Table 3", displayName: "3", x: 820, y: 450, width: 50, height: 150, capacity: 8 }, // DB ID: 4
@@ -105,8 +105,9 @@ function calculateSeatPositions(layout: TableLayout): { x: number, y: number }[]
     const shortDim = isVertical ? tableWidth : tableHeight; // Width of the table
 
     // Distribute seats approximately evenly between the two long sides
-    let seatsOnLongSide1 = Math.ceil(numSeats / 2);
-    let seatsOnLongSide2 = Math.floor(numSeats / 2);
+    // *** ESLint Fix: Use const instead of let ***
+    const seatsOnLongSide1 = Math.ceil(numSeats / 2);
+    const seatsOnLongSide2 = Math.floor(numSeats / 2);
 
     // Calculate spacing between seats on each long side
     const spacing1 = seatsOnLongSide1 > 0 ? longDim / (seatsOnLongSide1 + 1) : longDim;
@@ -212,6 +213,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
     const containerClassName = containerClasses.join(' ');
 
     return (
+        // Use the conditional class for the main container
         <div className={containerClassName}>
             {/* Only show the main title when not in full view mode */}
             {!fullView && <h2 className={styles.mainTitle}>Floor Plan Visualization</h2>}
@@ -240,7 +242,8 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                 <rect x="50" y="750" width="50" height="80" className={styles.drinksArea} />
                 <text x="75" y="790" className={styles.labelText} textAnchor="middle" transform="rotate(-90, 75, 790)">Drinks</text>
                 <rect x="30" y="625" width="80" height="100" className={styles.catererEntranceArea} />
-                <text x="70" y="670" className={styles.labelText} textAnchor="middle">Caterer's</text>
+                 {/* *** ESLint Fix: Escaped apostrophe *** */}
+                <text x="70" y="670" className={styles.labelText} textAnchor="middle">Caterer&apos;s</text>
                 <text x="70" y="685" className={styles.labelText} textAnchor="middle">Entrance</text>
                 <rect x="450" y="1280" width="80" height="30" className={styles.guestBookArea} />
                 <text x="490" y="1295" className={styles.labelText} textAnchor="middle">Guest Book</text>
