@@ -7,6 +7,7 @@ import ConfirmedInviteeGuests from "./ConfirmedInviteeGuests";
 import ManageTables from "./ManageTables";
 import SeatingAssignment from "./SeatingAssignment";
 import "./rsvp.css";
+import FloorPlanVisualization from "./FloorPlanVisualization";
 
 
 export default function RsvpPage() {
@@ -24,6 +25,7 @@ export default function RsvpPage() {
       <ConfirmedInviteeGuests />
       <ManageTables />
       <SeatingAssignment />
+      <FloorPlanVisualization />
     </div>
   );
 }

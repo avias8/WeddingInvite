@@ -1,0 +1,200 @@
+/* app/management/rsvp/FloorPlanVisualization.module.css */
+
+.visualizationContainer {
+    padding: 1.5rem;
+    /* Use theme background or a slightly contrasting one */
+    background-color: #fdfdfd;
+    border: 1px solid var(--color-border, #ddd);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin: 1.5rem auto;
+    max-width: 1200px; /* Or adjust as needed */
+    overflow: hidden; /* Hide any SVG overflow */
+}
+
+.mainTitle {
+    text-align: center;
+    font-size: clamp(1.6rem, 4vw, 2rem);
+    color: var(--color-text-primary, #333);
+    font-family: var(--font-wedding);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border, #eee);
+}
+
+.loading,
+.error {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.1rem;
+    color: var(--color-text-secondary, #666);
+    font-family: var(--font-body);
+}
+
+.error {
+    color: #d32f2f; /* A distinct error color */
+    font-weight: bold;
+}
+
+.floorPlanSvg {
+    width: 100%;
+    height: auto; /* Maintain aspect ratio */
+    display: block; /* Remove extra space below SVG */
+    border: 1px solid var(--color-border, #ccc);
+    background-color: #fff; /* White background for the drawing area */
+    border-radius: 8px; /* Optional rounded corners for the SVG area */
+}
+
+/* Static elements */
+.venueBackground {
+    fill: #f9f9f9; /* Very light grey for the venue background */
+    stroke: none; /* No border for the overall background */
+}
+
+.danceFloor {
+    fill: #e0f2f7; /* Light cyan/blue */
+    stroke: #b3e5fc;
+    stroke-width: 1px;
+}
+
+.djBooth {
+     fill: #fce4ec; /* Light pink */
+     stroke: #f8bbd0;
+     stroke-width: 1px;
+}
+
+.buffetArea {
+    fill: #fff9c4; /* Light yellow */
+    stroke: #fff59d;
+    stroke-width: 1px;
+}
+
+/* --- Style Definitions for New Static Elements --- */
+.drinksArea {
+    fill: #e3f2fd; /* Light blue */
+    stroke: #bbdefb;
+    stroke-width: 1px;
+}
+
+.guestBookArea {
+    fill: #f3e5f5; /* Light purple */
+    stroke: #e1bee7;
+    stroke-width: 1px;
+}
+/* --- End of New Static Element Styles --- */
+
+
+.labelText {
+    font-size: 10px; /* Small labels for static items */
+    font-family: var(--font-body, sans-serif);
+    fill: #666; /* Grey text */
+    text-anchor: middle; /* Center horizontally */
+    dominant-baseline: middle; /* Center vertically */
+    pointer-events: none;
+    font-weight: 500;
+}
+
+/* Table Styles */
+.tableGroup {
+    /* No specific styles needed for the group itself unless transforming */
+    transition: transform 0.3s ease; /* For potential future animations */
+}
+
+.tableRect {
+    /* Use theme colors or specific ones */
+    fill: var(--color-background-light, #fff8e1); /* Light cream/yellow */
+    stroke: var(--color-border, #ffe0b2); /* Soft border */
+    stroke-width: 1.5px;
+    rx: 3; /* Slightly rounded corners */
+    ry: 3;
+}
+
+.tableLabel {
+    font-size: 11px; /* Slightly smaller table number */
+    font-weight: bold;
+    fill: var(--color-text-primary, #444);
+    font-family: var(--font-body, sans-serif);
+    pointer-events: none; /* Don't block interactions */
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+/* Seat Styles */
+.seatEmpty {
+    fill: #f5f5f5; /* Light grey for empty seats */
+    stroke: #e0e0e0;
+    stroke-width: 1px;
+    transition: fill 0.2s ease;
+}
+
+.seatOccupied {
+    /* Use a theme accent color */
+    fill: var(--color-accent-light, #c8e6c9); /* Light green */
+    stroke: var(--color-accent, #81c784); /* Darker green border */
+    stroke-width: 1px;
+    transition: fill 0.2s ease;
+}
+
+/* Seat Initials */
+.seatInitial {
+    font-size: 7px; /* Very small font for initials */
+    font-weight: bold;
+    fill: var(--color-text-secondary, #555); /* Dark text color */
+    font-family: var(--font-body, sans-serif);
+    pointer-events: none; /* Don't interfere with clicks */
+    text-anchor: middle;
+    dominant-baseline: middle; /* Center text in the circle */
+    transition: fill 0.2s ease;
+}
+
+/* Optional: Hide initials on empty seats explicitly if needed */
+.seatEmpty + .seatInitial { /* Select initial text following an empty seat */
+   /* visibility: hidden; */ /* Or set fill to transparent */
+   /* fill: transparent; */
+}
+
+/* Add to FloorPlanVisualization.module.css */
+.catererEntranceArea {
+    fill: #eeeeee; /* Neutral grey */
+    stroke: #bdbdbd;
+    stroke-width: 1px;
+}
+
+/* Add to FloorPlanVisualization.module.css */
+.entranceFrame {
+    fill: none; /* No background fill */
+    stroke: var(--color-border, #ccc); /* Use border color */
+    stroke-width: 1.5px;
+    rx: 4; /* Slightly rounded corners */
+    ry: 4;
+}
+
+/* Add to FloorPlanVisualization.module.css */
+.garbageArea {
+    /* Styles for the group if needed */
+}
+
+.garbageBin {
+    fill: #bdbdbd; /* Grey fill */
+    stroke: #757575; /* Darker grey stroke */
+    stroke-width: 1px;
+}
+
+/* Add to FloorPlanVisualization.module.css */
+
+.outerBorder {
+    fill: none; /* No fill */
+    stroke: var(--color-text-primary, #555); /* Use primary text or a dark color */
+    stroke-width: 2px; /* Make it slightly thicker */
+    rx: 5; /* Optional: slightly rounded corners */
+    ry: 5;
+}
+
+.wallLabel {
+    font-size: 11px;
+    font-family: var(--font-body, sans-serif);
+    fill: var(--color-text-secondary, #777); /* Use secondary text color */
+    font-weight: bold;
+    text-transform: uppercase; /* Match diagram */
+    letter-spacing: 0.5px;
+}
