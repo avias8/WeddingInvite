@@ -169,7 +169,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                 }
             });
 
-            setTables(tablesData.map(t => ({...t, guests: guestMap[t.id] || []})));
+            setTables(tablesData.map(t => ({ ...t, guests: guestMap[t.id] || [] })));
             setUnassignedGuests(allGuestsData.filter(g => g.tableId === null));
             // *** Ensure invitee state is set ***
             setInvitees(inviteesData);
@@ -181,11 +181,11 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
         } finally {
             setLoading(false);
         }
-     }, []);
+    }, []);
 
-     useEffect(() => {
+    useEffect(() => {
         fetchData();
-     }, [fetchData]);
+    }, [fetchData]);
 
     // --- API Call Functions ---
     const assignGuest = async (guestId: number, tableId: number) => {
@@ -237,14 +237,14 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                 body: JSON.stringify({ guestId }),
             });
             if (!res.ok) {
-                 const errData = await res.json();
-                 throw new Error(errData.error || "Failed to unassign guest");
+                const errData = await res.json();
+                throw new Error(errData.error || "Failed to unassign guest");
             }
-             // Refetch data to ensure consistency after successful unassignment
+            // Refetch data to ensure consistency after successful unassignment
             await fetchData();
         } catch (error) {
             console.error("Error unassigning guest:", error);
-             const errMsg = error instanceof Error ? error.message : "Error unassigning guest";
+            const errMsg = error instanceof Error ? error.message : "Error unassigning guest";
             setAssignError(errMsg);
             setTimeout(() => setAssignError(""), 3000); // Clear error after 3s
         }
@@ -316,8 +316,8 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
         <div className={containerClassName} style={{ position: 'relative' }}>
             {!fullView && <h2 className={styles.mainTitle}>Floor Plan Visualization</h2>}
 
-             {/* Display assignment errors */}
-             {assignError && (
+            {/* Display assignment errors */}
+            {assignError && (
                 <div className={styles.assignErrorPopup}>
                     <span role="img" aria-label="error">😢</span> {assignError}
                 </div>
@@ -325,28 +325,28 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
 
             <svg viewBox="0 0 1000 1350" className={styles.floorPlanSvg}>
                 {/* ... (Background, Border, Wall Labels, Static Elements remain the same) ... */}
-                 <rect x="0" y="0" width="1000" height="1350" className={styles.venueBackground} />
-                 <rect x="20" y="20" width="960" height="1290" className={styles.outerBorder} />
-                 <text x="500" y="15" className={styles.wallLabel} textAnchor="middle">East Wall Open</text>
-                 <text x="970" y="585" className={styles.wallLabel} textAnchor="middle" transform="rotate(90, 970, 600)">South Wall Open</text>
-                 <rect x="50" y="50" width="80" height="40" className={styles.djBooth} />
-                 <text x="90" y="75" className={styles.labelText} textAnchor="middle">DJ</text>
-                 <rect x="50" y="200" width="50" height="400" className={styles.buffetArea} />
-                 <text x="75" y="400" className={styles.labelText} textAnchor="middle" transform="rotate(-90, 75, 400)">Buffet</text>
-                 <rect x="50" y="750" width="50" height="80" className={styles.drinksArea} />
-                 <text x="75" y="790" className={styles.labelText} textAnchor="middle" transform="rotate(-90, 75, 790)">Drinks</text>
-                 <rect x="30" y="625" width="80" height="100" className={styles.catererEntranceArea} />
-                 <text x="70" y="670" className={styles.labelText} textAnchor="middle">Caterer&apos;s</text>
-                 <text x="70" y="685" className={styles.labelText} textAnchor="middle">Entrance</text>
-                 <rect x="450" y="1280" width="80" height="30" className={styles.guestBookArea} />
-                 <text x="490" y="1295" className={styles.labelText} textAnchor="middle">Guest Book</text>
-                 <rect x="550" y="1310" width="80" height="30" className={styles.entranceFrame} />
-                 <text x="590" y="1325" className={styles.labelText} textAnchor="middle">Entrance</text>
-                 <g className={styles.garbageArea}>
-                     <circle cx="280" cy="1290" r="10" className={styles.garbageBin} />
-                     <circle cx="310" cy="1290" r="10" className={styles.garbageBin} />
-                     <text x="300" y="1265" className={styles.labelText} textAnchor="middle">Garbage & Recycling</text>
-                 </g>
+                <rect x="0" y="0" width="1000" height="1350" className={styles.venueBackground} />
+                <rect x="20" y="20" width="960" height="1290" className={styles.outerBorder} />
+                <text x="500" y="15" className={styles.wallLabel} textAnchor="middle">East Wall Open</text>
+                <text x="970" y="585" className={styles.wallLabel} textAnchor="middle" transform="rotate(90, 970, 600)">South Wall Open</text>
+                <rect x="50" y="50" width="80" height="40" className={styles.djBooth} />
+                <text x="90" y="75" className={styles.labelText} textAnchor="middle">DJ</text>
+                <rect x="50" y="200" width="50" height="400" className={styles.buffetArea} />
+                <text x="75" y="400" className={styles.labelText} textAnchor="middle" transform="rotate(-90, 75, 400)">Buffet</text>
+                <rect x="50" y="750" width="50" height="80" className={styles.drinksArea} />
+                <text x="75" y="790" className={styles.labelText} textAnchor="middle" transform="rotate(-90, 75, 790)">Drinks</text>
+                <rect x="30" y="625" width="80" height="100" className={styles.catererEntranceArea} />
+                <text x="70" y="670" className={styles.labelText} textAnchor="middle">Caterer&apos;s</text>
+                <text x="70" y="685" className={styles.labelText} textAnchor="middle">Entrance</text>
+                <rect x="450" y="1280" width="80" height="30" className={styles.guestBookArea} />
+                <text x="490" y="1295" className={styles.labelText} textAnchor="middle">Guest Book</text>
+                <rect x="550" y="1310" width="80" height="30" className={styles.entranceFrame} />
+                <text x="590" y="1325" className={styles.labelText} textAnchor="middle">Entrance</text>
+                <g className={styles.garbageArea}>
+                    <circle cx="280" cy="1290" r="10" className={styles.garbageBin} />
+                    <circle cx="310" cy="1290" r="10" className={styles.garbageBin} />
+                    <text x="300" y="1265" className={styles.labelText} textAnchor="middle">Garbage & Recycling</text>
+                </g>
 
                 {/* Render Tables and Seats Dynamically */}
                 {TABLE_LAYOUTS.map(layout => {
@@ -391,11 +391,11 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                     );
                 })}
 
-                 {/* Dance Floor */}
-                 <rect x={danceFloorX} y={danceFloorY} width={danceFloorWidth} height={danceFloorHeight} className={styles.danceFloor} />
-                 <text x={danceFloorX + danceFloorWidth / 2} y={danceFloorY + danceFloorHeight / 2 + 5} className={styles.labelText} textAnchor="middle">
-                     Dance
-                 </text>
+                {/* Dance Floor */}
+                <rect x={danceFloorX} y={danceFloorY} width={danceFloorWidth} height={danceFloorHeight} className={styles.danceFloor} />
+                <text x={danceFloorX + danceFloorWidth / 2} y={danceFloorY + danceFloorHeight / 2 + 5} className={styles.labelText} textAnchor="middle">
+                    Dance
+                </text>
             </svg>
 
             {/* Link to Full Viewer Page */}
@@ -416,16 +416,16 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                 >
                     <div className={styles.tooltipName}>{tooltipContent.name}</div>
                     {tooltipContent.dietaryRestrictions && (
-                         <div className={styles.tooltipDetail}>Diet: {tooltipContent.dietaryRestrictions}</div>
+                        <div className={styles.tooltipDetail}>Diet: {tooltipContent.dietaryRestrictions}</div>
                     )}
-                     {tooltipContent.accessibilityInfo && (
-                         <div className={styles.tooltipDetail}>Access: {tooltipContent.accessibilityInfo}</div>
+                    {tooltipContent.accessibilityInfo && (
+                        <div className={styles.tooltipDetail}>Access: {tooltipContent.accessibilityInfo}</div>
                     )}
                 </div>
             )}
 
-             {/* Assignment Modal */}
-             {isModalOpen && modalTarget && (
+            {/* Assignment Modal */}
+            {isModalOpen && modalTarget && (
                 <AssignmentActionModal
                     isOpen={isModalOpen}
                     onClose={closeModal}
@@ -439,7 +439,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                     onUnassign={handleModalAction}
                     onMove={handleModalAction}
                 />
-             )}
+            )}
         </div>
     );
 }
@@ -475,15 +475,15 @@ function AssignmentActionModal({
     // Reset local state when modal opens or target changes
     useEffect(() => {
         if (isOpen && target?.type === 'seat') {
-             setSelectedGuestId(unassignedGuests.length > 0 ? unassignedGuests[0].id.toString() : '');
+            setSelectedGuestId(unassignedGuests.length > 0 ? unassignedGuests[0].id.toString() : '');
         }
         if (isOpen && target?.type === 'guest') {
             const firstAvailableTable = tables.find(t => t.id !== target.guest.tableId && t.guests.length < t.capacity);
             setSelectedMoveTableId(firstAvailableTable ? firstAvailableTable.id.toString() : '');
         }
         if (!isOpen || !target) {
-             setSelectedGuestId('');
-             setSelectedMoveTableId('');
+            setSelectedGuestId('');
+            setSelectedMoveTableId('');
         }
     }, [isOpen, target, unassignedGuests, tables]);
 
@@ -498,15 +498,15 @@ function AssignmentActionModal({
             return new Date(dateString).toLocaleString(undefined, {
                 year: 'numeric', month: 'short', day: 'numeric',
                 hour: 'numeric', minute: '2-digit', hour12: true
-             });
+            });
         } catch (_e) { // *** FIX: Prefixed unused 'e' with '_' ***
-            // Optional: console.error("Error formatting date:", _e);
+            console.error("Error formatting date:", _e);
             return 'Invalid Date';
         }
     };
 
     // --- Helper Function to Format RSVP Status ---
-     const formatRsvpStatus = (status: boolean | null | undefined) => {
+    const formatRsvpStatus = (status: boolean | null | undefined) => {
         if (status === true) return 'Yes';
         if (status === false) return 'No';
         return 'Pending';
@@ -529,10 +529,10 @@ function AssignmentActionModal({
 
                     {/* Guest Details Section */}
                     <div className={styles.modalGuestDetails}>
-                         <p>Assigned Table: {currentTable?.name || 'Unassigned?'}</p>
-                         {/* Display Guest Specific Details */}
-                         {currentGuest.dietaryRestrictions && <p>Guest Diet: {currentGuest.dietaryRestrictions}</p>}
-                         {currentGuest.accessibilityInfo && <p>Guest Access: {currentGuest.accessibilityInfo}</p>}
+                        <p>Assigned Table: {currentTable?.name || 'Unassigned?'}</p>
+                        {/* Display Guest Specific Details */}
+                        {currentGuest.dietaryRestrictions && <p>Guest Diet: {currentGuest.dietaryRestrictions}</p>}
+                        {currentGuest.accessibilityInfo && <p>Guest Access: {currentGuest.accessibilityInfo}</p>}
                     </div>
 
                     {/* Invitee Details Section - EXPANDED */}
@@ -557,23 +557,23 @@ function AssignmentActionModal({
                     {/* Move Guest Section */}
                     <div className={styles.modalSection}>
                         {/* ... (Move Guest Select and Button) ... */}
-                         <h4>Move Guest</h4>
-                         {availableMoveTables.length > 0 ? (
-                             <>
-                                 <select value={selectedMoveTableId} onChange={(e) => setSelectedMoveTableId(e.target.value)} className={styles.modalSelect}>
-                                     <option value="" disabled>Select new table...</option>
-                                     {availableMoveTables.map(table => ( <option key={table.id} value={table.id}> {table.name} ({table.guests.length}/{table.capacity}) </option> ))}
-                                 </select>
-                                 <button onClick={() => onMove('move', { guestId: currentGuest.id, newTableId: parseInt(selectedMoveTableId) })} disabled={!selectedMoveTableId} className={styles.modalButton}> Move Guest </button>
-                             </>
-                         ) : ( <p className={styles.modalInfo}>No other tables with available space.</p> )}
+                        <h4>Move Guest</h4>
+                        {availableMoveTables.length > 0 ? (
+                            <>
+                                <select value={selectedMoveTableId} onChange={(e) => setSelectedMoveTableId(e.target.value)} className={styles.modalSelect}>
+                                    <option value="" disabled>Select new table...</option>
+                                    {availableMoveTables.map(table => (<option key={table.id} value={table.id}> {table.name} ({table.guests.length}/{table.capacity}) </option>))}
+                                </select>
+                                <button onClick={() => onMove('move', { guestId: currentGuest.id, newTableId: parseInt(selectedMoveTableId) })} disabled={!selectedMoveTableId} className={styles.modalButton}> Move Guest </button>
+                            </>
+                        ) : (<p className={styles.modalInfo}>No other tables with available space.</p>)}
                     </div>
 
                     {/* Unassign Guest Section */}
                     <div className={styles.modalSection}>
                         {/* ... (Unassign Button) ... */}
-                         <h4>Unassign Guest</h4>
-                         <button onClick={() => onUnassign('unassign', { guestId: currentGuest.id })} className={`${styles.modalButton} ${styles.unassignButton}`}> Unassign (Send to List) </button>
+                        <h4>Unassign Guest</h4>
+                        <button onClick={() => onUnassign('unassign', { guestId: currentGuest.id })} className={`${styles.modalButton} ${styles.unassignButton}`}> Unassign (Send to List) </button>
                     </div>
 
                     {/* Cancel Button */}
@@ -592,17 +592,17 @@ function AssignmentActionModal({
             <div className={styles.modalBackground} onClick={onClose}>
                 <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                     <h3 className={styles.modalTitle}>Assign Guest to {targetTable?.name || `Table ID ${target.tableId}`}</h3>
-                    {isTableFull ? ( <p className={styles.modalWarning}>This table is full!</p> )
-                     : unassignedGuests.length === 0 ? ( <p className={styles.modalInfo}>No unassigned guests available.</p> )
-                     : (
-                        <>
-                            <select value={selectedGuestId} onChange={(e) => setSelectedGuestId(e.target.value)} className={styles.modalSelect}>
-                                {unassignedGuests.map(guest => ( <option key={guest.id} value={guest.id}> {guest.name} </option> ))}
-                            </select>
-                            <button onClick={() => onAssign('assign', { guestId: parseInt(selectedGuestId), tableId: target.tableId })} disabled={!selectedGuestId} className={styles.modalButton}> Assign Guest </button>
-                        </>
-                    )}
-                     <button onClick={onClose} className={`${styles.modalButton} ${styles.cancelButton}`}>Cancel</button>
+                    {isTableFull ? (<p className={styles.modalWarning}>This table is full!</p>)
+                        : unassignedGuests.length === 0 ? (<p className={styles.modalInfo}>No unassigned guests available.</p>)
+                            : (
+                                <>
+                                    <select value={selectedGuestId} onChange={(e) => setSelectedGuestId(e.target.value)} className={styles.modalSelect}>
+                                        {unassignedGuests.map(guest => (<option key={guest.id} value={guest.id}> {guest.name} </option>))}
+                                    </select>
+                                    <button onClick={() => onAssign('assign', { guestId: parseInt(selectedGuestId), tableId: target.tableId })} disabled={!selectedGuestId} className={styles.modalButton}> Assign Guest </button>
+                                </>
+                            )}
+                    <button onClick={onClose} className={`${styles.modalButton} ${styles.cancelButton}`}>Cancel</button>
                 </div>
             </div>
         );
