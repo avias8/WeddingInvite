@@ -3,6 +3,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import styles from './FloorPlanVisualization.module.css'; // Use the same CSS Module
 import type { Guest, Table } from '@/app/types';
 
@@ -151,6 +152,9 @@ export default function FloorPlanVisualization() {
     const danceFloorWidth = 250;
     const danceFloorHeight = 250;
 
+    const staticImagePath = "/images/final_floor_plan.png"; // Adjust path/name as needed
+
+
     return (
         <div className={styles.visualizationContainer}>
             <h2 className={styles.mainTitle}>Floor Plan Visualization</h2>
@@ -258,8 +262,24 @@ export default function FloorPlanVisualization() {
                     textAnchor="middle">
                     Dance
                 </text>
-
             </svg>
+
+            {/* *** ADDED Link to Full Viewer Page *** */}
+            {/* Inside FloorPlanVisualization.tsx, update the Link section */}
+            <div className={styles.fullViewLinkContainer}>
+                <Link
+                    // *** UPDATED href to point to the new root path ***
+                    href="/floorplan"
+                    className={styles.fullViewLinkButton}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Open full-screen floor plan viewer"
+                >
+                    View Full Floor Plan
+                </Link>
+                 <p className={styles.fullViewLinkNote}>(Opens interactive floor plan in a new tab)</p>
+            </div>
+
         </div>
     );
 }

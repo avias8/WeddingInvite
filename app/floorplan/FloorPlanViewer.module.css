@@ -1,0 +1,58 @@
+/* app/management/rsvp/floorplan/FloorPlanViewer.module.css */
+
+.viewerContainer {
+    padding: 1rem;
+    background-color: #f0f0f0; /* Light background */
+    min-height: 100vh;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.controls {
+    padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.backButton {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: var(--color-accent, #8fa88c);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+    font-family: var(--font-body);
+}
+
+.backButton:hover {
+     background-color: var(--color-secondary-accent, #21701a);
+}
+
+.instructions {
+    font-size: 0.85rem;
+    color: #555;
+    font-style: italic;
+}
+
+.visualizationWrapper {
+    width: 100%;
+    /* Force a large minimum width to make SVG render larger */
+    /* Adjust this value as needed */
+    min-width: 1200px;
+    /* Allow scrolling within this wrapper if content overflows */
+    overflow: auto;
+    border: 1px solid #ccc; /* Optional border */
+    background-color: #fff;
+}
+
+/* Target the SVG directly if needed, although min-width on wrapper is often enough */
+/* .visualizationWrapper > div > svg { */
+    /* min-width: 1200px; */ /* Example */
+/* } */
