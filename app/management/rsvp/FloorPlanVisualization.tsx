@@ -341,7 +341,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                         background: '#b3d4fc', // Avi color
                         border: '1px solid #7bb1e7'
                     }} />
-                    <span>Avi's Tables</span>
+                    <span>Avi&apos;s Tables</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{
@@ -352,7 +352,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                         background: '#ffd6b3', // Shakthi color
                         border: '1px solid #e7b97b'
                     }} />
-                    <span>Shakthi's Tables</span>
+                    <span>Shakthi&apos;s Tables</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{
