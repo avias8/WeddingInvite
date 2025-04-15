@@ -166,7 +166,7 @@
 
 /* Seat Group (for hover target) */
 .seatGroup {
-    cursor: default; /* Indicate hover is available */
+    cursor: pointer; /* Indicate clickability */
 }
 
 /* Seat Indicator Circle Styles */
@@ -235,6 +235,146 @@
     font-size: 0.8rem;
     color: #eee; /* Lighter grey for details */
     margin-top: 3px;
+}
+
+
+/* --- Assignment Error Popup --- */
+.assignErrorPopup {
+    position: fixed; /* Or absolute relative to container */
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ffcdd2; /* Light red */
+    color: #c62828; /* Dark red */
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 110; /* Above tooltip */
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+
+/* --- Assignment Action Modal Styles --- */
+.modalBackground {
+    position: fixed; /* Cover the whole viewport */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.65); /* Darker overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* High z-index */
+    padding: 1rem;
+}
+
+.modalContent {
+    background-color: #fff;
+    padding: 1.5rem 2rem;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 450px; /* Limit modal width */
+    text-align: center;
+    font-family: var(--font-body);
+}
+
+.modalTitle {
+    font-size: 1.5rem;
+    font-family: var(--font-wedding);
+    color: var(--color-text-primary);
+    margin-top: 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0.5rem;
+}
+
+.modalSection {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #eee;
+}
+.modalSection:first-of-type {
+    margin-top: 1rem;
+    padding-top: 0;
+    border-top: none;
+}
+
+
+.modalSection h4 {
+    font-size: 1.1rem;
+    color: var(--color-accent);
+    margin-bottom: 0.75rem;
+}
+
+.modalSelect {
+    width: 100%;
+    padding: 0.6rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    box-sizing: border-box; /* Include padding in width */
+}
+
+.modalButton {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    margin: 0.5rem 0.3rem;
+    min-width: 100px;
+    font-weight: bold;
+}
+
+.modalButton:hover {
+    transform: translateY(-1px);
+}
+
+.modalButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.7;
+}
+
+/* Specific button styles */
+.modalButton { /* Default/Assign/Move */
+    background-color: var(--color-accent, #81c784);
+    color: #fff;
+}
+.modalButton:hover:not(:disabled) {
+    background-color: #66bb6a; /* Darker green */
+}
+
+.unassignButton {
+    background-color: #ef9a9a; /* Light red */
+    color: #333;
+}
+.unassignButton:hover:not(:disabled) {
+    background-color: #e57373; /* Darker red */
+}
+
+.cancelButton {
+    background-color: #e0e0e0; /* Grey */
+    color: #333;
+}
+.cancelButton:hover:not(:disabled) {
+    background-color: #bdbdbd; /* Darker grey */
+}
+
+.modalInfo, .modalWarning {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 1rem;
+}
+.modalWarning {
+    color: #d32f2f;
+    font-weight: bold;
 }
 
 

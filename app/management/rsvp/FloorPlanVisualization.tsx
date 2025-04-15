@@ -1,14 +1,14 @@
 // app/management/rsvp/FloorPlanVisualization.tsx (React-based SVG)
-// Added custom tooltip on hover for guest details
+// Added Click-to-Assign/Unassign/Move functionality via Modal
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import styles from './FloorPlanVisualization.module.css';
-// Make sure Guest type includes all fields needed for tooltip
+// Ensure Guest type includes all needed fields from DB (id, name, tableId, dietary, access, inviteeId)
 import type { Guest, Table } from '@/app/types';
 
-// Interface for joined Table data including assigned guests
+// Interface for Table data including assigned guests array
 interface TableWithGuests extends Table {
     guests: Guest[];
 }
@@ -26,22 +26,20 @@ function getInitials(name: string): string {
     return `${firstInitial}${lastInitial}`.toUpperCase();
 }
 
-
 // Define the structure for layout properties of each table in the SVG
 interface TableLayout {
-    id: number;
+    id: number;         // Database Table ID
     x: number;
     y: number;
     width: number;
     height: number;
     capacity: number;
-    name: string;
-    displayName: string;
+    name: string;       // Database Table Name
+    displayName: string;// Label for SVG
 }
 
-// Layout Coordinates & Data Mapping (Using the final corrected array)
+// Layout Coordinates & Data Mapping (Final version based on user DB IDs)
 const TABLE_LAYOUTS: TableLayout[] = [
-    // ... (TABLE_LAYOUTS array remains the same) ...
     { id: 1, name: "Head Table", displayName: "Head", x: 300, y: 50, width: 400, height: 40, capacity: 16 },
     { id: 2, name: "Table 1", displayName: "1", x: 820, y: 100, width: 50, height: 150, capacity: 8 },
     { id: 3, name: "Table 2", displayName: "2", x: 820, y: 250, width: 50, height: 150, capacity: 8 },
@@ -72,10 +70,9 @@ const TABLE_LAYOUTS: TableLayout[] = [
 ];
 
 /**
- * Calculates seat positions. Uses seatRadius=10 for offset.
+ * Calculates seat positions.
  */
 function calculateSeatPositions(layout: TableLayout): { x: number, y: number }[] {
-    // ... (calculateSeatPositions function remains the same) ...
     const positions: { x: number, y: number }[] = [];
     const seatRadius = 10;
     const numSeats = layout.capacity;
@@ -110,54 +107,143 @@ interface FloorPlanVisualizationProps {
     fullView?: boolean;
 }
 
+// Define types for the modal target state
+type ModalTarget =
+    | { type: 'guest'; guest: Guest } // Clicked an occupied seat
+    | { type: 'seat'; tableId: number; seatIndex: number }; // Clicked an empty seat
+
 /**
- * Renders an SVG floor plan visualization with assigned guest initials
- * and a custom tooltip on hover showing guest details.
+ * Renders an SVG floor plan visualization with assigned guest initials,
+ * hover tooltips, and click-to-assign/unassign functionality via a modal.
  */
 export default function FloorPlanVisualization({ fullView = false }: FloorPlanVisualizationProps) {
-    const [assignedGuests, setAssignedGuests] = useState<Record<number, Guest[]>>({});
+    // State for all tables, including their assigned guests
+    const [tables, setTables] = useState<TableWithGuests[]>([]);
+    // State for guests not assigned to any table
+    const [unassignedGuests, setUnassignedGuests] = useState<Guest[]>([]);
+    // Loading and error states for data fetching
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    // State for assignment/API errors
+    const [assignError, setAssignError] = useState<string>("");
 
-    // *** State for Tooltip ***
+    // State for Tooltip
     const [tooltipVisible, setTooltipVisible] = useState<boolean>(false);
-    // Ensure Guest type includes needed fields (name, dietaryRestrictions, etc.)
     const [tooltipContent, setTooltipContent] = useState<Guest | null>(null);
     const [tooltipPosition, setTooltipPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
 
-    useEffect(() => {
-        // ... (fetchData logic remains the same) ...
-        async function fetchData() {
-            setLoading(true);
-            setError(null);
-            try {
-                const res = await fetch('/api/tables');
-                if (!res.ok) {
-                    throw new Error(`Failed to fetch tables: ${res.statusText}`);
-                }
-                // Ensure the API returns guests with all necessary fields
-                const data: TableWithGuests[] = await res.json();
-                const guestMap: Record<number, Guest[]> = {};
-                data.forEach(table => {
-                    if (table && typeof table.id === 'number') {
-                         guestMap[table.id] = table.guests?.filter(g => g.tableId === table.id) || [];
-                    }
-                });
-                setAssignedGuests(guestMap);
-            } catch (err) {
-                console.error("Error fetching floor plan data:", err);
-                setError(err instanceof Error ? err.message : "An unknown error occurred");
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchData();
-    }, []);
+    // State for Assignment Action Modal
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [modalTarget, setModalTarget] = useState<ModalTarget | null>(null);
 
-    // *** Tooltip Event Handlers ***
+    // --- Data Fetching ---
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            // Fetch both tables (with guests) and all guests in parallel
+            const [resTables, resGuests] = await Promise.all([
+                fetch('/api/tables'), // API must return tables with nested guest array
+                fetch('/api/guests')  // API returns all guests
+            ]);
+
+            if (!resTables.ok) throw new Error(`Failed to fetch tables: ${resTables.statusText}`);
+            if (!resGuests.ok) throw new Error(`Failed to fetch guests: ${resGuests.statusText}`);
+
+            const tablesData: TableWithGuests[] = await resTables.json();
+            const allGuestsData: Guest[] = await resGuests.json();
+
+            // Populate tables state (ensure guests array exists)
+            const tablesWithGuests = tablesData.map(t => ({
+                ...t,
+                guests: allGuestsData.filter(g => g.tableId === t.id) || []
+            }));
+            setTables(tablesWithGuests);
+
+            // Populate unassigned guests state
+            const unassigned = allGuestsData.filter(g => g.tableId === null);
+            setUnassignedGuests(unassigned);
+
+        } catch (err) {
+            console.error("Error fetching floor plan data:", err);
+            setError(err instanceof Error ? err.message : "An unknown error occurred");
+        } finally {
+            setLoading(false);
+        }
+    }, []); // useCallback dependency array is empty as it doesn't depend on component state/props
+
+    // Fetch data on initial mount
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]); // Include fetchData in dependency array
+
+
+    // --- API Call Functions ---
+    const assignGuest = async (guestId: number, tableId: number) => {
+        // Find the target table to check capacity
+        const targetTable = tables.find(t => t.id === tableId);
+        const guestToAssign = [...unassignedGuests, ...tables.flatMap(t => t.guests)].find(g => g.id === guestId);
+
+        if (!targetTable || !guestToAssign) {
+            console.error("Target table or guest not found for assignment");
+            setAssignError("Could not find table or guest.");
+            setTimeout(() => setAssignError(""), 3000);
+            return;
+        }
+
+        // Check capacity (only if assigning to a different table or from unassigned)
+        if (guestToAssign.tableId !== tableId && targetTable.guests.length >= targetTable.capacity) {
+            setAssignError(`Table "${targetTable.name}" is full (Capacity: ${targetTable.capacity}).`);
+            setTimeout(() => setAssignError(""), 3000);
+            return; // Stop assignment if table is full
+        }
+
+        setAssignError(""); // Clear previous errors
+        try {
+            const res = await fetch("/api/tables/assign", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ guestId, tableId }),
+            });
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error || "Failed to assign guest");
+            }
+            // Refetch data to ensure consistency after successful assignment
+            await fetchData();
+        } catch (error) {
+            console.error("Error assigning guest:", error);
+            const errMsg = error instanceof Error ? error.message : "Error assigning guest";
+            setAssignError(errMsg);
+            setTimeout(() => setAssignError(""), 3000); // Clear error after 3s
+        }
+    };
+
+    const unassignGuest = async (guestId: number) => {
+        setAssignError(""); // Clear previous errors
+        try {
+            const res = await fetch("/api/tables/unassign", {
+                method: "DELETE", // Use DELETE for unassigning
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ guestId }),
+            });
+            if (!res.ok) {
+                 const errData = await res.json();
+                 throw new Error(errData.error || "Failed to unassign guest");
+            }
+             // Refetch data to ensure consistency after successful unassignment
+            await fetchData();
+        } catch (error) {
+            console.error("Error unassigning guest:", error);
+             const errMsg = error instanceof Error ? error.message : "Error unassigning guest";
+            setAssignError(errMsg);
+            setTimeout(() => setAssignError(""), 3000); // Clear error after 3s
+        }
+    };
+
+    // --- Event Handlers ---
     const handleMouseEnter = (event: React.MouseEvent, guest: Guest) => {
         setTooltipContent(guest);
-        // Position tooltip slightly offset from cursor
         setTooltipPosition({ x: event.clientX + 10, y: event.clientY + 10 });
         setTooltipVisible(true);
     };
@@ -167,6 +253,37 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
         setTooltipContent(null);
     };
 
+    const handleSeatClick = (event: React.MouseEvent, tableId: number, seatIndex: number, guest: Guest | null) => {
+        event.stopPropagation(); // Prevent triggering clicks on elements behind
+        if (guest) {
+            // Clicked an occupied seat
+            setModalTarget({ type: 'guest', guest: guest });
+        } else {
+            // Clicked an empty seat
+            setModalTarget({ type: 'seat', tableId: tableId, seatIndex: seatIndex });
+        }
+        setIsModalOpen(true); // Open the modal
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setModalTarget(null);
+    };
+
+    // Handler for actions within the modal
+    const handleModalAction = async (action: 'assign' | 'unassign' | 'move', data: any) => {
+        closeModal(); // Close modal immediately
+        if (action === 'assign') {
+            await assignGuest(data.guestId, data.tableId);
+        } else if (action === 'unassign') {
+            await unassignGuest(data.guestId);
+        } else if (action === 'move') {
+            await assignGuest(data.guestId, data.newTableId); // Assign handles moving logic
+        }
+    };
+
+
+    // --- Render Logic ---
     if (loading) return <div className={styles.loading}>Loading Floor Plan...</div>;
     if (error) return <div className={styles.error}>Error loading data: {error}</div>;
 
@@ -184,10 +301,15 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
     const containerClassName = containerClasses.join(' ');
 
     return (
-        // Use a relative container to potentially position tooltip absolutely if needed
-        // but fixed positioning based on mouse is generally easier
         <div className={containerClassName} style={{ position: 'relative' }}>
             {!fullView && <h2 className={styles.mainTitle}>Floor Plan Visualization</h2>}
+
+             {/* Display assignment errors */}
+             {assignError && (
+                <div className={styles.assignErrorPopup}>
+                    <span role="img" aria-label="error">😢</span> {assignError}
+                </div>
+            )}
 
             <svg viewBox="0 0 1000 1350" className={styles.floorPlanSvg}>
                 {/* ... (Background, Border, Wall Labels, Static Elements remain the same) ... */}
@@ -216,33 +338,37 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
 
                 {/* Render Tables and Seats Dynamically */}
                 {TABLE_LAYOUTS.map(layout => {
-                    const guestsAtTable = typeof layout.id === 'number' ? (assignedGuests[layout.id] || []) : [];
+                    // Find the corresponding table data from state, including guests
+                    const currentTableData = tables.find(t => t.id === layout.id);
+                    const guestsAtTable = currentTableData?.guests || [];
                     const seatPositions = calculateSeatPositions(layout);
+
                     return (
                         <g key={layout.id} transform={`translate(${layout.x}, ${layout.y})`} className={styles.tableGroup}>
-                            {/* ... Table rect and label ... */}
-                             <rect x={0} y={0} width={layout.width} height={layout.height} className={styles.tableRect} />
-                             <text x={layout.width / 2} y={layout.height / 2 + 5} className={styles.tableLabel} textAnchor="middle">
-                                 {layout.displayName}
-                             </text>
+                            {/* Table Rect - Could potentially add onClick here too */}
+                            <rect x={0} y={0} width={layout.width} height={layout.height} className={styles.tableRect} />
+                            <text x={layout.width / 2} y={layout.height / 2 + 5} className={styles.tableLabel} textAnchor="middle">
+                                {layout.displayName}
+                            </text>
                             {/* Seats */}
                             {seatPositions.map((pos, index) => {
-                                const guest = guestsAtTable[index];
+                                const guest = guestsAtTable[index]; // Guest object or undefined
                                 const displayLabel = guest ? getInitials(guest.name) : '';
                                 const seatClass = guest ? styles.seatOccupied : styles.seatEmpty;
                                 const seatKey = `seat-${layout.id}-${index}`;
                                 return (
-                                    // *** Add mouse event handlers to the seat group ***
                                     <g
                                         key={seatKey}
                                         transform={`translate(${pos.x}, ${pos.y})`}
                                         className={styles.seatGroup}
                                         onMouseEnter={(e) => guest && handleMouseEnter(e, guest)}
                                         onMouseLeave={handleMouseLeave}
+                                        // *** Add onClick handler to the seat group ***
+                                        onClick={(e) => handleSeatClick(e, layout.id, index, guest || null)}
+                                        style={{ cursor: 'pointer' }} // Indicate clickability
                                     >
-                                        {/* Remove the <title> element */}
-                                        {/* {guest && <title>{guest.name}</title>} */}
-
+                                        {/* Tooltip for hover */}
+                                        {guest && <title>{guest.name}</title>}
                                         {/* Seat circle indicator */}
                                         <circle cx="0" cy="0" r="10" className={seatClass} />
                                         {/* Initials label inside circle */}
@@ -273,28 +399,191 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                 </div>
             )}
 
-            {/* *** Conditionally Render Tooltip *** */}
+            {/* Conditionally Render Tooltip */}
             {tooltipVisible && tooltipContent && (
                 <div
                     className={styles.tooltip}
-                    style={{
-                        left: `${tooltipPosition.x}px`,
-                        top: `${tooltipPosition.y}px`,
-                    }}
+                    style={{ left: `${tooltipPosition.x}px`, top: `${tooltipPosition.y}px` }}
                 >
                     <div className={styles.tooltipName}>{tooltipContent.name}</div>
-                    {/* Add other details - check if they exist */}
                     {tooltipContent.dietaryRestrictions && (
                          <div className={styles.tooltipDetail}>Diet: {tooltipContent.dietaryRestrictions}</div>
                     )}
                      {tooltipContent.accessibilityInfo && (
                          <div className={styles.tooltipDetail}>Access: {tooltipContent.accessibilityInfo}</div>
                     )}
-                    {/* Add more fields as needed */}
-                    {/* <div className={styles.tooltipDetail}>Guest ID: {tooltipContent.id}</div> */}
-                    {/* <div className={styles.tooltipDetail}>Invitee ID: {tooltipContent.inviteeId}</div> */}
                 </div>
             )}
+
+             {/* Conditionally Render Assignment Modal */}
+             {isModalOpen && modalTarget && (
+                <AssignmentActionModal
+                    isOpen={isModalOpen}
+                    onClose={closeModal}
+                    target={modalTarget}
+                    unassignedGuests={unassignedGuests}
+                    tables={tables} // Pass full tables data with guests
+                    onAssign={handleModalAction}
+                    onUnassign={handleModalAction}
+                    onMove={handleModalAction} // Use assign function for move
+                />
+             )}
         </div>
     );
 }
+
+
+// --- Assignment Action Modal Component ---
+interface AssignmentActionModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    target: ModalTarget;
+    unassignedGuests: Guest[];
+    tables: TableWithGuests[]; // Receive tables with guest info for capacity check
+    onAssign: (action: 'assign' | 'move', data: { guestId: number; tableId: number; newTableId?: number }) => void;
+    onUnassign: (action: 'unassign', data: { guestId: number }) => void;
+    onMove: (action: 'move', data: { guestId: number; newTableId: number }) => void;
+}
+
+function AssignmentActionModal({
+    isOpen,
+    onClose,
+    target,
+    unassignedGuests,
+    tables,
+    onAssign,
+    onUnassign,
+    onMove
+}: AssignmentActionModalProps) {
+
+    const [selectedGuestId, setSelectedGuestId] = useState<string>(''); // For assigning unassigned
+    const [selectedMoveTableId, setSelectedMoveTableId] = useState<string>(''); // For moving assigned
+
+    // Reset local state when modal opens or target changes
+    useEffect(() => {
+        if (isOpen && target?.type === 'seat' && unassignedGuests.length > 0) {
+            setSelectedGuestId(unassignedGuests[0].id.toString());
+        } else {
+            setSelectedGuestId('');
+        }
+
+        if (isOpen && target?.type === 'guest') {
+            // Pre-select a valid different table if possible
+            const firstAvailableTable = tables.find(t => t.id !== target.guest.tableId && t.guests.length < t.capacity);
+            setSelectedMoveTableId(firstAvailableTable ? firstAvailableTable.id.toString() : '');
+        } else {
+            setSelectedMoveTableId('');
+        }
+    }, [isOpen, target, unassignedGuests, tables]);
+
+
+    if (!isOpen) return null;
+
+    // --- Render logic based on target type ---
+
+    // Case 1: Clicked an OCCUPIED seat
+    if (target.type === 'guest') {
+        const currentGuest = target.guest;
+        const currentTable = tables.find(t => t.id === currentGuest.tableId);
+        // Filter tables for moving: different from current and not full
+        const availableMoveTables = tables.filter(t =>
+            t.id !== currentGuest.tableId && t.guests.length < t.capacity
+        );
+
+        return (
+            <div className={styles.modalBackground} onClick={onClose}>
+                <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                    <h3 className={styles.modalTitle}>{currentGuest.name}</h3>
+                    <p>Currently at: {currentTable?.name || 'Unassigned?'}</p>
+
+                    <div className={styles.modalSection}>
+                        <h4>Move Guest</h4>
+                        {availableMoveTables.length > 0 ? (
+                            <>
+                                <select
+                                    value={selectedMoveTableId}
+                                    onChange={(e) => setSelectedMoveTableId(e.target.value)}
+                                    className={styles.modalSelect}
+                                >
+                                    <option value="" disabled>Select new table...</option>
+                                    {availableMoveTables.map(table => (
+                                        <option key={table.id} value={table.id}>
+                                            {table.name} ({table.guests.length}/{table.capacity})
+                                        </option>
+                                    ))}
+                                </select>
+                                <button
+                                    onClick={() => onMove('move', { guestId: currentGuest.id, newTableId: parseInt(selectedMoveTableId) })}
+                                    disabled={!selectedMoveTableId}
+                                    className={styles.modalButton}
+                                >
+                                    Move Guest
+                                </button>
+                            </>
+                        ) : (
+                            <p className={styles.modalInfo}>No other tables with available space.</p>
+                        )}
+                    </div>
+
+                    <div className={styles.modalSection}>
+                        <h4>Unassign Guest</h4>
+                        <button
+                            onClick={() => onUnassign('unassign', { guestId: currentGuest.id })}
+                            className={`${styles.modalButton} ${styles.unassignButton}`}
+                        >
+                            Unassign (Send to List)
+                        </button>
+                    </div>
+
+                    <button onClick={onClose} className={`${styles.modalButton} ${styles.cancelButton}`}>Cancel</button>
+                </div>
+            </div>
+        );
+    }
+
+    // Case 2: Clicked an EMPTY seat
+    if (target.type === 'seat') {
+        const targetTable = tables.find(t => t.id === target.tableId);
+        const isTableFull = targetTable ? targetTable.guests.length >= targetTable.capacity : true;
+
+        return (
+            <div className={styles.modalBackground} onClick={onClose}>
+                <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                    <h3 className={styles.modalTitle}>Assign Guest to {targetTable?.name || `Table ID ${target.tableId}`}</h3>
+
+                    {isTableFull ? (
+                         <p className={styles.modalWarning}>This table is full!</p>
+                    ) : unassignedGuests.length === 0 ? (
+                        <p className={styles.modalInfo}>No unassigned guests available.</p>
+                    ) : (
+                        <>
+                            <select
+                                value={selectedGuestId}
+                                onChange={(e) => setSelectedGuestId(e.target.value)}
+                                className={styles.modalSelect}
+                            >
+                                {/* Default option removed to ensure selection */}
+                                {unassignedGuests.map(guest => (
+                                    <option key={guest.id} value={guest.id}>
+                                        {guest.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <button
+                                onClick={() => onAssign('assign', { guestId: parseInt(selectedGuestId), tableId: target.tableId })}
+                                disabled={!selectedGuestId} // Disable if no guest is selected
+                                className={styles.modalButton}
+                            >
+                                Assign Guest
+                            </button>
+                        </>
+                    )}
+                     <button onClick={onClose} className={`${styles.modalButton} ${styles.cancelButton}`}>Cancel</button>
+                </div>
+            </div>
+        );
+    }
+
+    return null; // Should not happen if target is set correctly
+}
+
