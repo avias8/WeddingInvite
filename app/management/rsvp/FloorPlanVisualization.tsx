@@ -442,16 +442,14 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
     );
 }
 
-
-// --- Assignment Action Modal Component ---
-// --- Assignment Action Modal Component ---
+// --- Assignment Action Modal Component (Updated to show COMPREHENSIVE Invitee details) ---
 interface AssignmentActionModalProps {
     isOpen: boolean;
     onClose: () => void;
     target: ModalTarget;
     unassignedGuests: Guest[];
     tables: TableWithGuests[];
-    invitees: Invitee[];
+    invitees: Invitee[]; // Added invitees prop type
     onAssign: (action: 'assign', data: { guestId: number; tableId: number }) => void;
     onUnassign: (action: 'unassign', data: { guestId: number }) => void;
     onMove: (action: 'move', data: { guestId: number; newTableId: number }) => void;
@@ -463,7 +461,7 @@ function AssignmentActionModal({
     target,
     unassignedGuests,
     tables,
-    invitees, // Destructure invitees from props
+    invitees, // Destructure invitees
     onAssign,
     onUnassign,
     onMove
@@ -490,12 +488,29 @@ function AssignmentActionModal({
 
     if (!isOpen) return null;
 
+    // --- Helper Function to Format Dates ---
+    const formatDate = (dateString: string | null | undefined) => {
+        if (!dateString) return 'N/A';
+        try {
+            return new Date(dateString).toLocaleString();
+        } catch (e) {
+            return 'Invalid Date';
+        }
+    };
+
+    // --- Helper Function to Format RSVP Status ---
+     const formatRsvpStatus = (status: boolean | null | undefined) => {
+        if (status === true) return 'Yes';
+        if (status === false) return 'No';
+        return 'Pending';
+    };
+
+
     // Case 1: Clicked an OCCUPIED seat
     if (target.type === 'guest') {
         const currentGuest = target.guest;
         const currentTable = tables.find(t => t.id === currentGuest.tableId);
-        // *** Find the parent Invitee record ***
-        const invitee = invitees.find(inv => inv.id === currentGuest.inviteeId);
+        const invitee = invitees.find(inv => inv.id === currentGuest.inviteeId); // Find parent Invitee
         const availableMoveTables = tables.filter(t =>
             t.id !== currentGuest.tableId && t.guests.length < t.capacity
         );
@@ -507,43 +522,54 @@ function AssignmentActionModal({
 
                     {/* Guest Details Section */}
                     <div className={styles.modalGuestDetails}>
-                         <p>Currently at: {currentTable?.name || 'Unassigned?'}</p>
+                         <p>Assigned Table: {currentTable?.name || 'Unassigned?'}</p>
                          {/* Display Guest Specific Details */}
-                         {currentGuest.dietaryRestrictions && <p>Diet: {currentGuest.dietaryRestrictions}</p>}
-                         {currentGuest.accessibilityInfo && <p>Access: {currentGuest.accessibilityInfo}</p>}
+                         {currentGuest.dietaryRestrictions && <p>Guest Diet: {currentGuest.dietaryRestrictions}</p>}
+                         {currentGuest.accessibilityInfo && <p>Guest Access: {currentGuest.accessibilityInfo}</p>}
                     </div>
 
-                    {/* *** ADDED Invitee Details Section *** */}
+                    {/* Invitee Details Section - EXPANDED */}
                     {invitee && (
                         <div className={styles.modalInviteeSection}>
                             <h4>Party Details (Invitee: {invitee.name})</h4>
+                            <p>Email: {invitee.email || 'N/A'}</p>
+                            <p>RSVP Status: {formatRsvpStatus(invitee.isAttending)}</p>
+                            <p>Party Size: {invitee.guests} / {invitee.maxInvites}</p>
+                            <p>Responded At: {formatDate(invitee.respondedAt)}</p>
+                            {invitee.dietaryRestrictions && <p>Party Diet Notes: {invitee.dietaryRestrictions}</p>}
+                            {invitee.accessibilityInfo && <p>Party Access Notes: {invitee.accessibilityInfo}</p>}
                             {invitee.comments && <p>Comments: {invitee.comments}</p>}
                             {invitee.songRequests && <p>Song Requests: {invitee.songRequests}</p>}
-                            {/* Add any other invitee fields you want to display */}
-                            {!invitee.comments && !invitee.songRequests && <p>No additional party details provided.</p>}
+                            <p>Email Sent: {formatDate(invitee.emailSentAt)}</p>
+                            <p>Email Opened: {formatDate(invitee.emailOpenedAt)}</p>
                         </div>
                     )}
                     {/* ************************************** */}
 
 
+                    {/* Move Guest Section */}
                     <div className={styles.modalSection}>
-                        <h4>Move Guest</h4>
-                        {availableMoveTables.length > 0 ? (
-                            <>
-                                <select value={selectedMoveTableId} onChange={(e) => setSelectedMoveTableId(e.target.value)} className={styles.modalSelect}>
-                                    <option value="" disabled>Select new table...</option>
-                                    {availableMoveTables.map(table => ( <option key={table.id} value={table.id}> {table.name} ({table.guests.length}/{table.capacity}) </option> ))}
-                                </select>
-                                <button onClick={() => onMove('move', { guestId: currentGuest.id, newTableId: parseInt(selectedMoveTableId) })} disabled={!selectedMoveTableId} className={styles.modalButton}> Move Guest </button>
-                            </>
-                        ) : ( <p className={styles.modalInfo}>No other tables with available space.</p> )}
+                        {/* ... (Move Guest Select and Button) ... */}
+                         <h4>Move Guest</h4>
+                         {availableMoveTables.length > 0 ? (
+                             <>
+                                 <select value={selectedMoveTableId} onChange={(e) => setSelectedMoveTableId(e.target.value)} className={styles.modalSelect}>
+                                     <option value="" disabled>Select new table...</option>
+                                     {availableMoveTables.map(table => ( <option key={table.id} value={table.id}> {table.name} ({table.guests.length}/{table.capacity}) </option> ))}
+                                 </select>
+                                 <button onClick={() => onMove('move', { guestId: currentGuest.id, newTableId: parseInt(selectedMoveTableId) })} disabled={!selectedMoveTableId} className={styles.modalButton}> Move Guest </button>
+                             </>
+                         ) : ( <p className={styles.modalInfo}>No other tables with available space.</p> )}
                     </div>
 
+                    {/* Unassign Guest Section */}
                     <div className={styles.modalSection}>
-                        <h4>Unassign Guest</h4>
-                        <button onClick={() => onUnassign('unassign', { guestId: currentGuest.id })} className={`${styles.modalButton} ${styles.unassignButton}`}> Unassign (Send to List) </button>
+                        {/* ... (Unassign Button) ... */}
+                         <h4>Unassign Guest</h4>
+                         <button onClick={() => onUnassign('unassign', { guestId: currentGuest.id })} className={`${styles.modalButton} ${styles.unassignButton}`}> Unassign (Send to List) </button>
                     </div>
 
+                    {/* Cancel Button */}
                     <button onClick={onClose} className={`${styles.modalButton} ${styles.cancelButton}`}>Cancel</button>
                 </div>
             </div>
