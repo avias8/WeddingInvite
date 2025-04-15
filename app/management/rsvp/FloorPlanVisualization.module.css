@@ -13,10 +13,12 @@
     width: 100%;
     box-sizing: border-box;
 }
+
 .constrainedWidth {
     margin: 1.5rem auto;
     max-width: 1200px;
 }
+
 .mainTitle {
     text-align: center;
     font-size: clamp(1.6rem, 4vw, 2rem);
@@ -26,6 +28,7 @@
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--color-border, #eee);
 }
+
 .loading,
 .error {
     text-align: center;
@@ -34,51 +37,214 @@
     color: var(--color-text-secondary, #666);
     font-family: var(--font-body);
 }
+
 .error {
-    color: #d32f2f; /* A distinct error color */
+    color: #d32f2f;
+    /* A distinct error color */
     font-weight: bold;
 }
 
 /* --- SVG Canvas --- */
 .floorPlanSvg {
     width: 100%;
-    height: auto; /* Maintain aspect ratio */
-    display: block; /* Remove extra space below SVG */
-    background-color: #fff; /* White background for the drawing area */
+    height: auto;
+    /* Maintain aspect ratio */
+    display: block;
+    /* Remove extra space below SVG */
+    background-color: #fff;
+    /* White background for the drawing area */
 }
 
 /* --- Static SVG Elements --- */
-.venueBackground { fill: #f9f9f9; stroke: none; }
-.outerBorder { fill: none; stroke: var(--color-text-primary, #555); stroke-width: 2px; rx: 5; ry: 5; }
-.wallLabel { font-size: 11px; font-family: var(--font-body, sans-serif); fill: var(--color-text-secondary, #777); font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
-.danceFloor { fill: #e0f2f7; stroke: #b3e5fc; stroke-width: 1px; }
-.djBooth { fill: #fce4ec; stroke: #f8bbd0; stroke-width: 1px; }
-.buffetArea { fill: #fff9c4; stroke: #fff59d; stroke-width: 1px; }
-.drinksArea { fill: #e3f2fd; stroke: #bbdefb; stroke-width: 1px; }
-.catererEntranceArea { fill: #eeeeee; stroke: #bdbdbd; stroke-width: 1px; }
-.guestBookArea { fill: #f3e5f5; stroke: #e1bee7; stroke-width: 1px; }
-.entranceFrame { fill: none; stroke: var(--color-border, #ccc); stroke-width: 1.5px; rx: 4; ry: 4; }
-.garbageArea { /* Styles for the group if needed */ }
-.garbageBin { fill: #bdbdbd; stroke: #757575; stroke-width: 1px; }
-.labelText { font-size: 10px; font-family: var(--font-body, sans-serif); fill: #666; text-anchor: middle; dominant-baseline: middle; pointer-events: none; font-weight: 500; }
+.venueBackground {
+    fill: #f9f9f9;
+    stroke: none;
+}
+
+.outerBorder {
+    fill: none;
+    stroke: var(--color-text-primary, #555);
+    stroke-width: 2px;
+    rx: 5;
+    ry: 5;
+}
+
+.wallLabel {
+    font-size: 11px;
+    font-family: var(--font-body, sans-serif);
+    fill: var(--color-text-secondary, #777);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.danceFloor {
+    fill: #e0f2f7;
+    stroke: #b3e5fc;
+    stroke-width: 1px;
+}
+
+.djBooth {
+    fill: #fce4ec;
+    stroke: #f8bbd0;
+    stroke-width: 1px;
+}
+
+.buffetArea {
+    fill: #fff9c4;
+    stroke: #fff59d;
+    stroke-width: 1px;
+}
+
+.drinksArea {
+    fill: #e3f2fd;
+    stroke: #bbdefb;
+    stroke-width: 1px;
+}
+
+.catererEntranceArea {
+    fill: #eeeeee;
+    stroke: #bdbdbd;
+    stroke-width: 1px;
+}
+
+.guestBookArea {
+    fill: #f3e5f5;
+    stroke: #e1bee7;
+    stroke-width: 1px;
+}
+
+.entranceFrame {
+    fill: none;
+    stroke: var(--color-border, #ccc);
+    stroke-width: 1.5px;
+    rx: 4;
+    ry: 4;
+}
+
+.garbageBin {
+    fill: #bdbdbd;
+    stroke: #757575;
+    stroke-width: 1px;
+}
+
+.labelText {
+    font-size: 10px;
+    font-family: var(--font-body, sans-serif);
+    fill: #666;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+    font-weight: 500;
+}
 
 /* --- Dynamic Table/Seat Elements --- */
-.tableGroup { transition: transform 0.3s ease; }
-.tableRect { fill: var(--color-background-light, #fff8e1); stroke: var(--color-border, #ffe0b2); stroke-width: 1.5px; rx: 3; ry: 3; }
-.tableLabel { font-size: 11px; font-weight: bold; fill: var(--color-text-primary, #444); font-family: var(--font-body, sans-serif); pointer-events: none; text-anchor: middle; dominant-baseline: middle; }
-.seatGroup { cursor: pointer; }
-.seatEmpty { fill: #f5f5f5; stroke: #e0e0e0; stroke-width: 1px; transition: fill 0.2s ease; }
-.seatOccupied { fill: var(--color-accent-light, #c8e6c9); stroke: var(--color-accent, #81c784); stroke-width: 1px; transition: fill 0.2s ease; }
-.seatInitial { font-size: 8px; font-weight: bold; fill: var(--color-text-secondary, #444); font-family: var(--font-body, sans-serif); pointer-events: none; text-anchor: middle; dominant-baseline: middle; transition: fill 0.2s ease; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
+.tableGroup {
+    transition: transform 0.3s ease;
+}
+
+.tableRect {
+    fill: var(--color-background-light, #fff8e1);
+    stroke: var(--color-border, #ffe0b2);
+    stroke-width: 1.5px;
+    rx: 3;
+    ry: 3;
+}
+
+.tableLabel {
+    font-size: 11px;
+    font-weight: bold;
+    fill: var(--color-text-primary, #444);
+    font-family: var(--font-body, sans-serif);
+    pointer-events: none;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.seatGroup {
+    cursor: pointer;
+}
+
+.seatEmpty {
+    fill: #f5f5f5;
+    stroke: #e0e0e0;
+    stroke-width: 1px;
+    transition: fill 0.2s ease;
+}
+
+.seatOccupied {
+    fill: var(--color-accent-light, #c8e6c9);
+    stroke: var(--color-accent, #81c784);
+    stroke-width: 1px;
+    transition: fill 0.2s ease;
+}
+
+.seatInitial {
+    font-size: 8px;
+    font-weight: bold;
+    fill: var(--color-text-secondary, #444);
+    font-family: var(--font-body, sans-serif);
+    pointer-events: none;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    transition: fill 0.2s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
 
 /* --- Custom Tooltip Styles --- */
-.tooltip { position: fixed; background-color: rgba(0, 0, 0, 0.8); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; font-family: var(--font-body, sans-serif); z-index: 100; pointer-events: none; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.2); opacity: 0; animation: fadeInTooltip 0.2s forwards; }
-@keyframes fadeInTooltip { to { opacity: 1; } }
-.tooltipName { font-weight: bold; margin-bottom: 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.3); padding-bottom: 3px; }
-.tooltipDetail { font-size: 0.8rem; color: #eee; margin-top: 3px; }
+.tooltip {
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: var(--font-body, sans-serif);
+    z-index: 100;
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    animation: fadeInTooltip 0.2s forwards;
+}
+
+@keyframes fadeInTooltip {
+    to {
+        opacity: 1;
+    }
+}
+
+.tooltipName {
+    font-weight: bold;
+    margin-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    padding-bottom: 3px;
+}
+
+.tooltipDetail {
+    font-size: 0.8rem;
+    color: #eee;
+    margin-top: 3px;
+}
 
 /* --- Assignment Error Popup --- */
-.assignErrorPopup { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #ffcdd2; color: #c62828; padding: 10px 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 110; font-size: 0.9rem; font-weight: bold; }
+.assignErrorPopup {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ffcdd2;
+    color: #c62828;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 110;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
 
 
 /* --- Assignment Action Modal Styles (Sleek Update) --- */
@@ -88,7 +254,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.75); /* Slightly darker overlay */
+    background-color: rgba(0, 0, 0, 0.75);
+    /* Slightly darker overlay */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -97,12 +264,16 @@
 }
 
 .modalContent {
-    background-color: #2d2d2d; /* Dark background */
-    color: #e0e0e0; /* Light grey text */
+    background-color: #2d2d2d;
+    /* Dark background */
+    color: #e0e0e0;
+    /* Light grey text */
     padding: 1.5rem 2rem;
     border-radius: 8px;
-    border: 1px solid #444; /* Subtle border */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* Stronger shadow */
+    border: 1px solid #444;
+    /* Subtle border */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    /* Stronger shadow */
     width: 100%;
     max-width: 450px;
     text-align: center;
@@ -112,18 +283,25 @@
 .modalTitle {
     font-size: 1.5rem;
     font-family: var(--font-wedding);
-    color: #fff; /* White title */
+    color: #fff;
+    /* White title */
     margin-top: 0;
-    margin-bottom: 1.5rem; /* Increased spacing */
-    padding-bottom: 0.75rem; /* Increased padding */
-    border-bottom: 1px solid #555; /* Darker border */
+    margin-bottom: 1.5rem;
+    /* Increased spacing */
+    padding-bottom: 0.75rem;
+    /* Increased padding */
+    border-bottom: 1px solid #555;
+    /* Darker border */
 }
 
 .modalSection {
     margin-top: 1.5rem;
-    padding-top: 1.5rem; /* More spacing */
-    border-top: 1px solid #444; /* Darker separator */
+    padding-top: 1.5rem;
+    /* More spacing */
+    border-top: 1px solid #444;
+    /* Darker separator */
 }
+
 .modalSection:first-of-type {
     margin-top: 1rem;
     padding-top: 0;
@@ -133,22 +311,28 @@
 
 .modalSection h4 {
     font-size: 1.1rem;
-    color: var(--color-accent-light, #c8e6c9); /* Use light accent color */
+    color: var(--color-accent-light, #c8e6c9);
+    /* Use light accent color */
     margin-bottom: 0.75rem;
     font-weight: bold;
 }
 
 .modalSelect {
     width: 100%;
-    padding: 0.7rem 0.8rem; /* Adjust padding */
+    padding: 0.7rem 0.8rem;
+    /* Adjust padding */
     margin-bottom: 1rem;
-    border: 1px solid #555; /* Darker border */
+    border: 1px solid #555;
+    /* Darker border */
     border-radius: 4px;
     font-size: 0.95rem;
     box-sizing: border-box;
-    background-color: #333; /* Dark select background */
-    color: #eee; /* Light select text */
+    background-color: #333;
+    /* Dark select background */
+    color: #eee;
+    /* Light select text */
 }
+
 .modalSelect option {
     background-color: #333;
     color: #eee;
@@ -156,8 +340,10 @@
 
 
 .modalButton {
-    padding: 0.7rem 1.3rem; /* Slightly larger padding */
-    border: 1px solid transparent; /* Base border */
+    padding: 0.7rem 1.3rem;
+    /* Slightly larger padding */
+    border: 1px solid transparent;
+    /* Base border */
     border-radius: 5px;
     font-size: 0.95rem;
     cursor: pointer;
@@ -172,7 +358,8 @@
 }
 
 .modalButton:disabled {
-    background-color: #555 !important; /* Darker disabled background */
+    background-color: #555 !important;
+    /* Darker disabled background */
     color: #999 !important;
     border-color: #555 !important;
     cursor: not-allowed;
@@ -181,55 +368,111 @@
 }
 
 /* Specific button styles - Dark Theme */
-.modalButton { /* Default/Assign/Move */
-    background-color: var(--color-accent, #689f38); /* Using a darker green accent */
+.modalButton {
+    /* Default/Assign/Move */
+    background-color: var(--color-accent, #689f38);
+    /* Using a darker green accent */
     border-color: var(--color-accent, #689f38);
     color: #fff;
 }
+
 .modalButton:hover:not(:disabled) {
-    background-color: #7cb342; /* Lighter green on hover */
+    background-color: #7cb342;
+    /* Lighter green on hover */
     border-color: #7cb342;
 }
 
 .unassignButton {
-    background-color: #d32f2f; /* Red */
+    background-color: #d32f2f;
+    /* Red */
     border-color: #d32f2f;
     color: #fff;
 }
+
 .unassignButton:hover:not(:disabled) {
-    background-color: #e57373; /* Lighter red */
+    background-color: #e57373;
+    /* Lighter red */
     border-color: #e57373;
 }
 
 /* Cancel Button - Ghost style */
 .cancelButton {
     background-color: transparent;
-    color: #ccc; /* Light grey text */
-    border: 1px solid #555; /* Grey border */
+    color: #ccc;
+    /* Light grey text */
+    border: 1px solid #555;
+    /* Grey border */
 }
+
 .cancelButton:hover:not(:disabled) {
-    background-color: #444; /* Slight background on hover */
+    background-color: #444;
+    /* Slight background on hover */
     color: #fff;
     border-color: #666;
 }
 
-.modalInfo, .modalWarning {
+.modalInfo,
+.modalWarning {
     font-size: 0.9rem;
-    color: #ccc; /* Light grey info text */
+    color: #ccc;
+    /* Light grey info text */
     margin-bottom: 1rem;
 }
+
 .modalWarning {
-    color: #ef9a9a; /* Light red warning text */
+    color: #ef9a9a;
+    /* Light red warning text */
     font-weight: bold;
 }
 
 
 /* --- Full View Link --- */
-.fullViewLinkContainer { margin-top: 1.5rem; text-align: center; padding-top: 1rem; border-top: 1px solid var(--color-border, #eee); }
-.fullViewLinkButton { display: inline-block; padding: 0.6rem 1.2rem; background-color: var(--color-accent, #8fa88c); color: #fff; font-family: var(--font-body, sans-serif); font-size: 0.9rem; font-weight: bold; text-decoration: none; border-radius: 2rem; border: none; cursor: pointer; transition: background-color 0.3s ease, transform 0.1s ease; }
-.fullViewLinkButton:hover { background-color: var(--color-secondary-accent, #21701a); transform: translateY(-1px); }
-.fullViewLinkNote { font-size: 0.8rem; color: var(--color-text-secondary, #666); margin-top: 0.5rem; }
+.fullViewLinkContainer {
+    margin-top: 1.5rem;
+    text-align: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border, #eee);
+}
+
+.fullViewLinkButton {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    background-color: var(--color-accent, #8fa88c);
+    color: #fff;
+    font-family: var(--font-body, sans-serif);
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 2rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.fullViewLinkButton:hover {
+    background-color: var(--color-secondary-accent, #21701a);
+    transform: translateY(-1px);
+}
+
+.fullViewLinkNote {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary, #666);
+    margin-top: 0.5rem;
+}
 
 /* --- Full View Mode Overrides --- */
-.fullViewContainer { max-width: none; margin: 0; padding: 0.5rem; border: none; box-shadow: none; border-radius: 0; overflow: visible; }
-.fullViewContainer .floorPlanSvg { border-radius: 0; border: none; background-color: #f0f0f0; }
+.fullViewContainer {
+    max-width: none;
+    margin: 0;
+    padding: 0.5rem;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    overflow: visible;
+}
+
+.fullViewContainer .floorPlanSvg {
+    border-radius: 0;
+    border: none;
+    background-color: #f0f0f0;
+}
