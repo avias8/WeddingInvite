@@ -1,5 +1,5 @@
 /* app/management/rsvp/FloorPlanVisualization.module.css */
-/* Final Consolidated Version */
+/* Final Consolidated Version + Sleek Modal Styles */
 
 /* --- Base Component Container --- */
 .visualizationContainer {
@@ -8,20 +8,15 @@
     border: 1px solid var(--color-border, #ddd);
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    /* Default view is constrained by .constrainedWidth */
     overflow: hidden;
     position: relative;
-    width: 100%; /* Takes width of parent, constrained by constrainedWidth */
+    width: 100%;
     box-sizing: border-box;
 }
-
-/* --- Class applied for default constrained view --- */
 .constrainedWidth {
-    margin: 1.5rem auto;  /* Centers the container */
-    max-width: 1200px; /* Limits the width */
+    margin: 1.5rem auto;
+    max-width: 1200px;
 }
-
-
 .mainTitle {
     text-align: center;
     font-size: clamp(1.6rem, 4vw, 2rem);
@@ -31,7 +26,6 @@
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--color-border, #eee);
 }
-
 .loading,
 .error {
     text-align: center;
@@ -40,7 +34,6 @@
     color: var(--color-text-secondary, #666);
     font-family: var(--font-body);
 }
-
 .error {
     color: #d32f2f; /* A distinct error color */
     font-weight: bold;
@@ -55,228 +48,63 @@
 }
 
 /* --- Static SVG Elements --- */
-.venueBackground {
-    fill: #f9f9f9;
-    stroke: none;
-}
-
-.outerBorder {
-    fill: none;
-    stroke: var(--color-text-primary, #555);
-    stroke-width: 2px;
-    rx: 5;
-    ry: 5;
-}
-
-.wallLabel {
-    font-size: 11px;
-    font-family: var(--font-body, sans-serif);
-    fill: var(--color-text-secondary, #777);
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.danceFloor {
-    fill: #e0f2f7;
-    stroke: #b3e5fc;
-    stroke-width: 1px;
-}
-
-.djBooth {
-     fill: #fce4ec;
-     stroke: #f8bbd0;
-     stroke-width: 1px;
-}
-
-.buffetArea {
-    fill: #fff9c4;
-    stroke: #fff59d;
-    stroke-width: 1px;
-}
-
-.drinksArea {
-    fill: #e3f2fd;
-    stroke: #bbdefb;
-    stroke-width: 1px;
-}
-
-.catererEntranceArea {
-    fill: #eeeeee;
-    stroke: #bdbdbd;
-    stroke-width: 1px;
-}
-
-.guestBookArea {
-    fill: #f3e5f5;
-    stroke: #e1bee7;
-    stroke-width: 1px;
-}
-
-.entranceFrame {
-    fill: none;
-    stroke: var(--color-border, #ccc);
-    stroke-width: 1.5px;
-    rx: 4;
-    ry: 4;
-}
-
-.garbageArea {
-    /* Styles for the group if needed */
-}
-
-.garbageBin {
-    fill: #bdbdbd;
-    stroke: #757575;
-    stroke-width: 1px;
-}
-
-.labelText {
-    font-size: 10px;
-    font-family: var(--font-body, sans-serif);
-    fill: #666;
-    text-anchor: middle;
-    dominant-baseline: middle;
-    pointer-events: none;
-    font-weight: 500;
-}
+.venueBackground { fill: #f9f9f9; stroke: none; }
+.outerBorder { fill: none; stroke: var(--color-text-primary, #555); stroke-width: 2px; rx: 5; ry: 5; }
+.wallLabel { font-size: 11px; font-family: var(--font-body, sans-serif); fill: var(--color-text-secondary, #777); font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+.danceFloor { fill: #e0f2f7; stroke: #b3e5fc; stroke-width: 1px; }
+.djBooth { fill: #fce4ec; stroke: #f8bbd0; stroke-width: 1px; }
+.buffetArea { fill: #fff9c4; stroke: #fff59d; stroke-width: 1px; }
+.drinksArea { fill: #e3f2fd; stroke: #bbdefb; stroke-width: 1px; }
+.catererEntranceArea { fill: #eeeeee; stroke: #bdbdbd; stroke-width: 1px; }
+.guestBookArea { fill: #f3e5f5; stroke: #e1bee7; stroke-width: 1px; }
+.entranceFrame { fill: none; stroke: var(--color-border, #ccc); stroke-width: 1.5px; rx: 4; ry: 4; }
+.garbageArea { /* Styles for the group if needed */ }
+.garbageBin { fill: #bdbdbd; stroke: #757575; stroke-width: 1px; }
+.labelText { font-size: 10px; font-family: var(--font-body, sans-serif); fill: #666; text-anchor: middle; dominant-baseline: middle; pointer-events: none; font-weight: 500; }
 
 /* --- Dynamic Table/Seat Elements --- */
-.tableGroup {
-    transition: transform 0.3s ease;
-}
-
-.tableRect {
-    fill: var(--color-background-light, #fff8e1);
-    stroke: var(--color-border, #ffe0b2);
-    stroke-width: 1.5px;
-    rx: 3;
-    ry: 3;
-}
-
-.tableLabel {
-    font-size: 11px;
-    font-weight: bold;
-    fill: var(--color-text-primary, #444);
-    font-family: var(--font-body, sans-serif);
-    pointer-events: none;
-    text-anchor: middle;
-    dominant-baseline: middle;
-}
-
-/* Seat Group (for hover target) */
-.seatGroup {
-    cursor: pointer; /* Indicate clickability */
-}
-
-/* Seat Indicator Circle Styles */
-.seatEmpty {
-    fill: #f5f5f5;
-    stroke: #e0e0e0;
-    stroke-width: 1px;
-    transition: fill 0.2s ease;
-}
-.seatOccupied {
-    fill: var(--color-accent-light, #c8e6c9);
-    stroke: var(--color-accent, #81c784);
-    stroke-width: 1px;
-    transition: fill 0.2s ease;
-}
-
-/* Seat Initials Text */
-.seatInitial {
-    /* *** Adjusted font size *** */
-    font-size: 8px;
-    font-weight: bold;
-    fill: var(--color-text-secondary, #444);
-    font-family: var(--font-body, sans-serif);
-    pointer-events: none;
-    text-anchor: middle;
-    dominant-baseline: middle; /* Good for vertical centering */
-    transition: fill 0.2s ease;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-}
+.tableGroup { transition: transform 0.3s ease; }
+.tableRect { fill: var(--color-background-light, #fff8e1); stroke: var(--color-border, #ffe0b2); stroke-width: 1.5px; rx: 3; ry: 3; }
+.tableLabel { font-size: 11px; font-weight: bold; fill: var(--color-text-primary, #444); font-family: var(--font-body, sans-serif); pointer-events: none; text-anchor: middle; dominant-baseline: middle; }
+.seatGroup { cursor: pointer; }
+.seatEmpty { fill: #f5f5f5; stroke: #e0e0e0; stroke-width: 1px; transition: fill 0.2s ease; }
+.seatOccupied { fill: var(--color-accent-light, #c8e6c9); stroke: var(--color-accent, #81c784); stroke-width: 1px; transition: fill 0.2s ease; }
+.seatInitial { font-size: 8px; font-weight: bold; fill: var(--color-text-secondary, #444); font-family: var(--font-body, sans-serif); pointer-events: none; text-anchor: middle; dominant-baseline: middle; transition: fill 0.2s ease; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
 
 /* --- Custom Tooltip Styles --- */
-.tooltip {
-    position: fixed; /* Position relative to the viewport */
-    background-color: rgba(0, 0, 0, 0.8); /* Dark semi-transparent background */
-    color: #fff; /* White text */
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    font-family: var(--font-body, sans-serif);
-    z-index: 100; /* Ensure it's above SVG elements */
-    pointer-events: none; /* Tooltip shouldn't block mouse events */
-    white-space: nowrap; /* Prevent wrapping */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    /* Fade-in animation (optional) */
-    opacity: 0;
-    animation: fadeInTooltip 0.2s forwards;
-}
-
-@keyframes fadeInTooltip {
-    to {
-        opacity: 1;
-    }
-}
-
-.tooltipName {
-    font-weight: bold;
-    margin-bottom: 4px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    padding-bottom: 3px;
-}
-
-.tooltipDetail {
-    font-size: 0.8rem;
-    color: #eee; /* Lighter grey for details */
-    margin-top: 3px;
-}
-
+.tooltip { position: fixed; background-color: rgba(0, 0, 0, 0.8); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; font-family: var(--font-body, sans-serif); z-index: 100; pointer-events: none; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.2); opacity: 0; animation: fadeInTooltip 0.2s forwards; }
+@keyframes fadeInTooltip { to { opacity: 1; } }
+.tooltipName { font-weight: bold; margin-bottom: 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.3); padding-bottom: 3px; }
+.tooltipDetail { font-size: 0.8rem; color: #eee; margin-top: 3px; }
 
 /* --- Assignment Error Popup --- */
-.assignErrorPopup {
-    position: fixed; /* Or absolute relative to container */
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #ffcdd2; /* Light red */
-    color: #c62828; /* Dark red */
-    padding: 10px 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    z-index: 110; /* Above tooltip */
-    font-size: 0.9rem;
-    font-weight: bold;
-}
+.assignErrorPopup { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #ffcdd2; color: #c62828; padding: 10px 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 110; font-size: 0.9rem; font-weight: bold; }
 
 
-/* --- Assignment Action Modal Styles --- */
+/* --- Assignment Action Modal Styles (Sleek Update) --- */
 .modalBackground {
-    position: fixed; /* Cover the whole viewport */
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.65); /* Darker overlay */
+    background-color: rgba(0, 0, 0, 0.75); /* Slightly darker overlay */
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* High z-index */
+    z-index: 1000;
     padding: 1rem;
 }
 
 .modalContent {
-    background-color: #fff;
+    background-color: #2d2d2d; /* Dark background */
+    color: #e0e0e0; /* Light grey text */
     padding: 1.5rem 2rem;
     border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border: 1px solid #444; /* Subtle border */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* Stronger shadow */
     width: 100%;
-    max-width: 450px; /* Limit modal width */
+    max-width: 450px;
     text-align: center;
     font-family: var(--font-body);
 }
@@ -284,17 +112,17 @@
 .modalTitle {
     font-size: 1.5rem;
     font-family: var(--font-wedding);
-    color: var(--color-text-primary);
+    color: #fff; /* White title */
     margin-top: 0;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem; /* Increased spacing */
+    padding-bottom: 0.75rem; /* Increased padding */
+    border-bottom: 1px solid #555; /* Darker border */
 }
 
 .modalSection {
     margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px dashed #eee;
+    padding-top: 1.5rem; /* More spacing */
+    border-top: 1px solid #444; /* Darker separator */
 }
 .modalSection:first-of-type {
     margin-top: 1rem;
@@ -305,75 +133,93 @@
 
 .modalSection h4 {
     font-size: 1.1rem;
-    color: var(--color-accent);
+    color: var(--color-accent-light, #c8e6c9); /* Use light accent color */
     margin-bottom: 0.75rem;
+    font-weight: bold;
 }
 
 .modalSelect {
     width: 100%;
-    padding: 0.6rem;
+    padding: 0.7rem 0.8rem; /* Adjust padding */
     margin-bottom: 1rem;
-    border: 1px solid #ccc;
+    border: 1px solid #555; /* Darker border */
     border-radius: 4px;
     font-size: 0.95rem;
-    box-sizing: border-box; /* Include padding in width */
+    box-sizing: border-box;
+    background-color: #333; /* Dark select background */
+    color: #eee; /* Light select text */
+}
+.modalSelect option {
+    background-color: #333;
+    color: #eee;
 }
 
+
 .modalButton {
-    padding: 0.6rem 1.2rem;
-    border: none;
+    padding: 0.7rem 1.3rem; /* Slightly larger padding */
+    border: 1px solid transparent; /* Base border */
     border-radius: 5px;
     font-size: 0.95rem;
     cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
+    transition: background-color 0.2s, transform 0.1s, border-color 0.2s, color 0.2s;
     margin: 0.5rem 0.3rem;
     min-width: 100px;
     font-weight: bold;
 }
 
-.modalButton:hover {
+.modalButton:hover:not(:disabled) {
     transform: translateY(-1px);
 }
 
 .modalButton:disabled {
-    background-color: #ccc;
+    background-color: #555 !important; /* Darker disabled background */
+    color: #999 !important;
+    border-color: #555 !important;
     cursor: not-allowed;
     transform: none;
     opacity: 0.7;
 }
 
-/* Specific button styles */
+/* Specific button styles - Dark Theme */
 .modalButton { /* Default/Assign/Move */
-    background-color: var(--color-accent, #81c784);
+    background-color: var(--color-accent, #689f38); /* Using a darker green accent */
+    border-color: var(--color-accent, #689f38);
     color: #fff;
 }
 .modalButton:hover:not(:disabled) {
-    background-color: #66bb6a; /* Darker green */
+    background-color: #7cb342; /* Lighter green on hover */
+    border-color: #7cb342;
 }
 
 .unassignButton {
-    background-color: #ef9a9a; /* Light red */
-    color: #333;
+    background-color: #d32f2f; /* Red */
+    border-color: #d32f2f;
+    color: #fff;
 }
 .unassignButton:hover:not(:disabled) {
-    background-color: #e57373; /* Darker red */
+    background-color: #e57373; /* Lighter red */
+    border-color: #e57373;
 }
 
+/* Cancel Button - Ghost style */
 .cancelButton {
-    background-color: #e0e0e0; /* Grey */
-    color: #333;
+    background-color: transparent;
+    color: #ccc; /* Light grey text */
+    border: 1px solid #555; /* Grey border */
 }
 .cancelButton:hover:not(:disabled) {
-    background-color: #bdbdbd; /* Darker grey */
+    background-color: #444; /* Slight background on hover */
+    color: #fff;
+    border-color: #666;
 }
 
 .modalInfo, .modalWarning {
     font-size: 0.9rem;
-    color: #666;
+    color: #ccc; /* Light grey info text */
     margin-bottom: 1rem;
 }
 .modalWarning {
-    color: #d32f2f;
+    color: #ef9a9a; /* Light red warning text */
     font-weight: bold;
 }
 
@@ -387,4 +233,3 @@
 /* --- Full View Mode Overrides --- */
 .fullViewContainer { max-width: none; margin: 0; padding: 0.5rem; border: none; box-shadow: none; border-radius: 0; overflow: visible; }
 .fullViewContainer .floorPlanSvg { border-radius: 0; border: none; background-color: #f0f0f0; }
-

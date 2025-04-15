@@ -331,9 +331,9 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                  <rect x="550" y="1310" width="80" height="30" className={styles.entranceFrame} />
                  <text x="590" y="1325" className={styles.labelText} textAnchor="middle">Entrance</text>
                  <g className={styles.garbageArea}>
-                     <circle cx="360" cy="1290" r="10" className={styles.garbageBin} />
-                     <circle cx="400" cy="1290" r="10" className={styles.garbageBin} />
-                     <text x="380" y="1265" className={styles.labelText} textAnchor="middle">Garbage & Recycling</text>
+                     <circle cx="280" cy="1290" r="10" className={styles.garbageBin} />
+                     <circle cx="310" cy="1290" r="10" className={styles.garbageBin} />
+                     <text x="300" y="1265" className={styles.labelText} textAnchor="middle">Garbage & Recycling</text>
                  </g>
 
                 {/* Render Tables and Seats Dynamically */}
@@ -352,7 +352,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                             </text>
                             {/* Seats */}
                             {seatPositions.map((pos, index) => {
-                                const guest = guestsAtTable[index]; // Guest object or undefined
+                                const guest = guestsAtTable[index];
                                 const displayLabel = guest ? getInitials(guest.name) : '';
                                 const seatClass = guest ? styles.seatOccupied : styles.seatEmpty;
                                 const seatKey = `seat-${layout.id}-${index}`;
@@ -363,16 +363,13 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                                         className={styles.seatGroup}
                                         onMouseEnter={(e) => guest && handleMouseEnter(e, guest)}
                                         onMouseLeave={handleMouseLeave}
-                                        // *** Add onClick handler to the seat group ***
                                         onClick={(e) => handleSeatClick(e, layout.id, index, guest || null)}
-                                        style={{ cursor: 'pointer' }} // Indicate clickability
+                                        style={{ cursor: 'pointer' }}
                                     >
-                                        {/* Tooltip for hover */}
                                         {guest && <title>{guest.name}</title>}
-                                        {/* Seat circle indicator */}
                                         <circle cx="0" cy="0" r="10" className={seatClass} />
-                                        {/* Initials label inside circle */}
-                                        <text x="0" y="4" className={styles.seatInitial} textAnchor="middle">
+                                        {/* *** Centered text using y=0 and dominant-baseline from CSS *** */}
+                                        <text x="0" y="0" className={styles.seatInitial} textAnchor="middle">
                                             {displayLabel}
                                         </text>
                                     </g>
