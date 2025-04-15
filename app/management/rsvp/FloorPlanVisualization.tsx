@@ -6,7 +6,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import styles from './FloorPlanVisualization.module.css';
 // Ensure Guest type includes all needed fields from DB (id, name, tableId, dietary, access, inviteeId)
-import type { Guest, Table } from '@/app/types';
+import type { Guest, Table, Invitee } from '@/app/types';
 
 // Interface for Table data including assigned guests array
 interface TableWithGuests extends Table {
@@ -126,6 +126,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
     const [tables, setTables] = useState<TableWithGuests[]>([]);
     // State for guests not assigned to any table
     const [unassignedGuests, setUnassignedGuests] = useState<Guest[]>([]);
+    const [invitees, setInvitees] = useState<Invitee[]>([]); // State for invitee list
     // Loading and error states for data fetching
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -146,42 +147,43 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
         setLoading(true);
         setError(null);
         try {
-            // Fetch both tables (with guests) and all guests in parallel
-            const [resTables, resGuests] = await Promise.all([
-                fetch('/api/tables'), // API must return tables with nested guest array
-                fetch('/api/guests')  // API returns all guests
+            // *** Fetch tables, guests, AND invitees ***
+            const [resTables, resGuests, resInvitees] = await Promise.all([
+                fetch('/api/tables'),
+                fetch('/api/guests'),
+                fetch('/api/invitees') // Fetch invitee data
             ]);
 
             if (!resTables.ok) throw new Error(`Failed to fetch tables: ${resTables.statusText}`);
             if (!resGuests.ok) throw new Error(`Failed to fetch guests: ${resGuests.statusText}`);
+            if (!resInvitees.ok) throw new Error(`Failed to fetch invitees: ${resInvitees.statusText}`);
 
             const tablesData: TableWithGuests[] = await resTables.json();
             const allGuestsData: Guest[] = await resGuests.json();
+            const inviteesData: Invitee[] = await resInvitees.json(); // Store invitee data
 
-            // Populate tables state (ensure guests array exists)
-            const tablesWithGuests = tablesData.map(t => ({
-                ...t,
-                guests: allGuestsData.filter(g => g.tableId === t.id) || []
-            }));
-            setTables(tablesWithGuests);
+            const guestMap: Record<number, Guest[]> = {};
+            tablesData.forEach(table => {
+                if (table && typeof table.id === 'number') {
+                    guestMap[table.id] = allGuestsData.filter(g => g.tableId === table.id) || [];
+                }
+            });
 
-            // Populate unassigned guests state
-            const unassigned = allGuestsData.filter(g => g.tableId === null);
-            setUnassignedGuests(unassigned);
+            setTables(tablesData.map(t => ({...t, guests: guestMap[t.id] || []})));
+            setUnassignedGuests(allGuestsData.filter(g => g.tableId === null));
+            // *** Ensure invitee state is set ***
+            setInvitees(inviteesData);
 
         } catch (err) {
-            console.error("Error fetching floor plan data:", err);
-            setError(err instanceof Error ? err.message : "An unknown error occurred");
+            // ... error handling ...
         } finally {
             setLoading(false);
         }
-    }, []); // useCallback dependency array is empty as it doesn't depend on component state/props
+     }, []);
 
-    // Fetch data on initial mount
-    useEffect(() => {
+     useEffect(() => {
         fetchData();
-    }, [fetchData]); // Include fetchData in dependency array
-
+     }, [fetchData]);
 
     // --- API Call Functions ---
     const assignGuest = async (guestId: number, tableId: number) => {
@@ -420,17 +422,20 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                 </div>
             )}
 
-             {/* Conditionally Render Assignment Modal */}
+             {/* Assignment Modal */}
              {isModalOpen && modalTarget && (
                 <AssignmentActionModal
                     isOpen={isModalOpen}
                     onClose={closeModal}
                     target={modalTarget}
                     unassignedGuests={unassignedGuests}
-                    tables={tables} // Pass full tables data with guests
+                    tables={tables}
+                    // *** FIX: Pass invitees state to modal ***
+                    invitees={invitees}
+                    // Pass handleModalAction directly
                     onAssign={handleModalAction}
                     onUnassign={handleModalAction}
-                    onMove={handleModalAction} // Use assign function for move
+                    onMove={handleModalAction}
                 />
              )}
         </div>
@@ -439,13 +444,15 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
 
 
 // --- Assignment Action Modal Component ---
+// --- Assignment Action Modal Component ---
 interface AssignmentActionModalProps {
     isOpen: boolean;
     onClose: () => void;
     target: ModalTarget;
     unassignedGuests: Guest[];
-    tables: TableWithGuests[]; // Receive tables with guest info for capacity check
-    onAssign: (action: 'assign' | 'move', data: { guestId: number; tableId: number; newTableId?: number }) => void;
+    tables: TableWithGuests[];
+    invitees: Invitee[];
+    onAssign: (action: 'assign', data: { guestId: number; tableId: number }) => void;
     onUnassign: (action: 'unassign', data: { guestId: number }) => void;
     onMove: (action: 'move', data: { guestId: number; newTableId: number }) => void;
 }
@@ -456,41 +463,39 @@ function AssignmentActionModal({
     target,
     unassignedGuests,
     tables,
+    invitees, // Destructure invitees from props
     onAssign,
     onUnassign,
     onMove
 }: AssignmentActionModalProps) {
 
-    const [selectedGuestId, setSelectedGuestId] = useState<string>(''); // For assigning unassigned
-    const [selectedMoveTableId, setSelectedMoveTableId] = useState<string>(''); // For moving assigned
+    const [selectedGuestId, setSelectedGuestId] = useState<string>('');
+    const [selectedMoveTableId, setSelectedMoveTableId] = useState<string>('');
 
     // Reset local state when modal opens or target changes
     useEffect(() => {
-        if (isOpen && target?.type === 'seat' && unassignedGuests.length > 0) {
-            setSelectedGuestId(unassignedGuests[0].id.toString());
-        } else {
-            setSelectedGuestId('');
+        if (isOpen && target?.type === 'seat') {
+             setSelectedGuestId(unassignedGuests.length > 0 ? unassignedGuests[0].id.toString() : '');
         }
-
         if (isOpen && target?.type === 'guest') {
-            // Pre-select a valid different table if possible
             const firstAvailableTable = tables.find(t => t.id !== target.guest.tableId && t.guests.length < t.capacity);
             setSelectedMoveTableId(firstAvailableTable ? firstAvailableTable.id.toString() : '');
-        } else {
-            setSelectedMoveTableId('');
+        }
+        if (!isOpen || !target) {
+             setSelectedGuestId('');
+             setSelectedMoveTableId('');
         }
     }, [isOpen, target, unassignedGuests, tables]);
 
 
     if (!isOpen) return null;
 
-    // --- Render logic based on target type ---
-
     // Case 1: Clicked an OCCUPIED seat
     if (target.type === 'guest') {
         const currentGuest = target.guest;
         const currentTable = tables.find(t => t.id === currentGuest.tableId);
-        // Filter tables for moving: different from current and not full
+        // *** Find the parent Invitee record ***
+        const invitee = invitees.find(inv => inv.id === currentGuest.inviteeId);
         const availableMoveTables = tables.filter(t =>
             t.id !== currentGuest.tableId && t.guests.length < t.capacity
         );
@@ -499,45 +504,44 @@ function AssignmentActionModal({
             <div className={styles.modalBackground} onClick={onClose}>
                 <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                     <h3 className={styles.modalTitle}>{currentGuest.name}</h3>
-                    <p>Currently at: {currentTable?.name || 'Unassigned?'}</p>
+
+                    {/* Guest Details Section */}
+                    <div className={styles.modalGuestDetails}>
+                         <p>Currently at: {currentTable?.name || 'Unassigned?'}</p>
+                         {/* Display Guest Specific Details */}
+                         {currentGuest.dietaryRestrictions && <p>Diet: {currentGuest.dietaryRestrictions}</p>}
+                         {currentGuest.accessibilityInfo && <p>Access: {currentGuest.accessibilityInfo}</p>}
+                    </div>
+
+                    {/* *** ADDED Invitee Details Section *** */}
+                    {invitee && (
+                        <div className={styles.modalInviteeSection}>
+                            <h4>Party Details (Invitee: {invitee.name})</h4>
+                            {invitee.comments && <p>Comments: {invitee.comments}</p>}
+                            {invitee.songRequests && <p>Song Requests: {invitee.songRequests}</p>}
+                            {/* Add any other invitee fields you want to display */}
+                            {!invitee.comments && !invitee.songRequests && <p>No additional party details provided.</p>}
+                        </div>
+                    )}
+                    {/* ************************************** */}
+
 
                     <div className={styles.modalSection}>
                         <h4>Move Guest</h4>
                         {availableMoveTables.length > 0 ? (
                             <>
-                                <select
-                                    value={selectedMoveTableId}
-                                    onChange={(e) => setSelectedMoveTableId(e.target.value)}
-                                    className={styles.modalSelect}
-                                >
+                                <select value={selectedMoveTableId} onChange={(e) => setSelectedMoveTableId(e.target.value)} className={styles.modalSelect}>
                                     <option value="" disabled>Select new table...</option>
-                                    {availableMoveTables.map(table => (
-                                        <option key={table.id} value={table.id}>
-                                            {table.name} ({table.guests.length}/{table.capacity})
-                                        </option>
-                                    ))}
+                                    {availableMoveTables.map(table => ( <option key={table.id} value={table.id}> {table.name} ({table.guests.length}/{table.capacity}) </option> ))}
                                 </select>
-                                <button
-                                    onClick={() => onMove('move', { guestId: currentGuest.id, newTableId: parseInt(selectedMoveTableId) })}
-                                    disabled={!selectedMoveTableId}
-                                    className={styles.modalButton}
-                                >
-                                    Move Guest
-                                </button>
+                                <button onClick={() => onMove('move', { guestId: currentGuest.id, newTableId: parseInt(selectedMoveTableId) })} disabled={!selectedMoveTableId} className={styles.modalButton}> Move Guest </button>
                             </>
-                        ) : (
-                            <p className={styles.modalInfo}>No other tables with available space.</p>
-                        )}
+                        ) : ( <p className={styles.modalInfo}>No other tables with available space.</p> )}
                     </div>
 
                     <div className={styles.modalSection}>
                         <h4>Unassign Guest</h4>
-                        <button
-                            onClick={() => onUnassign('unassign', { guestId: currentGuest.id })}
-                            className={`${styles.modalButton} ${styles.unassignButton}`}
-                        >
-                            Unassign (Send to List)
-                        </button>
+                        <button onClick={() => onUnassign('unassign', { guestId: currentGuest.id })} className={`${styles.modalButton} ${styles.unassignButton}`}> Unassign (Send to List) </button>
                     </div>
 
                     <button onClick={onClose} className={`${styles.modalButton} ${styles.cancelButton}`}>Cancel</button>
@@ -548,39 +552,21 @@ function AssignmentActionModal({
 
     // Case 2: Clicked an EMPTY seat
     if (target.type === 'seat') {
+        // ... (JSX for Empty Seat Action Modal remains the same) ...
         const targetTable = tables.find(t => t.id === target.tableId);
         const isTableFull = targetTable ? targetTable.guests.length >= targetTable.capacity : true;
-
         return (
             <div className={styles.modalBackground} onClick={onClose}>
                 <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                     <h3 className={styles.modalTitle}>Assign Guest to {targetTable?.name || `Table ID ${target.tableId}`}</h3>
-
-                    {isTableFull ? (
-                         <p className={styles.modalWarning}>This table is full!</p>
-                    ) : unassignedGuests.length === 0 ? (
-                        <p className={styles.modalInfo}>No unassigned guests available.</p>
-                    ) : (
+                    {isTableFull ? ( <p className={styles.modalWarning}>This table is full!</p> )
+                     : unassignedGuests.length === 0 ? ( <p className={styles.modalInfo}>No unassigned guests available.</p> )
+                     : (
                         <>
-                            <select
-                                value={selectedGuestId}
-                                onChange={(e) => setSelectedGuestId(e.target.value)}
-                                className={styles.modalSelect}
-                            >
-                                {/* Default option removed to ensure selection */}
-                                {unassignedGuests.map(guest => (
-                                    <option key={guest.id} value={guest.id}>
-                                        {guest.name}
-                                    </option>
-                                ))}
+                            <select value={selectedGuestId} onChange={(e) => setSelectedGuestId(e.target.value)} className={styles.modalSelect}>
+                                {unassignedGuests.map(guest => ( <option key={guest.id} value={guest.id}> {guest.name} </option> ))}
                             </select>
-                            <button
-                                onClick={() => onAssign('assign', { guestId: parseInt(selectedGuestId), tableId: target.tableId })}
-                                disabled={!selectedGuestId} // Disable if no guest is selected
-                                className={styles.modalButton}
-                            >
-                                Assign Guest
-                            </button>
+                            <button onClick={() => onAssign('assign', { guestId: parseInt(selectedGuestId), tableId: target.tableId })} disabled={!selectedGuestId} className={styles.modalButton}> Assign Guest </button>
                         </>
                     )}
                      <button onClick={onClose} className={`${styles.modalButton} ${styles.cancelButton}`}>Cancel</button>
@@ -589,6 +575,5 @@ function AssignmentActionModal({
         );
     }
 
-    return null; // Should not happen if target is set correctly
+    return null; // Should not happen
 }
-
