@@ -494,13 +494,11 @@ function AssignmentActionModal({
     const formatDate = (dateString: string | null | undefined) => {
         if (!dateString) return 'N/A';
         try {
-            // Format for better readability (e.g., Apr 14, 2025, 10:00 PM)
             return new Date(dateString).toLocaleString(undefined, {
                 year: 'numeric', month: 'short', day: 'numeric',
                 hour: 'numeric', minute: '2-digit', hour12: true
-            });
-        } catch (_e) { // *** FIX: Prefixed unused 'e' with '_' ***
-            console.error("Error formatting date:", _e);
+             });
+        } catch { // *** FIX: Omitted the error variable binding entirely ***
             return 'Invalid Date';
         }
     };
