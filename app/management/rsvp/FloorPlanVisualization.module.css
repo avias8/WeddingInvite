@@ -509,10 +509,3 @@
     background-color: #1a5a13; /* Darker shade for hover */
     transform: translateY(-1px);
 }
-
-/* Ensure text in seat circles is well-centered vertically */
-.seatInitial, .seatFullName {
-    dominant-baseline: middle; /* Recommended for SVG text vertical centering */
-    text-anchor: middle; /* Ensure horizontal centering is also applied */
-    /* dy: 0.3em; /* Alternative if dominant-baseline doesn't give desired effect in all browsers */
-}

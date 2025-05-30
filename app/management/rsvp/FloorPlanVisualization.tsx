@@ -1,11 +1,14 @@
 // app/management/rsvp/FloorPlanVisualization.tsx
 "use client";
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import styles from './FloorPlanVisualization.module.css';
 import type { Guest, Table, Invitee } from '@/app/types';
 import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable"; // For data table PDF
+import html2canvas from 'html2canvas'; // For visual PDF
 
 // Interface for Table data including assigned guests array
 interface TableWithGuests extends Table {
@@ -25,8 +28,6 @@ interface TableLayout {
     owner: "Shared" | "Avi" | "Shakthi"; // Table owner
 }
 
-// Layout Coordinates & Data Mapping (Final version based on user DB IDs)
-// ***** IMPORTANT: This is your actual TABLE_LAYOUTS array from the uploaded file. *****
 const TABLE_LAYOUTS: TableLayout[] = [
     { id: 1, name: "Head Table", displayName: "Head", x: 300, y: 50, width: 400, height: 40, capacity: 17, owner: "Shared" },
     { id: 2, name: "Table 1", displayName: "1", x: 820, y: 100, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
@@ -116,6 +117,7 @@ function calculateSeatPositions(layout: TableLayout): { x: number, y: number }[]
     return positions;
 }
 
+
 interface FloorPlanVisualizationProps {
     fullView?: boolean;
 }
@@ -141,6 +143,8 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
     const [tooltipPosition, setTooltipPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [modalTarget, setModalTarget] = useState<ModalTarget | null>(null);
+    const svgRef = useRef<SVGSVGElement>(null); // Ref for the SVG element
+    const visualExportWrapperRef = useRef<HTMLDivElement>(null); // Ref for the container holding the SVG
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -188,13 +192,11 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
         const targetTableData = tables.find(t => t.id === tableId);
         const guestToAssign = [...unassignedGuests, ...tables.flatMap(t => t.guests)].find(g => g.id === guestId);
 
-
         if (!targetTableLayout || !targetTableData || !guestToAssign) {
             setAssignError("Target table definition, data or guest not found.");
             setTimeout(() => setAssignError(""), 3000);
             return;
         }
-        // Check capacity only if the guest is moving to a different table OR from unassigned list
         if (guestToAssign.tableId !== tableId && targetTableData.guests.length >= targetTableLayout.capacity) {
              setAssignError(`Table "${targetTableLayout.name}" is full (Capacity: ${targetTableLayout.capacity}).`);
             setTimeout(() => setAssignError(""), 3000);
@@ -278,58 +280,45 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
         }
     };
 
-    const handleExportSeatingChart = () => {
+    const handleExportSeatingChart = () => { 
         let exportText = "";
-        
         const sortedTables = [...tables].sort((a, b) => {
             const layoutA = TABLE_LAYOUTS.find(l => l.id === a.id);
             const layoutB = TABLE_LAYOUTS.find(l => l.id === b.id);
-            // Use displayName for sorting if available, otherwise table name
             const nameA = layoutA ? layoutA.displayName : a.name;
             const nameB = layoutB ? layoutB.displayName : b.name;
-            
             const numA = parseInt(nameA.replace(/[^0-9]/g, ''), 10);
             const numB = parseInt(nameB.replace(/[^0-9]/g, ''), 10);
-
-            if (!isNaN(numA) && !isNaN(numB)) {
-                return numA - numB; // Numeric sort for displayNames like "1", "2", "10"
-            }
-            return nameA.localeCompare(nameB); // Fallback for non-numeric (e.g. "Head")
+            if (!isNaN(numA) && !isNaN(numB)) { return numA - numB; }
+            return nameA.localeCompare(nameB);
         });
-
         for (const table of sortedTables) {
             if (table.guests && table.guests.length > 0) {
                 const layout = TABLE_LAYOUTS.find(l => l.id === table.id);
                 let tableExportName = layout ? layout.displayName.toUpperCase() : table.name.toUpperCase();
-
                 if (layout && /^\d+$/.test(layout.displayName)) {
                     tableExportName = `TABLE ${layout.displayName.toUpperCase()}`;
                 }
-                
                 exportText += `${tableExportName}:\n`;
-                for (const guest of table.guests) {
-                    exportText += `${guest.name}\n`;
-                }
-                exportText += "\n"; 
+                for (const guest of table.guests) { exportText += `${guest.name}\n`; }
+                exportText += "\n";
             }
         }
-
         if (unassignedGuests.length > 0) {
             exportText += "UNASSIGNED GUESTS:\n";
-            for (const guest of unassignedGuests) {
-                exportText += `${guest.name}\n`;
-            }
+            for (const guest of unassignedGuests) { exportText += `${guest.name}\n`; }
             exportText += "\n";
         }
-
-        if (!exportText.trim()) {
-            alert("No guests assigned to tables to export.");
-            return;
+        if (!exportText.trim()) { 
+            // Use a custom alert or notification system if available, instead of window.alert
+            console.warn("No guests assigned to tables to export."); 
+            setAssignError("No guests assigned to tables to export."); // Example: use existing error display
+            setTimeout(() => setAssignError(""), 3000);
+            return; 
         }
-
         const blob = new Blob([exportText], { type: 'text/plain;charset=utf-8;' });
         const link = document.createElement('a');
-        if (link.download !== undefined) { 
+        if (link.download !== undefined) {
             const url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
             link.setAttribute('download', 'seating_chart.txt');
@@ -338,18 +327,22 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
-        } else {
-            alert("Text export is not supported in your browser.");
+        } else { 
+            console.warn("Text export is not supported in your browser.");
+            setAssignError("Text export is not supported in your browser.");
+            setTimeout(() => setAssignError(""), 3000);
         }
     };
 
-    // --- CSV Export Functionality ---
     const handleExportSeatingChartCSV = () => {
-        let csvRows: string[] = [];
-        // Header
-        csvRows.push("Table,Seat #,Guest Name,Guest Dietary,Guest Accessibility,Invitee Name,Invitee Email,RSVP Status,Party Size,Party Max,Party Dietary,Party Accessibility,Comments,Song Requests");
+        const csvRows: string[] = [];
+        const header = [
+            "Table", "Seat #", "Guest Name", "Guest Dietary", "Guest Accessibility",
+            "Invitee Name", "Invitee Email", "RSVP Status", "Party Size", "Party Max",
+            "Party Dietary", "Party Accessibility", "Comments", "Song Requests"
+        ];
+        csvRows.push(header.map(h => `"${h.replace(/"/g, '""')}"`).join(",")); // Header row, quoted
 
-        // Sort tables as in text export
         const sortedTables = [...tables].sort((a, b) => {
             const layoutA = TABLE_LAYOUTS.find(l => l.id === a.id);
             const layoutB = TABLE_LAYOUTS.find(l => l.id === b.id);
@@ -357,9 +350,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
             const nameB = layoutB ? layoutB.displayName : b.name;
             const numA = parseInt(nameA.replace(/[^0-9]/g, ''), 10);
             const numB = parseInt(nameB.replace(/[^0-9]/g, ''), 10);
-            if (!isNaN(numA) && !isNaN(numB)) {
-                return numA - numB;
-            }
+            if (!isNaN(numA) && !isNaN(numB)) { return numA - numB; }
             return nameA.localeCompare(nameB);
         });
 
@@ -369,54 +360,55 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
             if (table.guests && table.guests.length > 0) {
                 table.guests.forEach((guest, idx) => {
                     const invitee = invitees.find(inv => inv.id === guest.inviteeId);
-                    csvRows.push([
-                        `"${tableExportName}"`,
+                    const row = [
+                        tableExportName,
                         idx + 1,
-                        `"${guest.name}"`,
-                        `"${guest.dietaryRestrictions || ""}"`,
-                        `"${guest.accessibilityInfo || ""}"`,
-                        `"${invitee?.name || ""}"`,
-                        `"${invitee?.email || ""}"`,
+                        guest.name || "",
+                        guest.dietaryRestrictions || "",
+                        guest.accessibilityInfo || "",
+                        invitee?.name || "",
+                        invitee?.email || "",
                         invitee?.isAttending === true ? "Yes" : invitee?.isAttending === false ? "No" : "Pending",
                         invitee?.guests ?? "",
                         invitee?.maxInvites ?? "",
-                        `"${invitee?.dietaryRestrictions || ""}"`,
-                        `"${invitee?.accessibilityInfo || ""}"`,
-                        `"${invitee?.comments || ""}"`,
-                        `"${invitee?.songRequests || ""}"`
-                    ].join(","));
+                        invitee?.dietaryRestrictions || "",
+                        invitee?.accessibilityInfo || "",
+                        invitee?.comments || "",
+                        invitee?.songRequests || ""
+                    ].map(field => `"${String(field).replace(/"/g, '""')}"`); // Quote all fields
+                    csvRows.push(row.join(","));
                 });
             }
         }
 
-        // Unassigned guests
         if (unassignedGuests.length > 0) {
             unassignedGuests.forEach(guest => {
                 const invitee = invitees.find(inv => inv.id === guest.inviteeId);
-                csvRows.push([
-                    `"UNASSIGNED"`,
-                    "",
-                    `"${guest.name}"`,
-                    `"${guest.dietaryRestrictions || ""}"`,
-                    `"${guest.accessibilityInfo || ""}"`,
-                    `"${invitee?.name || ""}"`,
-                    `"${invitee?.email || ""}"`,
+                const row = [
+                    "UNASSIGNED", "",
+                    guest.name || "",
+                    guest.dietaryRestrictions || "",
+                    guest.accessibilityInfo || "",
+                    invitee?.name || "",
+                    invitee?.email || "",
                     invitee?.isAttending === true ? "Yes" : invitee?.isAttending === false ? "No" : "Pending",
                     invitee?.guests ?? "",
                     invitee?.maxInvites ?? "",
-                    `"${invitee?.dietaryRestrictions || ""}"`,
-                    `"${invitee?.accessibilityInfo || ""}"`,
-                    `"${invitee?.comments || ""}"`,
-                    `"${invitee?.songRequests || ""}"`
-                ].join(","));
+                    invitee?.dietaryRestrictions || "",
+                    invitee?.accessibilityInfo || "",
+                    invitee?.comments || "",
+                    invitee?.songRequests || ""
+                ].map(field => `"${String(field).replace(/"/g, '""')}"`); // Quote all fields
+                csvRows.push(row.join(","));
             });
         }
 
-        if (csvRows.length <= 1) {
-            alert("No guests assigned to tables to export.");
+        if (csvRows.length <= 1) { // Only header
+            console.warn("No guests assigned to tables or unassigned to export for CSV.");
+            setAssignError("No guests assigned to tables or unassigned to export for CSV.");
+            setTimeout(() => setAssignError(""), 3000);
             return;
         }
-
         const csvContent = csvRows.join("\r\n");
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
@@ -429,34 +421,22 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
-        } else {
-            alert("CSV export is not supported in your browser.");
+        } else { 
+            console.warn("CSV export is not supported in your browser.");
+            setAssignError("CSV export is not supported in your browser.");
+            setTimeout(() => setAssignError(""), 3000);
         }
     };
 
-    // --- Excel Export Functionality ---
     const handleExportSeatingChartExcel = () => {
-        // Prepare data rows
-        const rows: any[] = [];
-        // Header
-        rows.push([
-            "Table",
-            "Seat #",
-            "Guest Name",
-            "Guest Dietary",
-            "Guest Accessibility",
-            "Invitee Name",
-            "Invitee Email",
-            "RSVP Status",
-            "Party Size",
-            "Party Max",
-            "Party Dietary",
-            "Party Accessibility",
-            "Comments",
-            "Song Requests"
-        ]);
+        const rows: any[][] = []; // Array of arrays for aoa_to_sheet
+        const header = [
+            "Table", "Seat #", "Guest Name", "Guest Dietary", "Guest Accessibility",
+            "Invitee Name", "Invitee Email", "RSVP Status", "Party Size", "Party Max",
+            "Party Dietary", "Party Accessibility", "Comments", "Song Requests"
+        ];
+        rows.push(header);
 
-        // Sort tables as in text export
         const sortedTables = [...tables].sort((a, b) => {
             const layoutA = TABLE_LAYOUTS.find(l => l.id === a.id);
             const layoutB = TABLE_LAYOUTS.find(l => l.id === b.id);
@@ -464,9 +444,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
             const nameB = layoutB ? layoutB.displayName : b.name;
             const numA = parseInt(nameA.replace(/[^0-9]/g, ''), 10);
             const numB = parseInt(nameB.replace(/[^0-9]/g, ''), 10);
-            if (!isNaN(numA) && !isNaN(numB)) {
-                return numA - numB;
-            }
+            if (!isNaN(numA) && !isNaN(numB)) { return numA - numB; }
             return nameA.localeCompare(nameB);
         });
 
@@ -477,61 +455,208 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                 table.guests.forEach((guest, idx) => {
                     const invitee = invitees.find(inv => inv.id === guest.inviteeId);
                     rows.push([
-                        tableExportName,
-                        idx + 1,
-                        guest.name,
-                        guest.dietaryRestrictions || "",
-                        guest.accessibilityInfo || "",
-                        invitee?.name || "",
-                        invitee?.email || "",
+                        tableExportName, idx + 1, guest.name || "",
+                        guest.dietaryRestrictions || "", guest.accessibilityInfo || "",
+                        invitee?.name || "", invitee?.email || "",
                         invitee?.isAttending === true ? "Yes" : invitee?.isAttending === false ? "No" : "Pending",
-                        invitee?.guests ?? "",
-                        invitee?.maxInvites ?? "",
-                        invitee?.dietaryRestrictions || "",
-                        invitee?.accessibilityInfo || "",
-                        invitee?.comments || "",
-                        invitee?.songRequests || ""
+                        invitee?.guests ?? "", invitee?.maxInvites ?? "",
+                        invitee?.dietaryRestrictions || "", invitee?.accessibilityInfo || "",
+                        invitee?.comments || "", invitee?.songRequests || ""
                     ]);
                 });
             }
         }
 
-        // Unassigned guests
         if (unassignedGuests.length > 0) {
             unassignedGuests.forEach(guest => {
                 const invitee = invitees.find(inv => inv.id === guest.inviteeId);
                 rows.push([
-                    "UNASSIGNED",
-                    "",
-                    guest.name,
-                    guest.dietaryRestrictions || "",
-                    guest.accessibilityInfo || "",
-                    invitee?.name || "",
-                    invitee?.email || "",
+                    "UNASSIGNED", "", guest.name || "",
+                    guest.dietaryRestrictions || "", guest.accessibilityInfo || "",
+                    invitee?.name || "", invitee?.email || "",
                     invitee?.isAttending === true ? "Yes" : invitee?.isAttending === false ? "No" : "Pending",
-                    invitee?.guests ?? "",
-                    invitee?.maxInvites ?? "",
-                    invitee?.dietaryRestrictions || "",
-                    invitee?.accessibilityInfo || "",
-                    invitee?.comments || "",
-                    invitee?.songRequests || ""
+                    invitee?.guests ?? "", invitee?.maxInvites ?? "",
+                    invitee?.dietaryRestrictions || "", invitee?.accessibilityInfo || "",
+                    invitee?.comments || "", invitee?.songRequests || ""
                 ]);
             });
         }
-
-        if (rows.length <= 1) {
-            alert("No guests assigned to tables to export.");
+        
+        if (rows.length <= 1) { // Only header
+            console.warn("No guests assigned to tables or unassigned to export for Excel.");
+            setAssignError("No guests assigned to tables or unassigned to export for Excel.");
+            setTimeout(() => setAssignError(""), 3000);
             return;
         }
-
-        // Create worksheet and workbook
         const worksheet = XLSX.utils.aoa_to_sheet(rows);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Seating Chart");
-
-        // Export to Excel file
         XLSX.writeFile(workbook, "seating_chart.xlsx");
     };
+
+    const handleExportSeatingChartPDF = () => { // Data PDF
+        if (loading) { 
+            setAssignError("Data is still loading. Please wait and try again."); 
+            setTimeout(() => setAssignError(""), 3000);
+            return; 
+        }
+        if (error) { 
+            setAssignError("Cannot export PDF due to a data loading error."); 
+            setTimeout(() => setAssignError(""), 3000);
+            return; 
+        }
+        if (!TABLE_LAYOUTS || TABLE_LAYOUTS.length === 0) { 
+            setAssignError("Table layout configuration is missing."); 
+            setTimeout(() => setAssignError(""), 3000);
+            return; 
+        }
+
+        const doc = new jsPDF({ orientation: 'landscape' });
+        doc.setFontSize(16);
+        doc.text("Wedding Seating Chart - Guest List", 14, 16);
+
+        const tableRows: any[] = [];
+        const header = [
+            "Table", "Seat #", "Guest Name", "Guest Dietary", "Guest Accessibility",
+            "Invitee Name", "Invitee Email", "RSVP Status", "Party Size", "Party Max",
+            "Party Dietary", "Party Accessibility", "Comments", "Song Requests"
+        ];
+
+        const sortedTables = [...tables].sort((a, b) => {
+            const layoutA = TABLE_LAYOUTS.find(l => l.id === a.id);
+            const layoutB = TABLE_LAYOUTS.find(l => l.id === b.id);
+            const nameA = layoutA ? layoutA.displayName : a.name;
+            const nameB = layoutB ? layoutB.displayName : b.name;
+            const numA = parseInt(nameA.replace(/[^0-9]/g, ''), 10);
+            const numB = parseInt(nameB.replace(/[^0-9]/g, ''), 10);
+            if (!isNaN(numA) && !isNaN(numB)) { return numA - numB; }
+            return nameA.localeCompare(nameB);
+        });
+
+        for (const table of sortedTables) {
+            const layout = TABLE_LAYOUTS.find(l => l.id === table.id);
+            const tableExportName = layout ? layout.displayName : table.name;
+            if (table.guests && table.guests.length > 0) {
+                table.guests.forEach((guest, idx) => {
+                    const invitee = invitees.find(inv => inv.id === guest.inviteeId);
+                    tableRows.push([
+                        tableExportName, idx + 1, guest.name || "",
+                        guest.dietaryRestrictions || "", guest.accessibilityInfo || "",
+                        invitee?.name || "", invitee?.email || "",
+                        invitee?.isAttending === true ? "Yes" : invitee?.isAttending === false ? "No" : "Pending",
+                        invitee?.guests ?? "", invitee?.maxInvites ?? "",
+                        invitee?.dietaryRestrictions || "", invitee?.accessibilityInfo || "",
+                        invitee?.comments || "", invitee?.songRequests || ""
+                    ]);
+                });
+            }
+        }
+
+        if (unassignedGuests.length > 0) {
+            unassignedGuests.forEach(guest => {
+                const invitee = invitees.find(inv => inv.id === guest.inviteeId);
+                tableRows.push([
+                    "UNASSIGNED", "", guest.name || "",
+                    guest.dietaryRestrictions || "", guest.accessibilityInfo || "",
+                    invitee?.name || "", invitee?.email || "",
+                    invitee?.isAttending === true ? "Yes" : invitee?.isAttending === false ? "No" : "Pending",
+                    invitee?.guests ?? "", invitee?.maxInvites ?? "",
+                    invitee?.dietaryRestrictions || "", invitee?.accessibilityInfo || "",
+                    invitee?.comments || "", invitee?.songRequests || ""
+                ]);
+            });
+        }
+        
+        if (tableRows.length === 0) { 
+            setAssignError("No guest data available to export for PDF."); 
+            setTimeout(() => setAssignError(""), 3000);
+            return; 
+        }
+
+        try {
+            autoTable(doc, {
+                head: [header],
+                body: tableRows,
+                startY: 22,
+                styles: { fontSize: 7, cellPadding: 1.5 },
+                headStyles: { fillColor: [41, 128, 185], fontSize: 7, cellPadding: 1.5 },
+                columnStyles: { 0: { cellWidth: 15 }, 1: { cellWidth: 10 }, 2: { cellWidth: 25 } },
+                margin: { top: 15, right: 7, bottom: 10, left: 7 },
+            });
+            doc.save("seating_chart_data.pdf");
+        } catch (e) {
+            console.error("Error during PDF (data) generation:", e);
+            setAssignError("An error occurred while generating the data PDF.");
+            setTimeout(() => setAssignError(""), 3000);
+        }
+    };
+
+    const handleExportVisualToPDF = async (event: React.MouseEvent<HTMLButtonElement>) => {
+        const currentButton = event.currentTarget;
+        const originalButtonText = currentButton.innerText;
+
+        const exportTargetElement = visualExportWrapperRef.current; // Use the wrapper div ref
+
+        if (!exportTargetElement) {
+            // Use a custom alert or notification system if available
+            console.error("Visual export target element ref (visualExportWrapperRef) is null.");
+            setAssignError("Floor plan visual export target element not found. Cannot export visual.");
+            setTimeout(() => setAssignError(""), 3000);
+            return;
+        }
+        
+        currentButton.innerText = "Generating PDF...";
+        currentButton.disabled = true;
+
+        try {
+            console.log("Attempting html2canvas with target:", exportTargetElement);
+            const canvas = await html2canvas(exportTargetElement, { // Target the wrapper div
+                scale: 2,
+                logging: true, 
+                useCORS: true, 
+                allowTaint: false, 
+                backgroundColor: '#ffffff',
+            });
+            console.log("html2canvas processing finished.");
+
+            const imgData = canvas.toDataURL('image/png');
+            
+            const pdf = new jsPDF({
+                orientation: 'p',
+                unit: 'px',
+                format: 'a4' 
+            });
+
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const canvasAspectRatio = canvas.width / canvas.height;
+            let imgPdfWidth, imgPdfHeight;
+
+            if ((pdfWidth / canvasAspectRatio) <= pdfHeight) { 
+                imgPdfWidth = pdfWidth;
+                imgPdfHeight = pdfWidth / canvasAspectRatio;
+            } else { 
+                imgPdfHeight = pdfHeight;
+                imgPdfWidth = pdfHeight * canvasAspectRatio;
+            }
+            
+            const xOffset = (pdfWidth - imgPdfWidth) / 2;
+            const yOffset = (pdfHeight - imgPdfHeight) / 2;
+
+            pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgPdfWidth, imgPdfHeight);
+            pdf.save('floor_plan_visual.pdf');
+
+        } catch (e: any) { 
+            console.error("Error exporting visual to PDF:", e);
+            const errorMessage = e.message || "An unknown error occurred.";
+            setAssignError(`Could not export visual to PDF. ${errorMessage} Check the console for more details.`);
+            setTimeout(() => setAssignError(""), 5000); // Longer timeout for error messages
+        } finally {
+            currentButton.innerText = originalButtonText;
+            currentButton.disabled = false;
+        }
+    };
+
 
     if (loading) return <div className={styles.loading}>Loading Floor Plan...</div>;
     if (error) return <div className={styles.error}>Error loading data: {error}</div>;
@@ -549,31 +674,47 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
 
     return (
         <div className={containerClassName} style={{ position: 'relative' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                 {!fullView && <h2 className={styles.mainTitle} style={{ margin: 0, flexGrow: 1 }}>Floor Plan Visualization</h2>}
-                {fullView && <div style={{flexGrow: 1}}></div>}
+                {fullView && <div style={{flexGrow: 1}}></div>} {/* Spacer */}
                 
-                <button 
-                    onClick={handleExportSeatingChart} 
-                    className={styles.exportButton} 
-                    style={{ marginLeft: !fullView ? '1rem' : '0', whiteSpace: 'nowrap' }}
-                >
-                    Export Seating to Text
-                </button>
-                <button
-                    onClick={handleExportSeatingChartCSV}
-                    className={styles.exportButton}
-                    style={{ marginLeft: '0.5rem', whiteSpace: 'nowrap' }}
-                >
-                    Export Seating to CSV
-                </button>
-                <button
-                    onClick={handleExportSeatingChartExcel}
-                    className={styles.exportButton}
-                    style={{ marginLeft: '0.5rem', whiteSpace: 'nowrap' }}
-                >
-                    Export Seating to Excel
-                </button>
+                <div style={{display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: fullView ? 'flex-end' : 'flex-start' }}>
+                    <button 
+                        onClick={handleExportSeatingChart} 
+                        className={styles.exportButton} 
+                        style={{ whiteSpace: 'nowrap' }}
+                    >
+                        Export to Text
+                    </button>
+                    <button
+                        onClick={handleExportSeatingChartCSV}
+                        className={styles.exportButton}
+                        style={{ whiteSpace: 'nowrap' }}
+                    >
+                        Export to CSV
+                    </button>
+                    <button
+                        onClick={handleExportSeatingChartExcel}
+                        className={styles.exportButton}
+                        style={{ whiteSpace: 'nowrap' }}
+                    >
+                        Export to Excel
+                    </button>
+                    <button
+                        onClick={handleExportSeatingChartPDF} // This is the DATA PDF
+                        className={styles.exportButton}
+                        style={{ whiteSpace: 'nowrap' }}
+                    >
+                        Export Data to PDF 
+                    </button>
+                     <button
+                        onClick={handleExportVisualToPDF} // This is the NEW VISUAL PDF
+                        className={styles.exportButton}
+                        style={{ whiteSpace: 'nowrap' }}
+                    >
+                        Export Visual to PDF
+                    </button>
+                </div>
             </div>
             
             <div style={{
@@ -601,85 +742,89 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                 </div>
             )}
 
-            <svg viewBox="0 0 1000 1350" className={styles.floorPlanSvg}>
-                <rect x="0" y="0" width="1000" height="1350" className={styles.venueBackground} />
-                <rect x="20" y="20" width="960" height="1290" className={styles.outerBorder} />
-                <text x="500" y="15" className={styles.wallLabel} textAnchor="middle">East Wall Open</text>
-                <text x="970" y="585" className={styles.wallLabel} textAnchor="middle" transform="rotate(90, 970, 600)">South Wall Open</text>
-                <rect x="50" y="50" width="80" height="40" className={styles.djBooth} />
-                <text x="90" y="75" className={styles.labelText} textAnchor="middle">DJ</text>
-                <rect x="50" y="200" width="50" height="400" className={styles.buffetArea} />
-                <text x="75" y="400" className={styles.labelText} textAnchor="middle" transform="rotate(-90, 75, 400)">Buffet</text>
-                <rect x="50" y="750" width="50" height="80" className={styles.drinksArea} />
-                <text x="75" y="790" className={styles.labelText} textAnchor="middle" transform="rotate(-90, 75, 790)">Drinks</text>
-                <rect x="30" y="625" width="80" height="100" className={styles.catererEntranceArea} />
-                <text x="70" y="670" className={styles.labelText} textAnchor="middle">Caterer&apos;s</text>
-                <text x="70" y="685" className={styles.labelText} textAnchor="middle">Entrance</text>
-                <rect x="450" y="1280" width="80" height="30" className={styles.guestBookArea} />
-                <text x="490" y="1295" className={styles.labelText} textAnchor="middle">Guest Book</text>
-                <rect x="550" y="1310" width="80" height="30" className={styles.entranceFrame} />
-                <text x="590" y="1325" className={styles.labelText} textAnchor="middle">Entrance</text>
-                <g className={styles.garbageArea}>
-                    <circle cx="280" cy="1290" r="10" className={styles.garbageBin} />
-                    <circle cx="310" cy="1290" r="10" className={styles.garbageBin} />
-                    <text x="300" y="1265" className={styles.labelText} textAnchor="middle">Garbage & Recycling</text>
-                </g>
+            {/* Wrapper for visual export. The ref is attached here. */}
+            <div ref={visualExportWrapperRef} style={{backgroundColor: '#ffffff'}}> {/* Added explicit white background for capture consistency */}
+                <svg ref={svgRef} viewBox="0 0 1000 1350" className={styles.floorPlanSvg}>
+                    <rect x="0" y="0" width="1000" height="1350" className={styles.venueBackground} />
+                    <rect x="20" y="20" width="960" height="1290" className={styles.outerBorder} />
+                    <text x="500" y="15" className={styles.wallLabel} textAnchor="middle">East Wall Open</text>
+                    <text x="970" y="585" className={styles.wallLabel} textAnchor="middle" transform="rotate(90, 970, 600)">South Wall Open</text>
+                    <rect x="50" y="50" width="80" height="40" className={styles.djBooth} />
+                    <text x="90" y="75" className={styles.labelText} textAnchor="middle">DJ</text>
+                    <rect x="50" y="200" width="50" height="400" className={styles.buffetArea} />
+                    <text x="75" y="400" className={styles.labelText} textAnchor="middle" transform="rotate(-90, 75, 400)">Buffet</text>
+                    <rect x="50" y="750" width="50" height="80" className={styles.drinksArea} />
+                    <text x="75" y="790" className={styles.labelText} textAnchor="middle" transform="rotate(-90, 75, 790)">Drinks</text>
+                    <rect x="30" y="625" width="80" height="100" className={styles.catererEntranceArea} />
+                    <text x="70" y="670" className={styles.labelText} textAnchor="middle">Caterer&apos;s</text>
+                    <text x="70" y="685" className={styles.labelText} textAnchor="middle">Entrance</text>
+                    <rect x="450" y="1280" width="80" height="30" className={styles.guestBookArea} />
+                    <text x="490" y="1295" className={styles.labelText} textAnchor="middle">Guest Book</text>
+                    <rect x="550" y="1310" width="80" height="30" className={styles.entranceFrame} />
+                    <text x="590" y="1325" className={styles.labelText} textAnchor="middle">Entrance</text>
+                    <g className={styles.garbageArea}>
+                        <circle cx="280" cy="1290" r="10" className={styles.garbageBin} />
+                        <circle cx="310" cy="1290" r="10" className={styles.garbageBin} />
+                        <text x="300" y="1265" className={styles.labelText} textAnchor="middle">Garbage & Recycling</text>
+                    </g>
 
-                {TABLE_LAYOUTS.map(layout => {
-                    const currentTableData = tables.find(t => t.id === layout.id);
-                    const guestsAtTable = currentTableData?.guests || [];
-                    const seatPositions = calculateSeatPositions(layout);
-                    const tableOwnerClass =
-                        layout.owner === "Avi" ? styles.tableAvi :
-                        layout.owner === "Shakthi" ? styles.tableShakthi :
-                        styles.tableShared;
+                    {TABLE_LAYOUTS.map(layout => {
+                        const currentTableData = tables.find(t => t.id === layout.id);
+                        const guestsAtTable = currentTableData?.guests || [];
+                        const seatPositions = calculateSeatPositions(layout);
+                        const tableOwnerClass =
+                            layout.owner === "Avi" ? styles.tableAvi :
+                            layout.owner === "Shakthi" ? styles.tableShakthi :
+                            styles.tableShared;
 
-                    return (
-                        <g key={layout.id} transform={`translate(${layout.x}, ${layout.y})`} className={styles.tableGroup}>
-                            <rect x={0} y={0} width={layout.width} height={layout.height}
-                                className={`${styles.tableRect} ${tableOwnerClass}`} />
-                            <text x={layout.width / 2} y={layout.height / 2 + 5} className={styles.tableLabel} textAnchor="middle">
-                                {layout.displayName}
-                            </text>
-                            {seatPositions.map((pos, index) => {
-                                const guest = guestsAtTable[index];
-                                let displayLabel;
-                                if (fullView && guest) {
-                                    displayLabel = truncateName(guest.name, 7);
-                                } else {
-                                    displayLabel = guest ? getInitials(guest.name) : '';
-                                }
-                                const seatClass = guest ? styles.seatOccupied : styles.seatEmpty;
-                                const seatKey = `seat-${layout.id}-${index}`;
-                                const textClass = fullView && guest ? styles.seatFullName : styles.seatInitial;
+                        return (
+                            <g key={layout.id} transform={`translate(${layout.x}, ${layout.y})`} className={styles.tableGroup}>
+                                <rect x={0} y={0} width={layout.width} height={layout.height}
+                                    className={`${styles.tableRect} ${tableOwnerClass}`} />
+                                <text x={layout.width / 2} y={layout.height / 2 + 5} className={styles.tableLabel} textAnchor="middle">
+                                    {layout.displayName}
+                                </text>
+                                {seatPositions.map((pos, index) => {
+                                    const guest = guestsAtTable[index];
+                                    let displayLabel;
+                                    if (fullView && guest) {
+                                        displayLabel = truncateName(guest.name, 7);
+                                    } else {
+                                        displayLabel = guest ? getInitials(guest.name) : '';
+                                    }
+                                    const seatClass = guest ? styles.seatOccupied : styles.seatEmpty;
+                                    const seatKey = `seat-${layout.id}-${index}`;
+                                    const textClass = fullView && guest ? styles.seatFullName : styles.seatInitial;
 
-                                return (
-                                    <g
-                                        key={seatKey}
-                                        transform={`translate(${pos.x}, ${pos.y})`}
-                                        className={styles.seatGroup}
-                                        onMouseEnter={(e) => guest && handleMouseEnter(e, guest)}
-                                        onMouseLeave={handleMouseLeave}
-                                        onClick={(e) => handleSeatClick(e, layout.id, index, guest || null)}
-                                        style={{ cursor: 'pointer' }}
-                                    >
-                                        {guest && <title>{guest.name}</title>}
-                                        <circle cx="0" cy="0" r="10" className={seatClass} />
-                                        <text x="0" y="0" dy="0.3em" className={textClass} textAnchor="middle">
-                                            {displayLabel}
-                                        </text>
-                                    </g>
-                                );
-                            })}
-                        </g>
-                    );
-                })}
-                
-                <rect x={danceFloorX} y={danceFloorY} width={danceFloorWidth} height={danceFloorHeight} className={styles.danceFloor} />
-                <text x={danceFloorX + danceFloorWidth / 2} y={danceFloorY + danceFloorHeight / 2 + 5} className={styles.labelText} textAnchor="middle">
-                    Dance
-                </text>
-            </svg>
+                                    return (
+                                        <g
+                                            key={seatKey}
+                                            transform={`translate(${pos.x}, ${pos.y})`}
+                                            className={styles.seatGroup}
+                                            onMouseEnter={(e) => guest && handleMouseEnter(e, guest)}
+                                            onMouseLeave={handleMouseLeave}
+                                            onClick={(e) => handleSeatClick(e, layout.id, index, guest || null)}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            {guest && <title>{guest.name}</title>}
+                                            <circle cx="0" cy="0" r="10" className={seatClass} />
+                                            <text x="0" y="0" dy="0.3em" className={textClass} textAnchor="middle">
+                                                {displayLabel}
+                                            </text>
+                                        </g>
+                                    );
+                                })}
+                            </g>
+                        );
+                    })}
+                    
+                    <rect x={danceFloorX} y={danceFloorY} width={danceFloorWidth} height={danceFloorHeight} className={styles.danceFloor} />
+                    <text x={danceFloorX + danceFloorWidth / 2} y={danceFloorY + danceFloorHeight / 2 + 5} className={styles.labelText} textAnchor="middle">
+                        Dance
+                    </text>
+                </svg>
+            </div>
+
 
             {!fullView && (
                 <div className={styles.fullViewLinkContainer}>
@@ -722,6 +867,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
     );
 }
 
+// --- Assignment Action Modal Component (Copied from your provided code) ---
 interface AssignmentActionModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -734,17 +880,7 @@ interface AssignmentActionModalProps {
     onMove: (action: 'move', data: { guestId: number; newTableId: number }) => void;
 }
 
-function AssignmentActionModal({
-    isOpen,
-    onClose,
-    target,
-    unassignedGuests,
-    tables,
-    invitees,
-    onAssign,
-    onUnassign,
-    onMove
-}: AssignmentActionModalProps) {
+function AssignmentActionModal({ isOpen, onClose, target, unassignedGuests, tables, invitees, onAssign, onUnassign, onMove }: AssignmentActionModalProps) {
     const [selectedGuestId, setSelectedGuestId] = useState<string>('');
     const [selectedMoveTableId, setSelectedMoveTableId] = useState<string>('');
 
@@ -754,10 +890,16 @@ function AssignmentActionModal({
         }
         if (isOpen && target?.type === 'guest' && target.guest.tableId !== null) {
              const currentGuestTableId = target.guest.tableId;
-             const firstAvailableTable = tables.find(t => t.id !== currentGuestTableId && t.guests.length < TABLE_LAYOUTS.find(l => l.id === t.id)!.capacity);
+             const firstAvailableTable = tables.find(t => {
+                const layout = TABLE_LAYOUTS.find(l => l.id === t.id);
+                return layout && t.id !== currentGuestTableId && t.guests.length < layout.capacity;
+             });
              setSelectedMoveTableId(firstAvailableTable ? firstAvailableTable.id.toString() : '');
         } else if (isOpen && target?.type === 'guest' && target.guest.tableId === null) { // Guest is unassigned
-            const firstAvailableTable = tables.find(t => t.guests.length < TABLE_LAYOUTS.find(l => l.id === t.id)!.capacity);
+            const firstAvailableTable = tables.find(t => {
+                const layout = TABLE_LAYOUTS.find(l => l.id === t.id);
+                return layout && t.guests.length < layout.capacity;
+            });
             setSelectedMoveTableId(firstAvailableTable ? firstAvailableTable.id.toString() : '');
         }
 
@@ -767,7 +909,7 @@ function AssignmentActionModal({
         }
     }, [isOpen, target, unassignedGuests, tables]);
 
-    if (!isOpen) return null;
+    if (!isOpen || !target) return null; // Ensure target is also checked
 
     const formatDate = (dateString: string | null | undefined) => {
         if (!dateString) return 'N/A';
@@ -828,7 +970,7 @@ function AssignmentActionModal({
                                     {availableMoveTables.map(table => {
                                         const layout = TABLE_LAYOUTS.find(l => l.id === table.id);
                                         return (
-                                            <option key={table.id} value={table.id}>
+                                            <option key={table.id} value={table.id.toString()}> {/* Ensure value is string */}
                                                 {layout?.displayName || table.name} ({table.guests.length}/{layout?.capacity})
                                             </option>
                                         );
@@ -874,7 +1016,7 @@ function AssignmentActionModal({
                                 <>
                                     <select value={selectedGuestId} onChange={(e) => setSelectedGuestId(e.target.value)} className={styles.modalSelect}>
                                         {unassignedGuests.map(guest => (
-                                            <option key={guest.id} value={guest.id}>
+                                            <option key={guest.id} value={guest.id.toString()}> {/* Ensure value is string */}
                                                 {guest.name}
                                             </option>
                                         ))}
