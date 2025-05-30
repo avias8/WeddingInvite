@@ -429,7 +429,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
     };
 
     const handleExportSeatingChartExcel = () => {
-        const rows: any[][] = []; // Array of arrays for aoa_to_sheet
+        const rows: (string | number)[][] = [];
         const header = [
             "Table", "Seat #", "Guest Name", "Guest Dietary", "Guest Accessibility",
             "Invitee Name", "Invitee Email", "RSVP Status", "Party Size", "Party Max",
@@ -515,7 +515,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
         doc.setFontSize(16);
         doc.text("Wedding Seating Chart - Guest List", 14, 16);
 
-        const tableRows: any[] = [];
+        const tableRows: (string | number)[][] = [];
         const header = [
             "Table", "Seat #", "Guest Name", "Guest Dietary", "Guest Accessibility",
             "Invitee Name", "Invitee Email", "RSVP Status", "Party Size", "Party Max",
@@ -646,9 +646,9 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
             pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgPdfWidth, imgPdfHeight);
             pdf.save('floor_plan_visual.pdf');
 
-        } catch (e: any) { 
+        } catch (e: unknown) { 
             console.error("Error exporting visual to PDF:", e);
-            const errorMessage = e.message || "An unknown error occurred.";
+            const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
             setAssignError(`Could not export visual to PDF. ${errorMessage} Check the console for more details.`);
             setTimeout(() => setAssignError(""), 5000); // Longer timeout for error messages
         } finally {
