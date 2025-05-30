@@ -68,14 +68,6 @@ function getInitials(name: string): string {
     return `${firstInitial}${lastInitial}`.toUpperCase();
 }
 
-function truncateName(name: string, maxLength: number = 10): string {
-    if (!name) return '';
-    if (name.length > maxLength) {
-        return name.substring(0, maxLength - 3) + "...";
-    }
-    return name;
-}
-
 function calculateSeatPositions(layout: TableLayout): { x: number, y: number }[] {
     const positions: { x: number, y: number }[] = [];
     const seatRadius = 10;
