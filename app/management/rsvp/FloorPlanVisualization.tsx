@@ -646,8 +646,9 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
             pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgPdfWidth, imgPdfHeight);
             pdf.save('floor_plan_visual.pdf');
 
-        } catch (e: unknown) { 
+        } catch (e: unknown) { // Type must be 'any' or 'unknown'
             console.error("Error exporting visual to PDF:", e);
+            // Safely extract error message if possible
             const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
             setAssignError(`Could not export visual to PDF. ${errorMessage} Check the console for more details.`);
             setTimeout(() => setAssignError(""), 5000); // Longer timeout for error messages
