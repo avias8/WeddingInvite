@@ -489,3 +489,30 @@
     border: none;
     background-color: #f0f0f0;
 }
+
+.exportButton {
+    padding: 0.6rem 1.2rem;
+    background-color: var(--color-secondary-accent, #21701a);
+    color: #fff;
+    font-family: var(--font-body, sans-serif);
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 2rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    flex-shrink: 0; /* Prevent button from shrinking too much */
+}
+
+.exportButton:hover {
+    background-color: #1a5a13; /* Darker shade for hover */
+    transform: translateY(-1px);
+}
+
+/* Ensure text in seat circles is well-centered vertically */
+.seatInitial, .seatFullName {
+    dominant-baseline: middle; /* Recommended for SVG text vertical centering */
+    text-anchor: middle; /* Ensure horizontal centering is also applied */
+    /* dy: 0.3em; /* Alternative if dominant-baseline doesn't give desired effect in all browsers */
+}
