@@ -5,6 +5,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import styles from './FloorPlanVisualization.module.css';
 import type { Guest, Table, Invitee } from '@/app/types';
+import * as XLSX from "xlsx";
 
 // Interface for Table data including assigned guests array
 interface TableWithGuests extends Table {
@@ -341,7 +342,197 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
             alert("Text export is not supported in your browser.");
         }
     };
-    
+
+    // --- CSV Export Functionality ---
+    const handleExportSeatingChartCSV = () => {
+        let csvRows: string[] = [];
+        // Header
+        csvRows.push("Table,Seat #,Guest Name,Guest Dietary,Guest Accessibility,Invitee Name,Invitee Email,RSVP Status,Party Size,Party Max,Party Dietary,Party Accessibility,Comments,Song Requests");
+
+        // Sort tables as in text export
+        const sortedTables = [...tables].sort((a, b) => {
+            const layoutA = TABLE_LAYOUTS.find(l => l.id === a.id);
+            const layoutB = TABLE_LAYOUTS.find(l => l.id === b.id);
+            const nameA = layoutA ? layoutA.displayName : a.name;
+            const nameB = layoutB ? layoutB.displayName : b.name;
+            const numA = parseInt(nameA.replace(/[^0-9]/g, ''), 10);
+            const numB = parseInt(nameB.replace(/[^0-9]/g, ''), 10);
+            if (!isNaN(numA) && !isNaN(numB)) {
+                return numA - numB;
+            }
+            return nameA.localeCompare(nameB);
+        });
+
+        for (const table of sortedTables) {
+            const layout = TABLE_LAYOUTS.find(l => l.id === table.id);
+            const tableExportName = layout ? layout.displayName : table.name;
+            if (table.guests && table.guests.length > 0) {
+                table.guests.forEach((guest, idx) => {
+                    const invitee = invitees.find(inv => inv.id === guest.inviteeId);
+                    csvRows.push([
+                        `"${tableExportName}"`,
+                        idx + 1,
+                        `"${guest.name}"`,
+                        `"${guest.dietaryRestrictions || ""}"`,
+                        `"${guest.accessibilityInfo || ""}"`,
+                        `"${invitee?.name || ""}"`,
+                        `"${invitee?.email || ""}"`,
+                        invitee?.isAttending === true ? "Yes" : invitee?.isAttending === false ? "No" : "Pending",
+                        invitee?.guests ?? "",
+                        invitee?.maxInvites ?? "",
+                        `"${invitee?.dietaryRestrictions || ""}"`,
+                        `"${invitee?.accessibilityInfo || ""}"`,
+                        `"${invitee?.comments || ""}"`,
+                        `"${invitee?.songRequests || ""}"`
+                    ].join(","));
+                });
+            }
+        }
+
+        // Unassigned guests
+        if (unassignedGuests.length > 0) {
+            unassignedGuests.forEach(guest => {
+                const invitee = invitees.find(inv => inv.id === guest.inviteeId);
+                csvRows.push([
+                    `"UNASSIGNED"`,
+                    "",
+                    `"${guest.name}"`,
+                    `"${guest.dietaryRestrictions || ""}"`,
+                    `"${guest.accessibilityInfo || ""}"`,
+                    `"${invitee?.name || ""}"`,
+                    `"${invitee?.email || ""}"`,
+                    invitee?.isAttending === true ? "Yes" : invitee?.isAttending === false ? "No" : "Pending",
+                    invitee?.guests ?? "",
+                    invitee?.maxInvites ?? "",
+                    `"${invitee?.dietaryRestrictions || ""}"`,
+                    `"${invitee?.accessibilityInfo || ""}"`,
+                    `"${invitee?.comments || ""}"`,
+                    `"${invitee?.songRequests || ""}"`
+                ].join(","));
+            });
+        }
+
+        if (csvRows.length <= 1) {
+            alert("No guests assigned to tables to export.");
+            return;
+        }
+
+        const csvContent = csvRows.join("\r\n");
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'seating_chart.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } else {
+            alert("CSV export is not supported in your browser.");
+        }
+    };
+
+    // --- Excel Export Functionality ---
+    const handleExportSeatingChartExcel = () => {
+        // Prepare data rows
+        const rows: any[] = [];
+        // Header
+        rows.push([
+            "Table",
+            "Seat #",
+            "Guest Name",
+            "Guest Dietary",
+            "Guest Accessibility",
+            "Invitee Name",
+            "Invitee Email",
+            "RSVP Status",
+            "Party Size",
+            "Party Max",
+            "Party Dietary",
+            "Party Accessibility",
+            "Comments",
+            "Song Requests"
+        ]);
+
+        // Sort tables as in text export
+        const sortedTables = [...tables].sort((a, b) => {
+            const layoutA = TABLE_LAYOUTS.find(l => l.id === a.id);
+            const layoutB = TABLE_LAYOUTS.find(l => l.id === b.id);
+            const nameA = layoutA ? layoutA.displayName : a.name;
+            const nameB = layoutB ? layoutB.displayName : b.name;
+            const numA = parseInt(nameA.replace(/[^0-9]/g, ''), 10);
+            const numB = parseInt(nameB.replace(/[^0-9]/g, ''), 10);
+            if (!isNaN(numA) && !isNaN(numB)) {
+                return numA - numB;
+            }
+            return nameA.localeCompare(nameB);
+        });
+
+        for (const table of sortedTables) {
+            const layout = TABLE_LAYOUTS.find(l => l.id === table.id);
+            const tableExportName = layout ? layout.displayName : table.name;
+            if (table.guests && table.guests.length > 0) {
+                table.guests.forEach((guest, idx) => {
+                    const invitee = invitees.find(inv => inv.id === guest.inviteeId);
+                    rows.push([
+                        tableExportName,
+                        idx + 1,
+                        guest.name,
+                        guest.dietaryRestrictions || "",
+                        guest.accessibilityInfo || "",
+                        invitee?.name || "",
+                        invitee?.email || "",
+                        invitee?.isAttending === true ? "Yes" : invitee?.isAttending === false ? "No" : "Pending",
+                        invitee?.guests ?? "",
+                        invitee?.maxInvites ?? "",
+                        invitee?.dietaryRestrictions || "",
+                        invitee?.accessibilityInfo || "",
+                        invitee?.comments || "",
+                        invitee?.songRequests || ""
+                    ]);
+                });
+            }
+        }
+
+        // Unassigned guests
+        if (unassignedGuests.length > 0) {
+            unassignedGuests.forEach(guest => {
+                const invitee = invitees.find(inv => inv.id === guest.inviteeId);
+                rows.push([
+                    "UNASSIGNED",
+                    "",
+                    guest.name,
+                    guest.dietaryRestrictions || "",
+                    guest.accessibilityInfo || "",
+                    invitee?.name || "",
+                    invitee?.email || "",
+                    invitee?.isAttending === true ? "Yes" : invitee?.isAttending === false ? "No" : "Pending",
+                    invitee?.guests ?? "",
+                    invitee?.maxInvites ?? "",
+                    invitee?.dietaryRestrictions || "",
+                    invitee?.accessibilityInfo || "",
+                    invitee?.comments || "",
+                    invitee?.songRequests || ""
+                ]);
+            });
+        }
+
+        if (rows.length <= 1) {
+            alert("No guests assigned to tables to export.");
+            return;
+        }
+
+        // Create worksheet and workbook
+        const worksheet = XLSX.utils.aoa_to_sheet(rows);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Seating Chart");
+
+        // Export to Excel file
+        XLSX.writeFile(workbook, "seating_chart.xlsx");
+    };
+
     if (loading) return <div className={styles.loading}>Loading Floor Plan...</div>;
     if (error) return <div className={styles.error}>Error loading data: {error}</div>;
 
@@ -368,6 +559,20 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                     style={{ marginLeft: !fullView ? '1rem' : '0', whiteSpace: 'nowrap' }}
                 >
                     Export Seating to Text
+                </button>
+                <button
+                    onClick={handleExportSeatingChartCSV}
+                    className={styles.exportButton}
+                    style={{ marginLeft: '0.5rem', whiteSpace: 'nowrap' }}
+                >
+                    Export Seating to CSV
+                </button>
+                <button
+                    onClick={handleExportSeatingChartExcel}
+                    className={styles.exportButton}
+                    style={{ marginLeft: '0.5rem', whiteSpace: 'nowrap' }}
+                >
+                    Export Seating to Excel
                 </button>
             </div>
             
