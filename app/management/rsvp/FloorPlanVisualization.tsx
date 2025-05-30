@@ -43,10 +43,10 @@ const TABLE_LAYOUTS: TableLayout[] = [
     { id: 11, name: "Table 10", displayName: "10", x: 680, y: 650, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
     { id: 10, name: "Table 9", displayName: "9", x: 680, y: 800, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
     { id: 9, name: "Table 8", displayName: "8", x: 680, y: 1000, width: 50, height: 150, capacity: 8, owner: "Avi" },
-    { id: 15, name: "Table 14", displayName: "14", x: 510, y: 400, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
-    { id: 16, name: "Table 15", displayName: "15", x: 510, y: 550, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
-    { id: 17, name: "Table 16", displayName: "16", x: 510, y: 700, width: 50, height: 150, capacity: 8, owner: "Avi" },
-    { id: 18, name: "Table 17", displayName: "17", x: 510, y: 850, width: 50, height: 150, capacity: 8, owner: "Avi" },
+    { id: 15, name: "Table 14", displayName: "14", x: 530, y: 400, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
+    { id: 16, name: "Table 15", displayName: "15", x: 530, y: 550, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
+    { id: 17, name: "Table 16", displayName: "16", x: 530, y: 700, width: 50, height: 150, capacity: 8, owner: "Avi" },
+    { id: 18, name: "Table 17", displayName: "17", x: 530, y: 850, width: 50, height: 150, capacity: 8, owner: "Avi" },
     { id: 22, name: "Table 21", displayName: "21", x: 400, y: 400, width: 50, height: 150, capacity: 8, owner: "Avi" },
     { id: 21, name: "Table 20", displayName: "20", x: 400, y: 550, width: 50, height: 150, capacity: 8, owner: "Avi" },
     { id: 20, name: "Table 19", displayName: "19", x: 400, y: 700, width: 50, height: 150, capacity: 8, owner: "Avi" },
@@ -787,12 +787,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                                 </text>
                                 {seatPositions.map((pos, index) => {
                                     const guest = guestsAtTable[index];
-                                    let displayLabel;
-                                    if (fullView && guest) {
-                                        displayLabel = truncateName(guest.name, 7);
-                                    } else {
-                                        displayLabel = guest ? getInitials(guest.name) : '';
-                                    }
+                                    const displayLabel = fullView && guest ? guest.name : guest ? getInitials(guest.name) : '';
                                     const seatClass = guest ? styles.seatOccupied : styles.seatEmpty;
                                     const seatKey = `seat-${layout.id}-${index}`;
                                     const textClass = fullView && guest ? styles.seatFullName : styles.seatInitial;
