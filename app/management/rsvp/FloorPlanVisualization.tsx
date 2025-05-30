@@ -1,5 +1,6 @@
 // app/management/rsvp/FloorPlanVisualization.tsx (React-based SVG)
 // Added Click-to-Assign/Unassign/Move functionality via Modal
+// Updated to truncate full names in fullView for better fit
 "use client";
 
 import React, { useEffect, useState, useCallback } from 'react';
@@ -25,6 +26,18 @@ function getInitials(name: string): string {
     const lastInitial = parts[parts.length - 1].substring(0, 1);
     return `${firstInitial}${lastInitial}`.toUpperCase();
 }
+
+/**
+ * Truncates a name if it exceeds a maxLength, appending '...'.
+ */
+function truncateName(name: string, maxLength: number = 10): string {
+    if (!name) return '';
+    if (name.length > maxLength) {
+        return name.substring(0, maxLength - 3) + "...";
+    }
+    return name;
+}
+
 
 // Define the structure for layout properties of each table in the SVG
 interface TableLayout {
@@ -75,28 +88,47 @@ const TABLE_LAYOUTS: TableLayout[] = [
  */
 function calculateSeatPositions(layout: TableLayout): { x: number, y: number }[] {
     const positions: { x: number, y: number }[] = [];
-    const seatRadius = 10;
+    const seatRadius = 10; // Radius of the seat circle
     const numSeats = layout.capacity;
     const tableWidth = layout.width;
     const tableHeight = layout.height;
+
+    // Determine if the table is oriented vertically or horizontally
     const isVertical = tableHeight > tableWidth;
-    const longDim = isVertical ? tableHeight : tableWidth;
-    const shortDim = isVertical ? tableWidth : tableHeight;
+    const longDim = isVertical ? tableHeight : tableWidth; // Longer dimension of the table
+    const shortDim = isVertical ? tableWidth : tableHeight; // Shorter dimension of the table
+
+    // Calculate number of seats on each of the two longer sides
     const seatsOnLongSide1 = Math.ceil(numSeats / 2);
     const seatsOnLongSide2 = Math.floor(numSeats / 2);
+
+    // Calculate spacing between seats on each long side
+    // Add 1 to the number of seats for spacing calculation to include space at ends
     const spacing1 = seatsOnLongSide1 > 0 ? longDim / (seatsOnLongSide1 + 1) : longDim;
     const spacing2 = seatsOnLongSide2 > 0 ? longDim / (seatsOnLongSide2 + 1) : longDim;
 
     for (let i = 0; i < numSeats; i++) {
-        let sx = 0;
-        let sy = 0;
-        if (i < seatsOnLongSide1) {
-            if (isVertical) { sx = -seatRadius * 1.5; sy = spacing1 * (i + 1); }
-            else { sx = spacing1 * (i + 1); sy = -seatRadius * 1.5; }
-        } else {
+        let sx = 0; // Seat x-coordinate relative to table's top-left
+        let sy = 0; // Seat y-coordinate relative to table's top-left
+
+        if (i < seatsOnLongSide1) { // Seats on the first long side
+            const indexOnSide = i;
+            if (isVertical) { // Vertical table
+                sx = -seatRadius * 1.5; // Position to the left of the table
+                sy = spacing1 * (indexOnSide + 1); // Distribute along the height
+            } else { // Horizontal table
+                sx = spacing1 * (indexOnSide + 1); // Distribute along the width
+                sy = -seatRadius * 1.5; // Position above the table
+            }
+        } else { // Seats on the second long side
             const indexOnSide = i - seatsOnLongSide1;
-            if (isVertical) { sx = shortDim + seatRadius * 1.5; sy = spacing2 * (indexOnSide + 1); }
-            else { sx = spacing2 * (indexOnSide + 1); sy = shortDim + seatRadius * 1.5; }
+            if (isVertical) { // Vertical table
+                sx = shortDim + seatRadius * 1.5; // Position to the right of the table
+                sy = spacing2 * (indexOnSide + 1); // Distribute along the height
+            } else { // Horizontal table
+                sx = spacing2 * (indexOnSide + 1); // Distribute along the width
+                sy = shortDim + seatRadius * 1.5; // Position below the table
+            }
         }
         positions.push({ x: sx, y: sy });
     }
@@ -119,7 +151,7 @@ type ModalActionData =
     | { guestId: number; newTableId: number }; // For move
 
 /**
- * Renders an SVG floor plan visualization with assigned guest initials,
+ * Renders an SVG floor plan visualization with assigned guest initials or truncated names,
  * hover tooltips, and click-to-assign/unassign functionality via a modal.
  */
 export default function FloorPlanVisualization({ fullView = false }: FloorPlanVisualizationProps) {
@@ -148,13 +180,14 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
         setLoading(true);
         setError(null);
         try {
-            // *** Fetch tables, guests, AND invitees ***
+            // Fetch tables, guests, AND invitees
             const [resTables, resGuests, resInvitees] = await Promise.all([
                 fetch('/api/tables'),
                 fetch('/api/guests'),
                 fetch('/api/invitees') // Fetch invitee data
             ]);
 
+            // Check if all responses are ok
             if (!resTables.ok) throw new Error(`Failed to fetch tables: ${resTables.statusText}`);
             if (!resGuests.ok) throw new Error(`Failed to fetch guests: ${resGuests.statusText}`);
             if (!resInvitees.ok) throw new Error(`Failed to fetch invitees: ${resInvitees.statusText}`);
@@ -163,45 +196,49 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
             const allGuestsData: Guest[] = await resGuests.json();
             const inviteesData: Invitee[] = await resInvitees.json(); // Store invitee data
 
+            // Map guests to their respective tables
             const guestMap: Record<number, Guest[]> = {};
             tablesData.forEach(table => {
                 if (table && typeof table.id === 'number') {
+                    // Ensure guests are correctly filtered and assigned
                     guestMap[table.id] = allGuestsData.filter(g => g.tableId === table.id) || [];
                 }
             });
 
+            // Set tables state with mapped guests
             setTables(tablesData.map(t => ({ ...t, guests: guestMap[t.id] || [] })));
+            // Set unassigned guests state
             setUnassignedGuests(allGuestsData.filter(g => g.tableId === null));
-            // *** Ensure invitee state is set ***
+            // Set invitees state
             setInvitees(inviteesData);
 
         } catch (err) {
             console.error("Error fetching floor plan data:", err);
             setError(err instanceof Error ? err.message : "An unknown error occurred");
-
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, []); // Empty dependency array means this useCallback will not change
 
     useEffect(() => {
         fetchData();
-    }, [fetchData]);
+    }, [fetchData]); // fetchData is stable due to its own empty dependency array
 
     // --- API Call Functions ---
     const assignGuest = async (guestId: number, tableId: number) => {
         // Find the target table to check capacity
         const targetTable = tables.find(t => t.id === tableId);
+        // Find the guest being assigned (could be from unassigned or another table)
         const guestToAssign = [...unassignedGuests, ...tables.flatMap(t => t.guests)].find(g => g.id === guestId);
 
         if (!targetTable || !guestToAssign) {
             console.error("Target table or guest not found for assignment");
             setAssignError("Could not find table or guest.");
-            setTimeout(() => setAssignError(""), 3000);
+            setTimeout(() => setAssignError(""), 3000); // Clear error after 3 seconds
             return;
         }
 
-        // Check capacity (only if assigning to a different table or from unassigned)
+        // Check capacity only if the guest is moving to a different table or from unassigned list
         if (guestToAssign.tableId !== tableId && targetTable.guests.length >= targetTable.capacity) {
             setAssignError(`Table "${targetTable.name}" is full (Capacity: ${targetTable.capacity}).`);
             setTimeout(() => setAssignError(""), 3000);
@@ -233,7 +270,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
         setAssignError(""); // Clear previous errors
         try {
             const res = await fetch("/api/tables/unassign", {
-                method: "DELETE", // Use DELETE for unassigning
+                method: "DELETE", // Use DELETE for unassigning as per API design
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ guestId }),
             });
@@ -254,7 +291,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
     // --- Event Handlers ---
     const handleMouseEnter = (event: React.MouseEvent, guest: Guest) => {
         setTooltipContent(guest);
-        setTooltipPosition({ x: event.clientX + 10, y: event.clientY + 10 });
+        setTooltipPosition({ x: event.clientX + 10, y: event.clientY + 10 }); // Position tooltip relative to cursor
         setTooltipVisible(true);
     };
 
@@ -264,7 +301,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
     };
 
     const handleSeatClick = (event: React.MouseEvent, tableId: number, seatIndex: number, guest: Guest | null) => {
-        event.stopPropagation(); // Prevent triggering clicks on elements behind
+        event.stopPropagation(); // Prevent triggering clicks on elements behind the seat
         if (guest) {
             // Clicked an occupied seat
             setModalTarget({ type: 'guest', guest: guest });
@@ -272,7 +309,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
             // Clicked an empty seat
             setModalTarget({ type: 'seat', tableId: tableId, seatIndex: seatIndex });
         }
-        setIsModalOpen(true); // Open the modal
+        setIsModalOpen(true); // Open the assignment/action modal
     };
 
     const closeModal = () => {
@@ -280,15 +317,15 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
         setModalTarget(null);
     };
 
-    // Handler for actions within the modal
+    // Handler for actions (assign, unassign, move) within the modal
     const handleModalAction = async (action: 'assign' | 'unassign' | 'move', data: ModalActionData) => {
-        closeModal();
-        // Type guards to ensure data matches action
-        if (action === 'assign' && 'tableId' in data) {
+        closeModal(); // Close modal first
+        // Type guards to ensure data matches the action and call appropriate API function
+        if (action === 'assign' && 'guestId' in data && 'tableId' in data) {
             await assignGuest(data.guestId, data.tableId);
-        } else if (action === 'unassign' && 'guestId' in data && !('tableId' in data) && !('newTableId' in data)) { // Be more specific for unassign
+        } else if (action === 'unassign' && 'guestId' in data && !('tableId' in data) && !('newTableId' in data)) {
             await unassignGuest(data.guestId);
-        } else if (action === 'move' && 'newTableId' in data) {
+        } else if (action === 'move' && 'guestId' in data && 'newTableId' in data) {
             await assignGuest(data.guestId, data.newTableId); // Re-use assignGuest for moving
         } else {
             console.error("Invalid action/data combination in handleModalAction", action, data);
@@ -300,37 +337,37 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
     if (loading) return <div className={styles.loading}>Loading Floor Plan...</div>;
     if (error) return <div className={styles.error}>Error loading data: {error}</div>;
 
-    // Define Dance Floor coordinates
+    // Define Dance Floor coordinates for SVG
     const danceFloorX = 350;
     const danceFloorY = 130;
     const danceFloorWidth = 250;
     const danceFloorHeight = 250;
 
-    // Determine container class based on the fullView prop
+    // Determine container class based on the fullView prop for styling
     const containerClasses = [styles.visualizationContainer];
     if (!fullView) {
-        containerClasses.push(styles.constrainedWidth);
+        containerClasses.push(styles.constrainedWidth); // Apply constrained width if not in full view
     }
     const containerClassName = containerClasses.join(' ');
 
     return (
-        <div className={containerClassName} style={{ position: 'relative' }}>
+        <div className={containerClassName} style={{ position: 'relative' }}> {/* Ensure parent is relative for absolute positioned children */}
             {!fullView && <h2 className={styles.mainTitle}>Floor Plan Visualization</h2>}
 
-            {/* Legend in top right */}
+            {/* Legend for table ownership, positioned absolutely in the top right */}
             <div style={{
                 position: 'absolute',
                 top: 10,
                 right: 10,
-                background: 'rgba(255,255,255,0.95)',
+                background: 'rgba(255,255,255,0.95)', // Semi-transparent white background
                 border: '1px solid #ccc',
                 borderRadius: 8,
                 padding: '8px 16px',
-                zIndex: 10,
+                zIndex: 10, // Ensure legend is above SVG
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 4,
-                minWidth: 120
+                gap: 4, // Space between legend items
+                minWidth: 120 // Minimum width for the legend box
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{
@@ -338,7 +375,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                         width: 18,
                         height: 18,
                         borderRadius: 4,
-                        background: '#b3d4fc', // Avi color
+                        background: '#b3d4fc', // Avi's table color
                         border: '1px solid #7bb1e7'
                     }} />
                     <span>Avi&apos;s Tables</span>
@@ -349,7 +386,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                         width: 18,
                         height: 18,
                         borderRadius: 4,
-                        background: '#ffd6b3', // Shakthi color
+                        background: '#ffd6b3', // Shakthi's table color
                         border: '1px solid #e7b97b'
                     }} />
                     <span>Shakthi&apos;s Tables</span>
@@ -360,14 +397,14 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                         width: 18,
                         height: 18,
                         borderRadius: 4,
-                        background: '#e0e0e0', // Shared color
+                        background: '#e0e0e0', // Shared table color
                         border: '1px solid #bdbdbd'
                     }} />
                     <span>Shared Table</span>
                 </div>
             </div>
 
-            {/* Display assignment errors */}
+            {/* Display assignment errors as a popup */}
             {assignError && (
                 <div className={styles.assignErrorPopup}>
                     <span role="img" aria-label="error">😢</span> {assignError}
@@ -375,11 +412,13 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
             )}
 
             <svg viewBox="0 0 1000 1350" className={styles.floorPlanSvg}>
-                {/* ... (Background, Border, Wall Labels, Static Elements remain the same) ... */}
+                {/* Static SVG elements for the venue layout */}
                 <rect x="0" y="0" width="1000" height="1350" className={styles.venueBackground} />
                 <rect x="20" y="20" width="960" height="1290" className={styles.outerBorder} />
+                {/* Wall labels */}
                 <text x="500" y="15" className={styles.wallLabel} textAnchor="middle">East Wall Open</text>
                 <text x="970" y="585" className={styles.wallLabel} textAnchor="middle" transform="rotate(90, 970, 600)">South Wall Open</text>
+                {/* Venue features like DJ booth, Buffet, etc. */}
                 <rect x="50" y="50" width="80" height="40" className={styles.djBooth} />
                 <text x="90" y="75" className={styles.labelText} textAnchor="middle">DJ</text>
                 <rect x="50" y="200" width="50" height="400" className={styles.buffetArea} />
@@ -403,10 +442,10 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                 {TABLE_LAYOUTS.map(layout => {
                     // Find the corresponding table data from state, including guests
                     const currentTableData = tables.find(t => t.id === layout.id);
-                    const guestsAtTable = currentTableData?.guests || [];
-                    const seatPositions = calculateSeatPositions(layout);
+                    const guestsAtTable = currentTableData?.guests || []; // Guests assigned to this table
+                    const seatPositions = calculateSeatPositions(layout); // Calculate positions for seats
 
-                    // Pick color class or inline style based on owner
+                    // Determine table color class based on owner
                     const tableOwnerClass =
                         layout.owner === "Avi"
                             ? styles.tableAvi
@@ -416,18 +455,29 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
 
                     return (
                         <g key={layout.id} transform={`translate(${layout.x}, ${layout.y})`} className={styles.tableGroup}>
-                            {/* Table Rect - Add owner color class */}
+                            {/* Table Rectangle with owner-specific styling */}
                             <rect x={0} y={0} width={layout.width} height={layout.height}
                                 className={`${styles.tableRect} ${tableOwnerClass}`} />
+                            {/* Table Display Name/Number */}
                             <text x={layout.width / 2} y={layout.height / 2 + 5} className={styles.tableLabel} textAnchor="middle">
                                 {layout.displayName}
                             </text>
-                            {/* Seats */}
+                            {/* Render Seats for the table */}
                             {seatPositions.map((pos, index) => {
-                                const guest = guestsAtTable[index];
-                                const displayLabel = guest ? getInitials(guest.name) : '';
+                                const guest = guestsAtTable[index]; // Guest at this seat, if any
+                                // MODIFICATION: Display full name (truncated) in fullView, otherwise initials
+                                let displayLabel;
+                                if (fullView && guest) {
+                                    displayLabel = truncateName(guest.name, 7); // Max 7 chars for full name view
+                                } else {
+                                    displayLabel = guest ? getInitials(guest.name) : '';
+                                }
                                 const seatClass = guest ? styles.seatOccupied : styles.seatEmpty;
                                 const seatKey = `seat-${layout.id}-${index}`;
+                                // MODIFICATION: Apply conditional text class for styling
+                                const textClass = fullView && guest ? styles.seatFullName : styles.seatInitial;
+
+
                                 return (
                                     <g
                                         key={seatKey}
@@ -436,12 +486,12 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                                         onMouseEnter={(e) => guest && handleMouseEnter(e, guest)}
                                         onMouseLeave={handleMouseLeave}
                                         onClick={(e) => handleSeatClick(e, layout.id, index, guest || null)}
-                                        style={{ cursor: 'pointer' }}
+                                        style={{ cursor: 'pointer' }} // Indicate clickable seats
                                     >
-                                        {guest && <title>{guest.name}</title>}
+                                        {guest && <title>{guest.name}</title>} {/* Tooltip with full name */}
                                         <circle cx="0" cy="0" r="10" className={seatClass} />
-                                        {/* *** Centered text using y=0 and dominant-baseline from CSS *** */}
-                                        <text x="0" y="0" className={styles.seatInitial} textAnchor="middle">
+                                        {/* Display guest name/initials */}
+                                        <text x="0" y="0" className={textClass} textAnchor="middle">
                                             {displayLabel}
                                         </text>
                                     </g>
@@ -458,7 +508,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                 </text>
             </svg>
 
-            {/* Link to Full Viewer Page */}
+            {/* Link to Full Viewer Page (only if not already in fullView) */}
             {!fullView && (
                 <div className={styles.fullViewLinkContainer}>
                     <Link href="/floorplan" className={styles.fullViewLinkButton} target="_blank" rel="noopener noreferrer" aria-label="Open full-screen floor plan viewer">
@@ -468,7 +518,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                 </div>
             )}
 
-            {/* Conditionally Render Tooltip */}
+            {/* Conditionally Render Tooltip for guest details on hover */}
             {tooltipVisible && tooltipContent && (
                 <div
                     className={styles.tooltip}
@@ -484,7 +534,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                 </div>
             )}
 
-            {/* Assignment Modal */}
+            {/* Assignment Modal for assigning/unassigning/moving guests */}
             {isModalOpen && modalTarget && (
                 <AssignmentActionModal
                     isOpen={isModalOpen}
@@ -492,9 +542,7 @@ export default function FloorPlanVisualization({ fullView = false }: FloorPlanVi
                     target={modalTarget}
                     unassignedGuests={unassignedGuests}
                     tables={tables}
-                    // *** FIX: Pass invitees state to modal ***
-                    invitees={invitees}
-                    // Pass handleModalAction directly
+                    invitees={invitees} // Pass invitee data to the modal
                     onAssign={handleModalAction}
                     onUnassign={handleModalAction}
                     onMove={handleModalAction}
@@ -532,68 +580,71 @@ function AssignmentActionModal({
     const [selectedGuestId, setSelectedGuestId] = useState<string>('');
     const [selectedMoveTableId, setSelectedMoveTableId] = useState<string>('');
 
-    // Reset local state when modal opens or target changes
+    // Reset local state when modal opens or target changes to ensure fresh selections
     useEffect(() => {
-        if (isOpen && target?.type === 'seat') {
+        if (isOpen && target?.type === 'seat') { // If opening for an empty seat
+            // Pre-select the first unassigned guest if available
             setSelectedGuestId(unassignedGuests.length > 0 ? unassignedGuests[0].id.toString() : '');
         }
-        if (isOpen && target?.type === 'guest') {
+        if (isOpen && target?.type === 'guest') { // If opening for an occupied seat (to move guest)
+            // Find the first available table to move to (not the current one and has capacity)
             const firstAvailableTable = tables.find(t => t.id !== target.guest.tableId && t.guests.length < t.capacity);
             setSelectedMoveTableId(firstAvailableTable ? firstAvailableTable.id.toString() : '');
         }
-        if (!isOpen || !target) {
+        if (!isOpen || !target) { // If modal is closed or no target, reset selections
             setSelectedGuestId('');
             setSelectedMoveTableId('');
         }
-    }, [isOpen, target, unassignedGuests, tables]);
+    }, [isOpen, target, unassignedGuests, tables]); // Dependencies for this effect
 
 
-    if (!isOpen) return null;
+    if (!isOpen) return null; // Don't render modal if not open
 
-    // --- Helper Function to Format Dates ---
+    // --- Helper Function to Format Dates for display ---
     const formatDate = (dateString: string | null | undefined) => {
         if (!dateString) return 'N/A';
         try {
+            // Format date to a readable local string (e.g., "May 29, 2024, 10:00 AM")
             return new Date(dateString).toLocaleString(undefined, {
                 year: 'numeric', month: 'short', day: 'numeric',
                 hour: 'numeric', minute: '2-digit', hour12: true
             });
-        } catch { // *** FIX: Omitted the error variable binding entirely ***
-            return 'Invalid Date';
+        } catch {
+            return 'Invalid Date'; // Handle potential errors in date parsing
         }
     };
 
-    // --- Helper Function to Format RSVP Status ---
+    // --- Helper Function to Format RSVP Status for display ---
     const formatRsvpStatus = (status: boolean | null | undefined) => {
         if (status === true) return 'Yes';
         if (status === false) return 'No';
-        return 'Pending';
+        return 'Pending'; // Default if null or undefined
     };
 
 
-    // Case 1: Clicked an OCCUPIED seat
+    // Case 1: Clicked an OCCUPIED seat (target is a guest)
     if (target.type === 'guest') {
         const currentGuest = target.guest;
         const currentTable = tables.find(t => t.id === currentGuest.tableId);
-        const invitee = invitees.find(inv => inv.id === currentGuest.inviteeId); // Find parent Invitee
+        const invitee = invitees.find(inv => inv.id === currentGuest.inviteeId); // Find parent Invitee for party details
+        // Filter tables available for moving: not the current table and has capacity
         const availableMoveTables = tables.filter(t =>
             t.id !== currentGuest.tableId && t.guests.length < t.capacity
         );
 
         return (
-            <div className={styles.modalBackground} onClick={onClose}>
-                <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalBackground} onClick={onClose}> {/* Click outside modal to close */}
+                <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}> {/* Prevent closing when clicking inside modal */}
                     <h3 className={styles.modalTitle}>{currentGuest.name}</h3>
 
-                    {/* Guest Details Section */}
+                    {/* Guest Specific Details Section */}
                     <div className={styles.modalGuestDetails}>
                         <p>Assigned Table: {currentTable?.name || 'Unassigned?'}</p>
-                        {/* Display Guest Specific Details */}
                         {currentGuest.dietaryRestrictions && <p>Guest Diet: {currentGuest.dietaryRestrictions}</p>}
                         {currentGuest.accessibilityInfo && <p>Guest Access: {currentGuest.accessibilityInfo}</p>}
                     </div>
 
-                    {/* Invitee Details Section - EXPANDED */}
+                    {/* Invitee (Party) Details Section - EXPANDED */}
                     {invitee && (
                         <div className={styles.modalInviteeSection}>
                             <h4>Party Details (Invitee: {invitee.name})</h4>
@@ -614,24 +665,38 @@ function AssignmentActionModal({
 
                     {/* Move Guest Section */}
                     <div className={styles.modalSection}>
-                        {/* ... (Move Guest Select and Button) ... */}
                         <h4>Move Guest</h4>
                         {availableMoveTables.length > 0 ? (
                             <>
                                 <select value={selectedMoveTableId} onChange={(e) => setSelectedMoveTableId(e.target.value)} className={styles.modalSelect}>
                                     <option value="" disabled>Select new table...</option>
-                                    {availableMoveTables.map(table => (<option key={table.id} value={table.id}> {table.name} ({table.guests.length}/{table.capacity}) </option>))}
+                                    {/* Populate dropdown with available tables */}
+                                    {availableMoveTables.map(table => (
+                                        <option key={table.id} value={table.id}>
+                                            {table.name} ({table.guests.length}/{table.capacity})
+                                        </option>
+                                    ))}
                                 </select>
-                                <button onClick={() => onMove('move', { guestId: currentGuest.id, newTableId: parseInt(selectedMoveTableId) })} disabled={!selectedMoveTableId} className={styles.modalButton}> Move Guest </button>
+                                <button
+                                    onClick={() => onMove('move', { guestId: currentGuest.id, newTableId: parseInt(selectedMoveTableId) })}
+                                    disabled={!selectedMoveTableId} // Disable if no table is selected
+                                    className={styles.modalButton}
+                                >
+                                    Move Guest
+                                </button>
                             </>
                         ) : (<p className={styles.modalInfo}>No other tables with available space.</p>)}
                     </div>
 
                     {/* Unassign Guest Section */}
                     <div className={styles.modalSection}>
-                        {/* ... (Unassign Button) ... */}
                         <h4>Unassign Guest</h4>
-                        <button onClick={() => onUnassign('unassign', { guestId: currentGuest.id })} className={`${styles.modalButton} ${styles.unassignButton}`}> Unassign (Send to List) </button>
+                        <button
+                            onClick={() => onUnassign('unassign', { guestId: currentGuest.id })}
+                            className={`${styles.modalButton} ${styles.unassignButton}`} // Specific styling for unassign button
+                        >
+                            Unassign (Send to List)
+                        </button>
                     </div>
 
                     {/* Cancel Button */}
@@ -641,9 +706,8 @@ function AssignmentActionModal({
         );
     }
 
-    // Case 2: Clicked an EMPTY seat
+    // Case 2: Clicked an EMPTY seat (target is a seat)
     if (target.type === 'seat') {
-        // ... (JSX for Empty Seat Action Modal remains the same) ...
         const targetTable = tables.find(t => t.id === target.tableId);
         const isTableFull = targetTable ? targetTable.guests.length >= targetTable.capacity : true;
         return (
@@ -652,12 +716,23 @@ function AssignmentActionModal({
                     <h3 className={styles.modalTitle}>Assign Guest to {targetTable?.name || `Table ID ${target.tableId}`}</h3>
                     {isTableFull ? (<p className={styles.modalWarning}>This table is full!</p>)
                         : unassignedGuests.length === 0 ? (<p className={styles.modalInfo}>No unassigned guests available.</p>)
-                            : (
+                            : ( // If table has space and there are unassigned guests
                                 <>
                                     <select value={selectedGuestId} onChange={(e) => setSelectedGuestId(e.target.value)} className={styles.modalSelect}>
-                                        {unassignedGuests.map(guest => (<option key={guest.id} value={guest.id}> {guest.name} </option>))}
+                                        {/* Populate dropdown with unassigned guests */}
+                                        {unassignedGuests.map(guest => (
+                                            <option key={guest.id} value={guest.id}>
+                                                {guest.name}
+                                            </option>
+                                        ))}
                                     </select>
-                                    <button onClick={() => onAssign('assign', { guestId: parseInt(selectedGuestId), tableId: target.tableId })} disabled={!selectedGuestId} className={styles.modalButton}> Assign Guest </button>
+                                    <button
+                                        onClick={() => onAssign('assign', { guestId: parseInt(selectedGuestId), tableId: target.tableId })}
+                                        disabled={!selectedGuestId} // Disable if no guest is selected
+                                        className={styles.modalButton}
+                                    >
+                                        Assign Guest
+                                    </button>
                                 </>
                             )}
                     <button onClick={onClose} className={`${styles.modalButton} ${styles.cancelButton}`}>Cancel</button>
@@ -666,5 +741,5 @@ function AssignmentActionModal({
         );
     }
 
-    return null; // Should not happen
+    return null; // Should not happen if target is always set when modal is open
 }

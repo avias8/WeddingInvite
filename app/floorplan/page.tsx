@@ -19,7 +19,9 @@ export default function FloorPlanViewerPage() {
             </div>
             {/* Wrapper to potentially control the size/scrolling */}
             <div className={styles.visualizationWrapper}>
-                <FloorPlanVisualization />
+                {/* MODIFICATION START: Pass fullView={true} */}
+                <FloorPlanVisualization fullView={true} />
+                {/* MODIFICATION END */}
             </div>
         </div>
     );

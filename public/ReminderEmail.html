@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>One Month To Go! - Avi & Shakthi's Wedding</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Google Font Import - Placed here for broader email client compatibility, though support varies. Best to have fallbacks. */
+    @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Georgia&display=swap');
+
+    body {
+      margin: 0;
+      padding: 40px 20px;
+      background-color: #f3efe4;
+      font-family: 'Georgia', 'Times New Roman', Times, serif; /* Fallback font */
+      color: #21701a;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased; /* Smoother fonts on WebKit */
+      -moz-osx-font-smoothing: grayscale; /* Smoother fonts on Firefox */
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1); /* Slightly enhanced shadow */
+      border: 1px solid #b6c4b0;
+    }
+    .cartoon-banner-image {
+      width: 100%;
+      max-width: 500px;
+      height: auto;
+      margin: 0 auto 30px auto; /* Increased bottom margin */
+      display: block;
+      border-radius: 8px;
+    }
+    /* Shared style for venue image and direction images */
+    .venue-image,
+    .direction-image,
+    .video-thumbnail-link img {
+      width: 100%;
+      max-width: 550px; /* Adjusted max-width for venue image to be slightly larger if desired */
+      height: auto;
+      margin: 20px auto; /* Consistent margin */
+      display: block;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+    .video-thumbnail-link {
+      display: block;
+      text-decoration: none;
+      position: relative; /* For play button overlay */
+      max-width: 400px; /* Ensure link container doesn't exceed image width */
+      margin: 20px auto; /* Center the link container */
+    }
+    .video-thumbnail-link::after {
+      content: '▶';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 60px; /* Slightly larger play button */
+      color: rgba(255, 255, 255, 0.95); /* More opaque */
+      text-shadow: 0px 0px 12px rgba(0, 0, 0, 0.6); /* Enhanced shadow */
+      pointer-events: none;
+      opacity: 0.9; /* Slightly more visible by default */
+      transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out; /* Added transform transition */
+    }
+    .video-thumbnail-link:hover::after {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.1); /* Slight zoom effect on hover */
+    }
+    h1 {
+      font-family: 'Libre Baskerville', 'Georgia', serif; /* Added Georgia as fallback */
+      color: #21701a;
+      font-size: 2.3rem; /* Slightly larger */
+      text-transform: uppercase;
+      margin: 0 0 25px 0;
+      text-align: center;
+      letter-spacing: 0.12rem; /* Slightly more spacing */
+    }
+    h2 {
+      font-family: 'Libre Baskerville', 'Georgia', serif; /* Added Georgia as fallback */
+      color: #8fa88c;
+      font-size: 1.7rem; /* Slightly larger */
+      margin-top: 35px; /* Increased top margin */
+      margin-bottom: 20px; /* Increased bottom margin */
+      text-align: center;
+      border-bottom: 1px solid #e0e0e0;
+      padding-bottom: 12px; /* Slightly more padding */
+    }
+    p {
+      margin: 0 0 18px 0; /* Slightly increased bottom margin for readability */
+      font-size: 1.08rem; /* Slightly larger font for body text */
+    }
+    .strong, strong { /* Target both class and element for robustness */
+      font-weight: bold;
+      color: #1a5a13;
+    }
+    .venue-details, .contact-details {
+      background-color: #f9f9f9;
+      padding: 20px; /* Increased padding */
+      border-radius: 8px;
+      margin-bottom: 25px; /* Increased margin */
+      border: 1px solid #e0e0e0;
+    }
+    .venue-details p, .contact-details p {
+      margin-bottom: 10px; /* Increased margin */
+    }
+    .map-link-container {
+        text-align: center;
+        margin-top:20px; /* Increased margin */
+        margin-bottom: 25px; /* Increased margin */
+    }
+    .map-link {
+      display: inline-block;
+      padding: 14px 30px; /* Increased padding */
+      background-color: #8fa88c;
+      color: #ffffff !important;
+      text-decoration: none !important;
+      border-radius: 30px; /* More rounded */
+      font-family: 'Georgia', serif;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.2s ease; /* Added transform transition */
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for button */
+    }
+    .map-link:hover {
+      background-color: #21701a;
+      transform: translateY(-2px); /* Slight lift on hover */
+    }
+    .footer {
+      margin-top: 35px;
+      padding-top: 25px;
+      border-top: 1px solid #b6c4b0;
+      font-size: 0.95rem; /* Slightly larger */
+      color: #777777;
+      text-align: center;
+    }
+    .image-caption { /* Also used for venue image caption */
+      text-align:center;
+      font-size:0.92em; /* Slightly adjusted */
+      color:#555;
+      margin-top: -10px; /* Adjust to bring caption closer to image/video thumbnail */
+      margin-bottom: 20px; /* Increased bottom margin */
+      font-style: italic;
+    }
+
+    .intro-text {
+        font-size: 1.1rem;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .section-divider {
+        height: 1px;
+        background-color: #e0e0e0;
+        margin: 40px auto;
+        width: 80%;
+    }
+
+
+    @media screen and (max-width: 620px) {
+      body {
+        padding: 20px 10px; /* Adjusted padding for smaller screens */
+      }
+      .container {
+        margin: 0 5px; /* Reduced horizontal margin */
+        padding: 20px;
+      }
+      h1 {
+        font-size: 1.9rem; /* Adjusted for mobile */
+      }
+      h2 {
+        font-size: 1.5rem; /* Adjusted for mobile */
+      }
+      p {
+        font-size: 1rem; /* Adjusted for mobile */
+      }
+      .intro-text {
+        font-size: 1.05rem; /* Adjusted for mobile */
+      }
+      .video-thumbnail-link::after {
+        font-size: 45px; /* Adjusted play button for mobile */
+      }
+      .map-link {
+        padding: 12px 25px; /* Adjusted button padding for mobile */
+      }
+      .cartoon-banner-image {
+        margin-bottom: 20px;
+      }
+      .venue-image, .direction-image {
+        max-width: 100%; /* Ensure images scale down properly on mobile */
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="https://storage.googleapis.com/my-wedding-assets/Images/WeddingReminder/Banner3.png" alt="Avi & Shakthi - One Month To Go!" class="cartoon-banner-image" />
+
+    <h1>One Month To Go!</h1>
+
+    <p class="intro-text">Dearest friends and family,</p>
+    <p>Can you believe it? There's just <strong>one month left</strong> until our Hindu wedding ceremony on <strong>June 29, 2025</strong>! We are getting so excited to celebrate with all of you.</p>
+
+    <div class="section-divider"></div>
+
+    <h2>A Friendly Reminder: Our Venue</h2>
+    <img src="https://static.wixstatic.com/media/b2a746_766742926656475590bd9ed07a593b62~mv2.jpg/v1/fill/w_1600,h_779,al_c,q_85,enc_avif,quality_auto/b2a746_766742926656475590bd9ed07a593b62~mv2.jpg" alt="Hilltop Wedding Centre Venue" class="venue-image" />
+
+    <div class="venue-details">
+      <p><strong>Hilltop Wedding Centre</strong></p>
+      <p>Box 9077</p>
+      <p>Sylvan Lake, Alberta, T4S 1S6</p>
+      <p><strong>Directions Note:</strong> The venue is located 2km North of Sylvan Lake on Highway 20.</p>
+    </div>
+    
+    <div class="map-link-container">
+      <a href="https://www.google.com/maps/dir/?api=1&destination=Blue%20Sign%2039145,%20Sylvan%20Lake,%20AB%20T0M%200H0,%20Canada" target="_blank" class="map-link">View Map & Directions</a>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <h2>Important Timings</h2>
+    <p>To ensure you don't miss any part of the celebration, we kindly request guests to arrive by <strong>10:00 AM</strong>.</p>
+    <p>The main events and ceremonies will likely wrap up by around <strong>7:00 PM - 8:00 PM</strong>. However, we'll be there with our close friends and family to enjoy the evening, possibly into the wee hours of the night!</p>
+
+    <div class="section-divider"></div>
+
+    <h2>Plan Your Journey</h2>
+    <p>If you haven't already, this is a great time to <strong>book your hotels or finalize your travel plans</strong> to Sylvan Lake. We want to make sure your journey to celebrate with us is as smooth as possible!</p>
+
+    <div class="section-divider"></div>
+
+    <h2>Finding Your Way & Parking</h2>
+    <p>To help you find the Hilltop Wedding Centre easily, here are a few visual cues:</p>
+
+    <img src="https://storage.googleapis.com/my-wedding-assets/Images/WeddingReminder/RightTurnCartoon.png" alt="Stylized blue sign for Hilltop Wedding Centre" class="direction-image" />
+    <p class="image-caption">You'll see a blue sign, before the turn in. <strong>Watch for this</strong>, shortly after the turn in right to the venue appears!</p>
+
+    <img src="https://storage.googleapis.com/my-wedding-assets/Images/WeddingReminder/TurnInAnnotated.png" alt="Illustration showing the turn off the main road towards Hilltop Wedding Center" class="direction-image" />
+    <p class="image-caption">Then comes the sharp right turn to the venue! It's a 180 degree turn to the right! Be careful not to miss this as you'll have to go around!</p>
+
+    <img src="https://storage.googleapis.com/my-wedding-assets/Images/WeddingReminder/SignForVenue.png" alt="Main entrance sign for Hilltop Wedding Centre" class="direction-image" />
+    <p class="image-caption">You're almost there! You'll see the sign for the venue after the turn, keep going up the drive to the main venue parking.</p>
+
+    <p>And here's a short video of the drive-in to give you a better perspective:</p>
+    <a href="https://youtu.be/Hu0lM6AF5HA?feature=shared" target="_blank" class="video-thumbnail-link">
+      <img src="https://storage.googleapis.com/my-wedding-assets/Images/WeddingReminder/RightTurn.png" alt="Video of the drive to Hilltop Wedding Centre - Click to Play" />
+    </a>
+    <p class="image-caption">Click the image above to watch a short video of the drive-in to Hilltop Wedding Centre.</p>
+
+    <p><strong>A Note on Parking:</strong> The first parking lot you'll see upon entering is primarily for overflow. You are welcome to park here if you wish; access from this lot might be easier for our elderly guests or those with mobility considerations. Ample parking is available closer to the main building as well.</p>
+
+    <div class="section-divider"></div>
+
+    <h2>We Can't Wait!</h2>
+    <p>Thank you once again for being such an important part of our lives and for choosing to celebrate this momentous occasion with us. We are truly counting down the days and are so excited to share our special day with you!</p>
+    <p>With much love and anticipation,</p>
+    <p><strong>Avi & Shakthi</strong></p>
+
+    <div class="footer">
+      If you have any immediate questions, feel free to reply to this email or contact us directly.
+    </div>
+  </div>
+</body>
+</html>

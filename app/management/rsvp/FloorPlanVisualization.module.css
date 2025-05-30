@@ -1,5 +1,5 @@
 /* app/management/rsvp/FloorPlanVisualization.module.css */
-/* Final Consolidated Version + Sleek Modal Styles */
+/* Final Consolidated Version + Sleek Modal Styles + FullName Seat Style */
 
 /* --- Base Component Container --- */
 .visualizationContainer {
@@ -186,13 +186,29 @@
     font-family: var(--font-body, sans-serif);
     pointer-events: none;
     text-anchor: middle;
-    dominant-baseline: middle;
+    dominant-baseline: middle; /* Essential for vertical centering */
     transition: fill 0.2s ease;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
 }
+
+/* Style for full names (potentially smart-truncated) in fullView mode */
+.seatFullName {
+    font-size: 7px; /* Slightly larger font size for smart-truncated names */
+    font-weight: normal; /* Can be bold if preferred */
+    fill: var(--color-text-secondary, #444);
+    font-family: var(--font-body, sans-serif);
+    pointer-events: none;
+    text-anchor: middle;
+    dominant-baseline: middle; /* Essential for vertical centering */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
 
 .tableAvi {
     fill: #b3d4fc !important;
@@ -270,7 +286,6 @@
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.75);
-    /* Slightly darker overlay */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -280,15 +295,11 @@
 
 .modalContent {
     background-color: #2d2d2d;
-    /* Dark background */
     color: #e0e0e0;
-    /* Light grey text */
     padding: 1.5rem 2rem;
     border-radius: 8px;
     border: 1px solid #444;
-    /* Subtle border */
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-    /* Stronger shadow */
     width: 100%;
     max-width: 450px;
     text-align: center;
@@ -299,22 +310,29 @@
     font-size: 1.5rem;
     font-family: var(--font-wedding);
     color: #fff;
-    /* White title */
     margin-top: 0;
     margin-bottom: 1.5rem;
-    /* Increased spacing */
     padding-bottom: 0.75rem;
-    /* Increased padding */
     border-bottom: 1px solid #555;
-    /* Darker border */
 }
+
+.modalGuestDetails p,
+.modalInviteeSection p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 0.4rem;
+    text-align: left;
+}
+.modalInviteeSection h4,
+.modalSection h4 {
+    text-align: left;
+}
+
 
 .modalSection {
     margin-top: 1.5rem;
     padding-top: 1.5rem;
-    /* More spacing */
     border-top: 1px solid #444;
-    /* Darker separator */
 }
 
 .modalSection:first-of-type {
@@ -327,7 +345,6 @@
 .modalSection h4 {
     font-size: 1.1rem;
     color: var(--color-accent-light, #c8e6c9);
-    /* Use light accent color */
     margin-bottom: 0.75rem;
     font-weight: bold;
 }
@@ -335,17 +352,13 @@
 .modalSelect {
     width: 100%;
     padding: 0.7rem 0.8rem;
-    /* Adjust padding */
     margin-bottom: 1rem;
     border: 1px solid #555;
-    /* Darker border */
     border-radius: 4px;
     font-size: 0.95rem;
     box-sizing: border-box;
     background-color: #333;
-    /* Dark select background */
     color: #eee;
-    /* Light select text */
 }
 
 .modalSelect option {
@@ -356,9 +369,7 @@
 
 .modalButton {
     padding: 0.7rem 1.3rem;
-    /* Slightly larger padding */
     border: 1px solid transparent;
-    /* Base border */
     border-radius: 5px;
     font-size: 0.95rem;
     cursor: pointer;
@@ -374,7 +385,6 @@
 
 .modalButton:disabled {
     background-color: #555 !important;
-    /* Darker disabled background */
     color: #999 !important;
     border-color: #555 !important;
     cursor: not-allowed;
@@ -382,46 +392,36 @@
     opacity: 0.7;
 }
 
-/* Specific button styles - Dark Theme */
 .modalButton {
-    /* Default/Assign/Move */
     background-color: var(--color-accent, #689f38);
-    /* Using a darker green accent */
     border-color: var(--color-accent, #689f38);
     color: #fff;
 }
 
 .modalButton:hover:not(:disabled) {
     background-color: #7cb342;
-    /* Lighter green on hover */
     border-color: #7cb342;
 }
 
 .unassignButton {
     background-color: #d32f2f;
-    /* Red */
     border-color: #d32f2f;
     color: #fff;
 }
 
 .unassignButton:hover:not(:disabled) {
     background-color: #e57373;
-    /* Lighter red */
     border-color: #e57373;
 }
 
-/* Cancel Button - Ghost style */
 .cancelButton {
     background-color: transparent;
     color: #ccc;
-    /* Light grey text */
     border: 1px solid #555;
-    /* Grey border */
 }
 
 .cancelButton:hover:not(:disabled) {
     background-color: #444;
-    /* Slight background on hover */
     color: #fff;
     border-color: #666;
 }
@@ -430,13 +430,11 @@
 .modalWarning {
     font-size: 0.9rem;
     color: #ccc;
-    /* Light grey info text */
     margin-bottom: 1rem;
 }
 
 .modalWarning {
     color: #ef9a9a;
-    /* Light red warning text */
     font-weight: bold;
 }
 
