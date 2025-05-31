@@ -17,8 +17,16 @@ interface GcsApiError extends Error {
   errors?: Array<{ message: string; reason: string }>; // Common in GCS errors
 }
 
+// Define an interface for Service Account Credentials
+interface ServiceAccountCredentials {
+  project_id: string;
+  client_email: string;
+  private_key: string;
+  // Add other fields if necessary, e.g., type, private_key_id, client_id, etc.
+}
+
 // Helper function to create Storage instance from parsed credentials
-const createStorageInstance = (credentials: any, sourceDescription: string): Storage | null => {
+const createStorageInstance = (credentials: ServiceAccountCredentials, sourceDescription: string): Storage | null => {
   if (!credentials.project_id || !credentials.client_email || !credentials.private_key) {
     console.error(`Guest Uploads: ${sourceDescription} JSON is missing required fields (project_id, client_email, private_key).`);
     return null;
@@ -37,7 +45,7 @@ const createStorageInstance = (credentials: any, sourceDescription: string): Sto
 // Attempt 1: Use GOOGLE_SERVICE_ACCOUNT if it contains the JSON string
 if (serviceAccountJsonStringEnv) {
   try {
-    const credentials = JSON.parse(serviceAccountJsonStringEnv);
+    const credentials = JSON.parse(serviceAccountJsonStringEnv) as ServiceAccountCredentials;
     storage = createStorageInstance(credentials, "GOOGLE_SERVICE_ACCOUNT (JSON string)");
   } catch (e: unknown) {
     console.error(
@@ -52,7 +60,7 @@ if (serviceAccountJsonStringEnv) {
 if (storage === null && gcsApplicationCredentialsEnv) {
   let gcsAppCredsIsJson = false;
   try {
-    const credentials = JSON.parse(gcsApplicationCredentialsEnv);
+    const credentials = JSON.parse(gcsApplicationCredentialsEnv) as ServiceAccountCredentials;
     // If parsing succeeds, it's a JSON string.
     storage = createStorageInstance(credentials, "GOOGLE_APPLICATION_CREDENTIALS (as JSON string)");
     if (storage) {
