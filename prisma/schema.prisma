@@ -1,3 +1,5 @@
+// schema.prisma
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -8,51 +10,116 @@ generator client {
 }
 
 model Invitee {
-  id                   Int      @id @default(autoincrement())
-  name                 String
-  email                String   @unique
-  isAttending          Boolean?
-  guests               Int      @default(1)
-  createdAt            DateTime @default(now())
-  token                String   @unique @default(uuid())
-  maxInvites           Int
-  respondedAt          DateTime?
-  dietaryRestrictions  String?
-  accessibilityInfo    String?
-  comments             String?
-  songRequests         String?
-  emailSentAt          DateTime?  
-  emailOpenedAt        DateTime?  
-  guestsList           Guest[]  // Relation to individual guests
+  id                  Int       @id @default(autoincrement())
+  name                String
+  email               String    @unique
+  isAttending         Boolean?
+  guests              Int       @default(1) // Number of guests confirmed in the party
+  createdAt           DateTime  @default(now())
+  token               String    @unique @default(uuid())
+  maxInvites          Int       // Max number of people allowed in this party
+  respondedAt         DateTime?
+  dietaryRestrictions String?
+  accessibilityInfo   String?
+  comments            String?
+  songRequests        String?
+  emailSentAt         DateTime?
+  emailOpenedAt       DateTime?
+  guestsList          Guest[]   // Relation to individual Guest records created for this Invitee's party
 }
 
 model Guest {
-  id         Int       @id @default(autoincrement())
-  name       String
-  inviteeId  Int       @map("invitee_id")
-  invitee    Invitee   @relation(fields: [inviteeId], references: [id])
+  id                  Int       @id @default(autoincrement())
+  name                String
+  inviteeId           Int       @map("invitee_id")
+  invitee             Invitee   @relation(fields: [inviteeId], references: [id], onDelete: Cascade) // If Invitee is deleted, their guests are also deleted
   dietaryRestrictions String?
-  accessibilityInfo String?
-  isAttending Boolean?
-  
-  tableId    Int?      @map("table_id")  
-  table      Table?    @relation(fields: [tableId], references: [id])
+  accessibilityInfo   String?
+  isAttending         Boolean?  // Individual guest attendance status, if different from Invitee's overall
 
-  seatingAssignment SeatingAssignment? @relation("GuestToSeatingAssignment") // ✅ Removed `references`
+  tableId             Int?      @map("table_id")
+  table               Table?    @relation(fields: [tableId], references: [id], onDelete: SetNull) // If table is deleted, guest's tableId becomes null
+
+  seatingAssignment   SeatingAssignment? @relation("GuestToSeatingAssignment")
+
+  // New relations for social features
+  uploadedMedia       GuestMedia[] @relation("UploadedMediaByGuest") // Media uploaded by this guest
+  likes               MediaLike[]    @relation("LikesByGuest")       // Likes given by this guest
+  comments            MediaComment[] @relation("CommentsByGuest")    // Comments made by this guest
 }
 
 model Table {
-  id          Int       @id @default(autoincrement())
-  name        String
-  capacity    Int
-  guests      Guest[]
-  assignments SeatingAssignment[]
+  id            Int                 @id @default(autoincrement())
+  name          String
+  capacity      Int
+  guests        Guest[]             // Guests assigned to this table
+  assignments   SeatingAssignment[] // Seating assignments for this table
 }
 
 model SeatingAssignment {
-  id        Int    @id @default(autoincrement())
-  guestId   Int    @unique @map("guest_id") 
-  guest     Guest  @relation("GuestToSeatingAssignment", fields: [guestId], references: [id]) // ✅ `references` only on this side
-  tableId   Int    @map("table_id")
-  table     Table  @relation(fields: [tableId], references: [id])
+  id      Int   @id @default(autoincrement())
+  guestId Int   @unique @map("guest_id")
+  guest   Guest @relation("GuestToSeatingAssignment", fields: [guestId], references: [id], onDelete: Cascade)
+  tableId Int   @map("table_id")
+  table   Table @relation(fields: [tableId], references: [id], onDelete: Cascade)
+}
+
+// --- NEW MODELS FOR SOCIAL FEATURES ---
+
+model GuestMedia {
+  id                Int      @id @default(autoincrement())
+  gcsPath           String   @unique // Full GCS path, e.g., "weddingguestphotos/uuid-filename.jpg"
+  originalFileName  String?  // Original name of the file uploaded by the guest
+  contentType       String?  // e.g., "image/jpeg", "video/mp4"
+  uploadedAt        DateTime @default(now())
+  
+  // Who uploaded it? Linking to a Guest record.
+  // If an uploader Guest record is deleted, we might want to keep the media, so onDelete: SetNull.
+  uploaderId        Int?     @map("uploader_guest_id") 
+  uploader          Guest?   @relation("UploadedMediaByGuest", fields: [uploaderId], references: [id], onDelete: SetNull) 
+  
+  // Relations to likes and comments
+  likes             MediaLike[]
+  comments          MediaComment[]
+
+  @@index([uploadedAt]) // Index for sorting media by upload time
+}
+
+model MediaLike {
+  id        Int      @id @default(autoincrement())
+  
+  mediaId   Int      @map("media_id")
+  media     GuestMedia @relation(fields: [mediaId], references: [id], onDelete: Cascade) // If media is deleted, likes are deleted
+  
+  guestId   Int      @map("guest_id")
+  guest     Guest    @relation("LikesByGuest", fields: [guestId], references: [id], onDelete: Cascade) // If guest is deleted, their likes are deleted
+  
+  createdAt DateTime @default(now())
+
+  @@unique([mediaId, guestId]) // A guest can only like a specific media item once
+  @@index([mediaId])
+  @@index([guestId])
+}
+
+model MediaComment {
+  id        Int      @id @default(autoincrement())
+  text      String   @db.Text // Use Text type for potentially longer comments
+  
+  mediaId   Int      @map("media_id")
+  media     GuestMedia @relation(fields: [mediaId], references: [id], onDelete: Cascade) // If media is deleted, comments are deleted
+  
+  guestId   Int      @map("guest_id")
+  guest     Guest    @relation("CommentsByGuest", fields: [guestId], references: [id], onDelete: Cascade) // If guest is deleted, their comments are deleted
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Optional: For threaded comments/replies
+  parentId  Int?            @map("parent_comment_id")
+  parent    MediaComment?   @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade, map: "comment_parent_fk")
+  replies   MediaComment[]  @relation("CommentReplies")
+
+  @@index([mediaId])
+  @@index([guestId])
+  @@index([createdAt])
 }
