@@ -1,15 +1,21 @@
 // app/api/get-guest-media/route.ts
 import { NextResponse } from "next/server";
-import { Storage, StorageOptions, File } from "@google-cloud/storage"; // Added File for explicit typing
+import { Storage, StorageOptions, File, GetFilesResponse } from "@google-cloud/storage"; // Added GetFilesResponse for clarity
 
 // --- Google Cloud Storage Client Initialization ---
-let storage: Storage;
+let storage: Storage | null = null; // Initialize to null
 const gcsBucketName = process.env.GCS_BUCKET_NAME;
 const serviceAccountJsonString = process.env.GOOGLE_SERVICE_ACCOUNT;
 const gcsCredentialsFilePath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
+// Define a type for expected GCS error structure
+interface GcsApiError extends Error {
+  code?: number | string;
+  // You can add other common properties if needed, e.g., errors?: Array<{ message: string; reason: string; }>;
+}
+
 // Primary: Try to use the JSON string from GOOGLE_SERVICE_ACCOUNT
-if (serviceAccountJsonString) {
+if (storage === null && serviceAccountJsonString) {
   try {
     const serviceAccountCredentials = JSON.parse(serviceAccountJsonString);
     if (!serviceAccountCredentials.project_id || !serviceAccountCredentials.client_email || !serviceAccountCredentials.private_key) {
@@ -19,45 +25,48 @@ if (serviceAccountJsonString) {
       projectId: serviceAccountCredentials.project_id,
       credentials: {
         client_email: serviceAccountCredentials.client_email,
-        // Ensure newline characters in the private key are correctly formatted
         private_key: serviceAccountCredentials.private_key.replace(/\\n/g, "\n"),
       },
     };
     storage = new Storage(storageConfig);
-    console.log("Initialized Google Cloud Storage with credentials from GOOGLE_SERVICE_ACCOUNT environment variable.");
-  } catch (error) {
+    console.log("Get Media: Initialized Google Cloud Storage with credentials from GOOGLE_SERVICE_ACCOUNT environment variable.");
+  } catch (e: unknown) {
+    const initError = e as Error; // Assume it's at least an Error
     console.error(
-      "Failed to parse or use GOOGLE_SERVICE_ACCOUNT environment variable:",
-      error instanceof Error ? error.message : String(error)
+      "Get Media: Failed to parse or use GOOGLE_SERVICE_ACCOUNT environment variable:",
+      initError.message
     );
-    // If parsing fails, we might want to prevent the app from starting or fall back.
-    // For now, we'll let it fall through to see if other methods work,
-    // but an explicit error response in GET might be needed if storage remains uninitialized.
   }
-} else if (gcsCredentialsFilePath) {
-  // Secondary: Fallback to GOOGLE_APPLICATION_CREDENTIALS file path
+}
+
+// Secondary: Fallback to GOOGLE_APPLICATION_CREDENTIALS file path if storage not yet initialized
+if (storage === null && gcsCredentialsFilePath) {
   try {
-    storage = new Storage(); // Uses GOOGLE_APPLICATION_CREDENTIALS by default if set
-    console.log("Initialized Google Cloud Storage using GOOGLE_APPLICATION_CREDENTIALS file path.");
-  } catch (error) {
-     console.error(
-      "Failed to initialize Storage with GOOGLE_APPLICATION_CREDENTIALS:",
-      error instanceof Error ? error.message : String(error)
+    storage = new Storage();
+    console.log("Get Media: Initialized Google Cloud Storage using GOOGLE_APPLICATION_CREDENTIALS file path.");
+  } catch (e: unknown) {
+    const initError = e as Error;
+    console.error(
+      "Get Media: Failed to initialize Storage with GOOGLE_APPLICATION_CREDENTIALS:",
+      initError.message
     );
   }
-} else {
-  // Tertiary: Attempt default ADC (e.g., for GCP environments or gcloud CLI auth)
+}
+
+// Tertiary: Attempt default ADC if storage still not initialized
+if (storage === null) {
   try {
     storage = new Storage();
     console.warn(
-      "GOOGLE_SERVICE_ACCOUNT and GOOGLE_APPLICATION_CREDENTIALS not set. Attempting default ADC for Storage."
+      "Get Media: GOOGLE_SERVICE_ACCOUNT and GOOGLE_APPLICATION_CREDENTIALS not set or failed. Attempting default ADC for Storage."
     );
-  } catch (error) {
+  } catch (e: unknown) {
+    const initError = e as Error;
     console.error(
-      "Failed to initialize Storage with default ADC:",
-      error instanceof Error ? error.message : String(error)
+      "Get Media: Failed to initialize Storage with default ADC:",
+      initError.message
     );
-    // At this point, storage is likely uninitialized.
+    // If all attempts fail, storage will remain null.
   }
 }
 // --- End of GCS Client Initialization ---
@@ -71,10 +80,9 @@ interface MediaItem {
 }
 
 export async function GET() {
-  // Check if GCS_BUCKET_NAME is set
   if (!gcsBucketName) {
     console.error(
-      "GCS_BUCKET_NAME environment variable is not set. Cannot fetch media."
+      "Get Media: GCS_BUCKET_NAME environment variable is not set. Cannot fetch media."
     );
     return NextResponse.json(
       { success: false, error: "Server configuration error: GCS_BUCKET_NAME missing." },
@@ -82,10 +90,9 @@ export async function GET() {
     );
   }
 
-  // Check if storage client was successfully initialized
-  // The `storage.bucket` check is a good way to see if it's a usable instance.
+  // Check if storage was successfully initialized. If storage is null, !storage is true.
   if (!storage || typeof storage.bucket !== 'function') {
-    console.error("Google Cloud Storage client not initialized properly. Check credentials configuration (GOOGLE_SERVICE_ACCOUNT or GOOGLE_APPLICATION_CREDENTIALS).");
+    console.error("Get Media: Google Cloud Storage client not initialized properly. Check credentials configuration.");
     return NextResponse.json(
       { success: false, error: "Server configuration error: GCS client failed to initialize." },
       { status: 500 }
@@ -93,7 +100,8 @@ export async function GET() {
   }
 
   try {
-    const [files]: [File[]] = await storage.bucket(gcsBucketName).getFiles();
+    // Correctly destructure the GetFilesResponse. We are interested in the first element (File[]).
+    const [files]: GetFilesResponse = await storage.bucket(gcsBucketName).getFiles();
 
     if (!files || files.length === 0) {
       return NextResponse.json({
@@ -107,8 +115,7 @@ export async function GET() {
     const oneHourInMs = 60 * 60 * 1000;
 
     for (const file of files) {
-      // Skip common placeholder files or directories if necessary
-      if (file.name.endsWith('/')) { // Example: skip "folders"
+      if (file.name.endsWith('/')) { // Skip "folders" if any exist
           continue;
       }
 
@@ -127,18 +134,16 @@ export async function GET() {
           timeCreated: file.metadata.timeCreated,
           updated: file.metadata.updated,
         });
-      } catch (signedUrlError) {
-        console.error(`Failed to get signed URL for ${file.name}:`, signedUrlError);
-        // Optionally skip this file or handle error differently
-        // For example, you could push an item with an error message or a placeholder URL
+      } catch (e: unknown) {
+        const signedUrlError = e as Error;
+        console.error(`Get Media: Failed to get signed URL for ${file.name}:`, signedUrlError.message);
       }
     }
 
-    // Sort by creation time, newest first (if timeCreated is available)
     mediaItems.sort((a, b) => {
       const timeA = a.timeCreated ? new Date(a.timeCreated).getTime() : 0;
       const timeB = b.timeCreated ? new Date(b.timeCreated).getTime() : 0;
-      return timeB - timeA; // Sort descending
+      return timeB - timeA;
     });
 
     return NextResponse.json({
@@ -146,17 +151,20 @@ export async function GET() {
       media: mediaItems,
     });
 
-  } catch (error) {
-    console.error("Error fetching media from GCS:", error);
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred while fetching media.";
-    // Check for specific GCS errors if needed, e.g., bucket not found, permissions issues
-    if (error instanceof Error && 'code' in error && (error as any).code === 403) {
+  } catch (e: unknown) { // Catch error as unknown
+    const error = e as GcsApiError; // Assert to our GcsApiError type
+
+    console.error("Get Media: Error fetching media from GCS:", error.message, error.stack);
+    const errorMessage = error.message || "An unknown error occurred while fetching media.";
+
+    // Now we can safely access error.code
+    if (error.code === 403) {
         return NextResponse.json(
           { success: false, error: `Permission denied when accessing GCS bucket. Check service account permissions. Original error: ${errorMessage}` },
           { status: 500 }
         );
     }
-     if (error instanceof Error && 'code' in error && (error as any).code === 404) {
+     if (error.code === 404) {
         return NextResponse.json(
           { success: false, error: `GCS bucket '${gcsBucketName}' not found. Original error: ${errorMessage}` },
           { status: 500 }
