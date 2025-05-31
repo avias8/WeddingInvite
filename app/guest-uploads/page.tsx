@@ -90,7 +90,7 @@ export default function GuestUploadPage() {
         <div className={styles.uploadCard}>
           <h1 className={styles.title}>Share Your Wedding Moments!</h1>
           <p className={styles.instructions}>
-            We'd love to see the wedding through your eyes! Please upload your
+            We&apos;d love to see the wedding through your eyes! Please upload your
             favorite photos and videos from our special day right here.
           </p>
 

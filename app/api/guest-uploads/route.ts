@@ -2,28 +2,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Storage } from "@google-cloud/storage";
 import { randomUUID } from "crypto"; // For generating unique filenames
-import { Writable } from 'stream'; // Import Writable for stream promise
 
 // Initialize Google Cloud Storage client
 // The client automatically uses GOOGLE_APPLICATION_CREDENTIALS environment variable
 const storage = new Storage();
 const bucketName = process.env.GCS_BUCKET_NAME;
-
-// Helper function to convert a ReadableStream to Buffer
-async function streamToBuffer(readableStream: ReadableStream<Uint8Array>): Promise<Buffer> {
-  const reader = readableStream.getReader();
-  const chunks: Uint8Array[] = [];
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-    if (value) {
-      chunks.push(value);
-    }
-  }
-  return Buffer.concat(chunks);
-}
 
 export async function POST(req: NextRequest) {
   // Check if the bucket name is configured
