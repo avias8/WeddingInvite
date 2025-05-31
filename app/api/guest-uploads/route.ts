@@ -12,13 +12,13 @@ const gcsCredentialsFilePath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 // Define a type for expected GCS error structure (can be shared if used in multiple files)
 interface GcsApiError extends Error {
   code?: number | string;
+  errors?: Array<{ message: string; reason: string }>; // Common in GCS errors
 }
 
 // Primary: Try to use the JSON string from GOOGLE_SERVICE_ACCOUNT
 if (storage === null && serviceAccountJsonString) {
   try {
     const serviceAccountCredentials = JSON.parse(serviceAccountJsonString);
-    // Basic validation of the parsed credentials object
     if (!serviceAccountCredentials.project_id || !serviceAccountCredentials.client_email || !serviceAccountCredentials.private_key) {
       throw new Error("GOOGLE_SERVICE_ACCOUNT JSON is missing required fields (project_id, client_email, private_key).");
     }
@@ -26,7 +26,6 @@ if (storage === null && serviceAccountJsonString) {
       projectId: serviceAccountCredentials.project_id,
       credentials: {
         client_email: serviceAccountCredentials.client_email,
-        // Ensure newline characters in the private key are correctly formatted
         private_key: serviceAccountCredentials.private_key.replace(/\\n/g, "\n"),
       },
     };
@@ -38,14 +37,13 @@ if (storage === null && serviceAccountJsonString) {
       "Guest Uploads: Failed to parse or use GOOGLE_SERVICE_ACCOUNT environment variable:",
       initError.message
     );
-    // Fall through to allow other initialization methods if this one fails
   }
 }
 
 // Secondary: Fallback to GOOGLE_APPLICATION_CREDENTIALS file path if storage not yet initialized
 if (storage === null && gcsCredentialsFilePath) {
   try {
-    storage = new Storage(); // Uses GOOGLE_APPLICATION_CREDENTIALS by default if set
+    storage = new Storage();
     console.log("Guest Uploads: Initialized Google Cloud Storage using GOOGLE_APPLICATION_CREDENTIALS file path.");
   } catch (e: unknown) {
     const initError = e as Error;
@@ -69,27 +67,22 @@ if (storage === null) {
       "Guest Uploads: Failed to initialize Storage with default ADC:",
       initError.message
     );
-    // At this point, storage is likely uninitialized, and POST requests will fail.
   }
 }
 // --- End of GCS Client Initialization ---
 
 
 export async function POST(req: NextRequest) {
-  // Check if the bucket name is configured
   if (!gcsBucketName) {
-    console.error(
-      "Guest Uploads: GCS_BUCKET_NAME environment variable is not set. File uploads will fail."
-    );
+    console.error("Guest Uploads: GCS_BUCKET_NAME environment variable is not set.");
     return NextResponse.json(
       { success: false, error: "Server configuration error: GCS_BUCKET_NAME missing." },
       { status: 500 }
     );
   }
 
-  // Check if storage client was successfully initialized
   if (!storage || typeof storage.bucket !== 'function') {
-    console.error("Guest Uploads: Google Cloud Storage client not initialized properly. Check credentials configuration.");
+    console.error("Guest Uploads: Google Cloud Storage client not initialized properly.");
     return NextResponse.json(
       { success: false, error: "Server configuration error: GCS client failed to initialize." },
       { status: 500 }
@@ -98,13 +91,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const formData = await req.formData();
-    const files = formData.getAll("files") as File[]; // "files" should match your FormData key
+    const files = formData.getAll("files") as File[];
 
     if (!files || files.length === 0) {
-      return NextResponse.json(
-        { success: false, error: "No files were uploaded." },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: "No files were uploaded." }, { status: 400 });
     }
 
     const uploadedFileDetails: { fileName: string; gcsPath: string; contentType: string }[] = [];
@@ -113,101 +103,97 @@ export async function POST(req: NextRequest) {
     for (const file of files) {
       filesProcessed++;
       if (!file.name || !file.type || file.size === 0) {
-        console.warn(`Guest Uploads: Skipping an invalid or empty file (File ${filesProcessed}/${files.length}): ${file.name || 'N/A'}`);
+        console.warn(`Guest Uploads: Skipping invalid/empty file (${filesProcessed}/${files.length}): ${file.name || 'N/A'}`);
         continue;
       }
 
       const fileBuffer = Buffer.from(await file.arrayBuffer());
-      // Sanitize filename and make it unique
-      const originalFileName = file.name.replace(/[^\w.-]/g, '_'); // Replace non-alphanumeric chars (except . -) with _
+      const originalFileName = file.name.replace(/[^\w.-]/g, '_');
       const uniqueFileName = `${randomUUID()}-${originalFileName}`;
       const gcsFile = storage.bucket(gcsBucketName).file(uniqueFileName);
 
-      const stream = gcsFile.createWriteStream({
-        metadata: {
-          contentType: file.type,
-        },
-        resumable: false, // Consider true for large files if you implement retry logic
-      });
+      console.log(`Guest Uploads: Attempting to upload ${uniqueFileName} (Size: ${fileBuffer.length} bytes)`);
 
-      // Using a Promise to handle stream events
-      await new Promise<void>((resolve, reject) => {
-        stream.on("error", (err: GcsApiError) => { // Explicitly type err
-          console.error(
-            `Guest Uploads: Error uploading ${uniqueFileName} to GCS:`,
-            err.message // Access message property
-          );
-          reject(new Error(`Failed to upload ${file.name}. Error: ${err.message}`));
-        });
-        stream.on("finish", () => {
-          uploadedFileDetails.push({
-            fileName: file.name, // Original name for reference
-            gcsPath: `gs://${gcsBucketName}/${uniqueFileName}`,
-            contentType: file.type,
+      try {
+        await new Promise<void>((resolve, reject) => {
+          const stream = gcsFile.createWriteStream({
+            metadata: { contentType: file.type },
+            resumable: false, // Keep false for simplicity unless large file issues persist
           });
-          console.log(`Guest Uploads: Successfully uploaded ${uniqueFileName} to GCS.`);
-          resolve();
+
+          let streamClosed = false; // Flag to prevent operations on a closed stream
+
+          stream.on("error", (err: GcsApiError) => {
+            if (streamClosed) return;
+            streamClosed = true;
+            console.error(`Guest Uploads: GCS stream error for ${uniqueFileName}:`, err);
+            // Log more detailed GCS errors if available
+            if (err.errors && err.errors.length > 0) {
+              err.errors.forEach(e => console.error(` - GCS specific error: ${e.reason} - ${e.message}`));
+            }
+            reject(new Error(`GCS stream error for ${file.name}: ${err.message}`));
+          });
+
+          stream.on("finish", () => {
+            if (streamClosed) return; // Should not happen if 'error' fired and rejected
+            streamClosed = true;
+            uploadedFileDetails.push({
+              fileName: file.name,
+              gcsPath: `gs://${gcsBucketName}/${uniqueFileName}`,
+              contentType: file.type,
+            });
+            console.log(`Guest Uploads: Successfully uploaded ${uniqueFileName} to GCS.`);
+            resolve();
+          });
+
+          // Important: Call end() only once and ensure stream is not already closed
+          // The 'error' event should lead to rejection before 'end' could cause issues
+          // if the stream was already destroyed.
+          try {
+            stream.end(fileBuffer);
+          } catch (endError: unknown) {
+            // This catch is for synchronous errors from stream.end() itself
+            if (!streamClosed) {
+                streamClosed = true;
+                console.error(`Guest Uploads: Synchronous error on stream.end() for ${uniqueFileName}:`, endError);
+                reject(new Error(`Error ending stream for ${file.name}: ${(endError as Error).message}`));
+            }
+          }
         });
-        stream.end(fileBuffer);
-      });
+      } catch (uploadError: unknown) {
+        // This catches rejections from the new Promise (e.g., from stream.on('error'))
+        // or synchronous errors if createWriteStream failed badly (though less likely to be "cannot write")
+        console.error(`Guest Uploads: Failed to process upload for ${file.name}:`, (uploadError as Error).message);
+        // We will not add this file to uploadedFileDetails and let the loop continue for other files.
+        // The function will later respond based on how many files were *successfully* uploaded.
+        // You could collect these errors to return to the client if needed.
+        // For now, just ensuring it doesn't stop other uploads.
+      }
     }
 
     if (uploadedFileDetails.length === 0 && files.length > 0) {
-        return NextResponse.json(
-            { success: false, error: "No valid files were processed for upload. Please check the file types or sizes." },
-            { status: 400 }
-        );
+      return NextResponse.json(
+        { success: false, error: "No files were successfully uploaded. Check server logs for details." },
+        { status: 400 }
+      );
     }
     if (uploadedFileDetails.length === 0 && files.length === 0) {
-        // This case is already handled by the initial check, but as a safeguard
-         return NextResponse.json(
-            { success: false, error: "No files were provided in the upload request." },
-            { status: 400 }
-        );
+      // Should be caught by earlier check, but for safety
+      return NextResponse.json({ success: false, error: "No files were provided." }, { status: 400 });
     }
-
-
-    // --- Optional: Save file metadata to your Prisma database ---
-    // if (uploadedFileDetails.length > 0 && typeof prisma !== 'undefined') {
-    //   try {
-    //     await prisma.guestMedia.createMany({
-    //       data: uploadedFileDetails.map(detail => ({
-    //         originalFileName: detail.fileName,
-    //         gcsPath: detail.gcsPath,
-    //         contentType: detail.contentType,
-    //         uploadedAt: new Date(),
-    //         // guestIdentifier: "some_guest_id_if_you_collect_it",
-    //       })),
-    //     });
-    //     console.log("Guest Uploads: Successfully saved media metadata to database.");
-    //   } catch (dbError) {
-    //     console.error("Guest Uploads: Database error saving media metadata:", dbError);
-    //     // Decide if this should be a critical error for the user.
-    //     // For now, we'll just log it and let the GCS upload be considered successful.
-    //     // You might want to return a partial success or a warning.
-    //   }
-    // }
-    // --- End Optional Database Save ---
 
     return NextResponse.json({
       success: true,
-      message: `${uploadedFileDetails.length} file(s) uploaded successfully to GCS!`,
+      message: `${uploadedFileDetails.length} of ${files.length} file(s) processed successfully.`,
       uploadedFiles: uploadedFileDetails,
     });
 
-  } catch (e: unknown) { // Catch error as unknown
-    const error = e as GcsApiError; // Assert to our GcsApiError type
+  } catch (e: unknown) {
+    const error = e as GcsApiError;
     console.error("Guest Uploads: Overall file upload process error:", error.message, error.stack);
     const errorMessage = error.message || "An unknown error occurred during file upload.";
-    // Provide more specific error messages if possible
-    if (error.message && error.message.includes("socket hang up")) { // Check if error.message exists
-        return NextResponse.json(
-          { success: false, error: `Network error during upload. Please try again. Details: ${errorMessage}` },
-          { status: 500 }
-        );
-    }
     return NextResponse.json(
-      { success: false, error: `Failed to upload files. ${errorMessage}` },
+      { success: false, error: `Upload process failed: ${errorMessage}` },
       { status: 500 }
     );
   }
