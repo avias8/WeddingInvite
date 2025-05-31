@@ -2,84 +2,127 @@
 "use client";
 
 import React, { useState, ChangeEvent, FormEvent, useRef } from "react";
-import Header from "../components/Header"; // Assuming Header is in app/components
-import styles from "./GuestUploads.module.css"; // We'll create this CSS module
+import Header from "../components/Header";
+import styles from "./GuestUploads.module.css";
 
-// Define a type for the API response for better type safety
 interface UploadResponse {
   success: boolean;
-  message: string;
-  uploadedFiles?: { fileName: string; gcsPath: string }[];
+  message?: string; // Optional for this new approach
+  signedUrl?: string;
+  gcsObjectName?: string;
   error?: string;
+  details?: string;
+}
+
+interface IndividualFileStatus {
+  file: File;
+  status: "pending" | "uploading" | "success" | "error";
+  errorMessage?: string;
+  gcsObjectName?: string;
 }
 
 export default function GuestUploadPage() {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [messageType, setMessageType] = useState<"success" | "error" | null>(
-    null
-  );
-  const fileInputRef = useRef<HTMLInputElement>(null); // Ref for the file input
+  const [filesStatus, setFilesStatus] = useState<IndividualFileStatus[]>([]);
+  const [overallMessage, setOverallMessage] = useState<string | null>(null);
+  const [overallMessageType, setOverallMessageType] = useState< "success" | "error" | null >(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSelectedFiles(event.target.files);
-    setMessage(null); // Clear previous messages
-    setMessageType(null);
+    setOverallMessage(null);
+    setOverallMessageType(null);
+    if (event.target.files) {
+      setFilesStatus(
+        Array.from(event.target.files).map(file => ({ file, status: "pending" }))
+      );
+    } else {
+      setFilesStatus([]);
+    }
+  };
+
+  const updateFileStatus = (index: number, status: IndividualFileStatus["status"], gcsObjectName?: string, errorMessage?: string) => {
+    setFilesStatus(prev =>
+      prev.map((fs, i) =>
+        i === index ? { ...fs, status, gcsObjectName, errorMessage } : fs
+      )
+    );
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedFiles || selectedFiles.length === 0) {
-      setMessage("Please select at least one file to upload.");
-      setMessageType("error");
+      setOverallMessage("Please select at least one file to upload.");
+      setOverallMessageType("error");
       return;
     }
 
-    setIsLoading(true);
-    setMessage("Uploading, please wait...");
-    setMessageType(null); // Neutral message type while loading
+    setIsSubmitting(true);
+    setOverallMessage("Processing uploads...");
+    setOverallMessageType(null);
 
-    const formData = new FormData();
+    let allSuccessful = true;
+    let successfulUploadsCount = 0;
+
     for (let i = 0; i < selectedFiles.length; i++) {
-      formData.append("files", selectedFiles[i]); // API expects "files"
+      const file = selectedFiles[i];
+      updateFileStatus(i, "uploading");
+
+      try {
+        // 1. Get signed URL from your new API
+        const signedUrlResponse = await fetch("/api/generate-upload-url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filename: file.name, contentType: file.type }),
+        });
+
+        const signedUrlData: UploadResponse = await signedUrlResponse.json();
+
+        if (!signedUrlResponse.ok || !signedUrlData.success || !signedUrlData.signedUrl) {
+          throw new Error(signedUrlData.error || signedUrlData.details || "Failed to get an upload URL.");
+        }
+
+        // 2. Upload file directly to GCS
+        const gcsUploadResponse = await fetch(signedUrlData.signedUrl, {
+          method: "PUT",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
+
+        if (!gcsUploadResponse.ok) {
+          throw new Error(`Upload failed for ${file.name}. Status: ${gcsUploadResponse.status}`);
+        }
+
+        updateFileStatus(i, "success", signedUrlData.gcsObjectName);
+        successfulUploadsCount++;
+
+      } catch (error) {
+        allSuccessful = false;
+        const errMsg = error instanceof Error ? error.message : "An unknown error occurred during upload.";
+        console.error(`Error uploading ${file.name}:`, error);
+        updateFileStatus(i, "error", undefined, errMsg);
+        // You might want to collect individual errors to show them
+      }
     }
 
-    try {
-      const response = await fetch("/api/guest-uploads", {
-        method: "POST",
-        body: formData,
-        // Headers are not strictly necessary for FormData with fetch,
-        // browser sets 'Content-Type': 'multipart/form-data' automatically.
-      });
-
-      const result: UploadResponse = await response.json();
-
-      if (response.ok && result.success) {
-        setMessage(
-          result.message || "Files uploaded successfully! Thank you!"
-        );
-        setMessageType("success");
-        setSelectedFiles(null); // Clear selection
-        if (fileInputRef.current) {
-          fileInputRef.current.value = ""; // Reset file input
-        }
-      } else {
-        setMessage(
-          result.error ||
-            result.message ||
-            "An error occurred during upload. Please try again."
-        );
-        setMessageType("error");
+    setIsSubmitting(false);
+    if (allSuccessful) {
+      setOverallMessage( `${successfulUploadsCount} file(s) uploaded successfully! Thank you!`);
+      setOverallMessageType("success");
+      setSelectedFiles(null); // Clear selection
+      setFilesStatus([]);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""; // Reset file input
       }
-    } catch (error) {
-      console.error("Upload submission error:", error);
-      setMessage(
-        "A network error occurred. Please check your connection and try again."
-      );
-      setMessageType("error");
-    } finally {
-      setIsLoading(false);
+    } else if (successfulUploadsCount > 0) {
+        setOverallMessage(
+            `Finished: ${successfulUploadsCount} file(s) uploaded successfully, but some failed. Check individual statuses.`
+        );
+        setOverallMessageType("error"); // or a "warning" type if you have one
+    } else {
+      setOverallMessage("All file uploads failed. Please try again or contact support.");
+      setOverallMessageType("error");
     }
   };
 
@@ -91,7 +134,7 @@ export default function GuestUploadPage() {
           <h1 className={styles.title}>Share Your Wedding Moments!</h1>
           <p className={styles.instructions}>
             We&apos;d love to see the wedding through your eyes! Please upload your
-            favorite photos and videos from our special day right here.
+            favorite photos and videos from our special day right here. (Large videos are now supported!)
           </p>
 
           <form onSubmit={handleSubmit} className={styles.uploadForm}>
@@ -106,20 +149,28 @@ export default function GuestUploadPage() {
                 id="fileUpload"
                 ref={fileInputRef}
                 multiple
-                accept="image/*,video/*" // Accepts all image and video types
+                accept="image/*,video/*"
                 onChange={handleFileChange}
                 className={styles.fileInput}
-                disabled={isLoading}
+                disabled={isSubmitting}
               />
             </div>
 
-            {selectedFiles && selectedFiles.length > 0 && (
+            {filesStatus.length > 0 && (
               <div className={styles.selectedFilesList}>
-                <p>Selected:</p>
+                <p>Selected Files:</p>
                 <ul>
-                  {Array.from(selectedFiles).map((file, index) => (
-                    <li key={index}>
-                      {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                  {filesStatus.map((fs, index) => (
+                    <li key={index} className={styles.fileStatusItem}>
+                      <span>
+                        {fs.file.name} ({(fs.file.size / 1024 / 1024).toFixed(2)} MB) - {}
+                        <span className={`${styles.statusText} ${styles[fs.status]}`}>
+                            {fs.status.toUpperCase()}
+                        </span>
+                      </span>
+                      {fs.status === "error" && fs.errorMessage && (
+                        <span className={styles.fileErrorMessage}>Error: {fs.errorMessage}</span>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -129,23 +180,23 @@ export default function GuestUploadPage() {
             <button
               type="submit"
               className={styles.uploadButton}
-              disabled={isLoading || !selectedFiles || selectedFiles.length === 0}
+              disabled={isSubmitting || !selectedFiles || selectedFiles.length === 0}
             >
-              {isLoading ? "Uploading..." : "Upload Memories"}
+              {isSubmitting ? "Uploading..." : "Upload Memories"}
             </button>
           </form>
 
-          {message && (
+          {overallMessage && (
             <div
               className={`${styles.message} ${
-                messageType === "success"
+                overallMessageType === "success"
                   ? styles.successMessage
-                  : messageType === "error"
+                  : overallMessageType === "error"
                   ? styles.errorMessage
-                  : styles.loadingMessage // For the "Uploading, please wait..." state
+                  : styles.loadingMessage
               }`}
             >
-              {message}
+              {overallMessage}
             </div>
           )}
           <p className={styles.thankYouNote}>

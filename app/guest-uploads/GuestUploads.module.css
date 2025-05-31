@@ -178,6 +178,63 @@
   color: var(--color-accent);
   font-style: italic;
 }
+/* Add these to your app/guest-uploads/GuestUploads.module.css */
+
+.fileStatusItem {
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px dashed #eee;
+  display: flex;
+  flex-direction: column; /* Allow error message to stack */
+  gap: 0.25rem;
+}
+.fileStatusItem:last-child {
+  border-bottom: none;
+}
+
+.statusText {
+  font-weight: bold;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.8em;
+  margin-left: 0.5rem;
+  color: white;
+}
+
+.statusText.pending { background-color: #777; }
+.statusText.uploading { background-color: #2196F3; } /* Blue */
+.statusText.success { background-color: #4CAF50; } /* Green */
+.statusText.error { background-color: #F44336; }   /* Red */
+
+.fileErrorMessage {
+  color: #D8000C; /* Error text color */
+  font-size: 0.8em;
+  margin-left: 1em; /* Indent error message slightly */
+}
+
+/* Ensure the existing selectedFilesList can accommodate the new structure */
+.selectedFilesList {
+  margin-top: 1rem;
+  text-align: left;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  max-height: 200px; /* Increased height */
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  padding: 0.75rem; /* Increased padding */
+  border-radius: 4px;
+  background-color: #fdfdfd;
+}
+
+.selectedFilesList p {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.selectedFilesList ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
