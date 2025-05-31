@@ -1,73 +1,107 @@
 // app/api/get-guest-media/route.ts
 import { NextResponse } from "next/server";
-// Removed 'File' from this import as it's implicitly used via GetFilesResponse
 import { Storage, StorageOptions, GetFilesResponse } from "@google-cloud/storage";
 
 // --- Google Cloud Storage Client Initialization ---
-let storage: Storage | null = null; // Initialize to null
+let storage: Storage | null = null; // Initialize storage to null
 const gcsBucketName = process.env.GCS_BUCKET_NAME;
-const serviceAccountJsonString = process.env.GOOGLE_SERVICE_ACCOUNT;
-const gcsCredentialsFilePath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+
+// Environment variables for credentials
+const serviceAccountJsonStringEnv = process.env.GOOGLE_SERVICE_ACCOUNT; // Preferred for JSON string
+const gcsApplicationCredentialsEnv = process.env.GOOGLE_APPLICATION_CREDENTIALS; // User's Vercel setup (JSON string) OR library default (file path)
 
 // Define a type for expected GCS error structure
 interface GcsApiError extends Error {
   code?: number | string;
-  // You can add other common properties if needed, e.g., errors?: Array<{ message: string; reason: string; }>;
+  errors?: Array<{ message: string; reason: string }>; // Common in GCS errors
 }
 
-// Primary: Try to use the JSON string from GOOGLE_SERVICE_ACCOUNT
-if (storage === null && serviceAccountJsonString) {
+// Helper function to create Storage instance from parsed credentials
+const createStorageInstance = (credentials: any, sourceDescription: string): Storage | null => {
+  if (!credentials.project_id || !credentials.client_email || !credentials.private_key) {
+    console.error(`Get Media: ${sourceDescription} JSON is missing required fields (project_id, client_email, private_key).`);
+    return null;
+  }
+  const storageConfig: StorageOptions = {
+    projectId: credentials.project_id,
+    credentials: {
+      client_email: credentials.client_email,
+      private_key: credentials.private_key.replace(/\\n/g, "\n"),
+    },
+  };
+  console.log(`Get Media: Initialized Google Cloud Storage with credentials from ${sourceDescription}.`);
+  return new Storage(storageConfig);
+};
+
+// Attempt 1: Use GOOGLE_SERVICE_ACCOUNT if it contains the JSON string
+if (serviceAccountJsonStringEnv) {
   try {
-    const serviceAccountCredentials = JSON.parse(serviceAccountJsonString);
-    if (!serviceAccountCredentials.project_id || !serviceAccountCredentials.client_email || !serviceAccountCredentials.private_key) {
-      throw new Error("GOOGLE_SERVICE_ACCOUNT JSON is missing required fields (project_id, client_email, private_key).");
+    const credentials = JSON.parse(serviceAccountJsonStringEnv);
+    storage = createStorageInstance(credentials, "GOOGLE_SERVICE_ACCOUNT (JSON string)");
+  } catch (e: unknown) {
+    console.error(
+      "Get Media: Failed to parse GOOGLE_SERVICE_ACCOUNT as JSON:",
+      (e as Error).message
+    );
+  }
+}
+
+// Attempt 2: If not initialized by GOOGLE_SERVICE_ACCOUNT, and GOOGLE_APPLICATION_CREDENTIALS is set,
+// try to parse IT as a JSON string (as per user's Vercel setup).
+if (storage === null && gcsApplicationCredentialsEnv) {
+  let gcsAppCredsIsJson = false;
+  try {
+    const credentials = JSON.parse(gcsApplicationCredentialsEnv);
+    // If parsing succeeds, it's a JSON string.
+    storage = createStorageInstance(credentials, "GOOGLE_APPLICATION_CREDENTIALS (as JSON string)");
+    if (storage) {
+        gcsAppCredsIsJson = true; // Mark that it was successfully used as JSON
     }
-    const storageConfig: StorageOptions = {
-      projectId: serviceAccountCredentials.project_id,
-      credentials: {
-        client_email: serviceAccountCredentials.client_email,
-        private_key: serviceAccountCredentials.private_key.replace(/\\n/g, "\n"),
-      },
-    };
-    storage = new Storage(storageConfig);
-    console.log("Get Media: Initialized Google Cloud Storage with credentials from GOOGLE_SERVICE_ACCOUNT environment variable.");
-  } catch (e: unknown) {
-    const initError = e as Error; // Assume it's at least an Error
-    console.error(
-      "Get Media: Failed to parse or use GOOGLE_SERVICE_ACCOUNT environment variable:",
-      initError.message
-    );
-  }
-}
-
-// Secondary: Fallback to GOOGLE_APPLICATION_CREDENTIALS file path if storage not yet initialized
-if (storage === null && gcsCredentialsFilePath) {
-  try {
-    storage = new Storage();
-    console.log("Get Media: Initialized Google Cloud Storage using GOOGLE_APPLICATION_CREDENTIALS file path.");
-  } catch (e: unknown) {
-    const initError = e as Error;
-    console.error(
-      "Get Media: Failed to initialize Storage with GOOGLE_APPLICATION_CREDENTIALS:",
-      initError.message
-    );
-  }
-}
-
-// Tertiary: Attempt default ADC if storage still not initialized
-if (storage === null) {
-  try {
-    storage = new Storage();
+  } catch (jsonParseError) {
+    // JSON.parse failed. This means gcsApplicationCredentialsEnv is NOT a valid JSON string.
+    // It MIGHT be a file path, or it's just malformed.
+    // Log this, and then proceed to Attempt 3 where the library will try it as a path.
     console.warn(
-      "Get Media: GOOGLE_SERVICE_ACCOUNT and GOOGLE_APPLICATION_CREDENTIALS not set or failed. Attempting default ADC for Storage."
+      "Get Media: GOOGLE_APPLICATION_CREDENTIALS was set, but failed to parse as JSON. Will attempt to use it as a file path if applicable. Parse error:",
+      (jsonParseError as Error).message
+    );
+  }
+
+  // Attempt 3: If GOOGLE_APPLICATION_CREDENTIALS was set but NOT successfully used as JSON (i.e., gcsAppCredsIsJson is false),
+  // let the GCS library try to use it as a file path.
+  // This also covers the case where GOOGLE_APPLICATION_CREDENTIALS was intended as a path from the start.
+  if (storage === null && !gcsAppCredsIsJson) {
+    // The GCS library will automatically look at process.env.GOOGLE_APPLICATION_CREDENTIALS if it's set
+    // and no credentials were provided to the constructor.
+    try {
+      storage = new Storage();
+      // If new Storage() succeeds here, it means it found credentials,
+      // likely via GOOGLE_APPLICATION_CREDENTIALS as a file path or another ADC mechanism.
+      console.log("Get Media: Initialized Google Cloud Storage using library's default credential discovery (e.g., GOOGLE_APPLICATION_CREDENTIALS as file path, or ADC).");
+    } catch (e: unknown) {
+      console.error(
+        "Get Media: Failed to initialize Storage using library's default credential discovery:",
+        (e as Error).message
+      );
+    }
+  }
+}
+
+// Attempt 4: If storage is STILL null (neither env var provided usable JSON,
+// and GOOGLE_APPLICATION_CREDENTIALS wasn't set or wasn't a usable path for the library),
+// try default ADC one last time (for environments with implicit ADC or local gcloud auth)
+if (storage === null && !gcsApplicationCredentialsEnv && !serviceAccountJsonStringEnv) {
+  // This condition ensures we only try this if no explicit credential env vars were even set.
+  try {
+    storage = new Storage(); // Default ADC
+    console.warn(
+      "Get Media: No explicit credential environment variables (GOOGLE_SERVICE_ACCOUNT, GOOGLE_APPLICATION_CREDENTIALS) were set. Attempting default ADC for Storage."
     );
   } catch (e: unknown) {
-    const initError = e as Error;
     console.error(
-      "Get Media: Failed to initialize Storage with default ADC:",
-      initError.message
+      "Get Media: Failed to initialize Storage with default ADC (no explicit env vars set):",
+      (e as Error).message
     );
-    // If all attempts fail, storage will remain null.
   }
 }
 // --- End of GCS Client Initialization ---
@@ -91,18 +125,15 @@ export async function GET() {
     );
   }
 
-  // Check if storage was successfully initialized. If storage is null, !storage is true.
   if (!storage || typeof storage.bucket !== 'function') {
-    console.error("Get Media: Google Cloud Storage client not initialized properly. Check credentials configuration.");
+    console.error("Get Media: Google Cloud Storage client not initialized properly. Check credentials configuration and server logs for details.");
     return NextResponse.json(
-      { success: false, error: "Server configuration error: GCS client failed to initialize." },
+      { success: false, error: "Server configuration error: GCS client failed to initialize. Review server logs for credential issues." },
       { status: 500 }
     );
   }
 
   try {
-    // Correctly destructure the GetFilesResponse. We are interested in the first element (File[]).
-    // The type of 'files' here will be File[] from @google-cloud/storage, inferred from GetFilesResponse.
     const [files]: GetFilesResponse = await storage.bucket(gcsBucketName).getFiles();
 
     if (!files || files.length === 0) {
@@ -116,7 +147,6 @@ export async function GET() {
     const mediaItems: MediaItem[] = [];
     const oneHourInMs = 60 * 60 * 1000;
 
-    // Each 'file' in this loop is of type File (from @google-cloud/storage) due to type inference.
     for (const file of files) {
       if (file.name.endsWith('/')) { // Skip "folders" if any exist
           continue;
@@ -140,13 +170,14 @@ export async function GET() {
       } catch (e: unknown) {
         const signedUrlError = e as Error;
         console.error(`Get Media: Failed to get signed URL for ${file.name}:`, signedUrlError.message);
+        // Optionally, you could push a placeholder or skip this item
       }
     }
 
     mediaItems.sort((a, b) => {
       const timeA = a.timeCreated ? new Date(a.timeCreated).getTime() : 0;
       const timeB = b.timeCreated ? new Date(b.timeCreated).getTime() : 0;
-      return timeB - timeA;
+      return timeB - timeA; // Sort descending (newest first)
     });
 
     return NextResponse.json({
@@ -154,28 +185,25 @@ export async function GET() {
       media: mediaItems,
     });
 
-  } catch (e: unknown) { // Catch error as unknown
-    const error = e as GcsApiError; // Assert to our GcsApiError type
+  } catch (e: unknown) {
+    const error = e as GcsApiError;
 
     console.error("Get Media: Error fetching media from GCS:", error.message, error.stack);
-    const errorMessage = error.message || "An unknown error occurred while fetching media.";
+    let errorMessage = error.message || "An unknown error occurred while fetching media.";
+    let statusCode = 500;
 
-    // Now we can safely access error.code
     if (error.code === 403) {
-        return NextResponse.json(
-          { success: false, error: `Permission denied when accessing GCS bucket. Check service account permissions. Original error: ${errorMessage}` },
-          { status: 500 }
-        );
+        errorMessage = `Permission denied when accessing GCS bucket. Check service account permissions. Original error: ${errorMessage}`;
+        // statusCode remains 500 as it's a server-side config issue
+    } else if (error.code === 404) {
+        errorMessage = `GCS bucket '${gcsBucketName}' not found. Original error: ${errorMessage}`;
+        // statusCode remains 500
     }
-     if (error.code === 404) {
-        return NextResponse.json(
-          { success: false, error: `GCS bucket '${gcsBucketName}' not found. Original error: ${errorMessage}` },
-          { status: 500 }
-        );
-    }
+    // Add more specific GCS error code handling if needed
+
     return NextResponse.json(
       { success: false, error: `Failed to fetch media. ${errorMessage}` },
-      { status: 500 }
+      { status: statusCode }
     );
   }
 }
