@@ -9,7 +9,7 @@ const gcsBucketName = process.env.GCS_BUCKET_NAME;
 const serviceAccountJsonString = process.env.GOOGLE_SERVICE_ACCOUNT;
 const gcsCredentialsFilePath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
-// Define a type for expected GCS error structure (can be shared if used in multiple files)
+// Define a type for expected GCS error structure
 interface GcsApiError extends Error {
   code?: number | string;
   errors?: Array<{ message: string; reason: string }>; // Common in GCS errors
@@ -43,7 +43,7 @@ if (storage === null && serviceAccountJsonString) {
 // Secondary: Fallback to GOOGLE_APPLICATION_CREDENTIALS file path if storage not yet initialized
 if (storage === null && gcsCredentialsFilePath) {
   try {
-    storage = new Storage();
+    storage = new Storage(); // Uses GOOGLE_APPLICATION_CREDENTIALS by default if set
     console.log("Guest Uploads: Initialized Google Cloud Storage using GOOGLE_APPLICATION_CREDENTIALS file path.");
   } catch (e: unknown) {
     const initError = e as Error;
@@ -67,22 +67,25 @@ if (storage === null) {
       "Guest Uploads: Failed to initialize Storage with default ADC:",
       initError.message
     );
+    // At this point, storage is likely uninitialized, and POST requests will fail.
   }
 }
 // --- End of GCS Client Initialization ---
 
 
 export async function POST(req: NextRequest) {
+  // Check if the bucket name is configured
   if (!gcsBucketName) {
-    console.error("Guest Uploads: GCS_BUCKET_NAME environment variable is not set.");
+    console.error("Guest Uploads: GCS_BUCKET_NAME environment variable is not set. File uploads will fail.");
     return NextResponse.json(
       { success: false, error: "Server configuration error: GCS_BUCKET_NAME missing." },
       { status: 500 }
     );
   }
 
+  // Check if storage client was successfully initialized
   if (!storage || typeof storage.bucket !== 'function') {
-    console.error("Guest Uploads: Google Cloud Storage client not initialized properly.");
+    console.error("Guest Uploads: Google Cloud Storage client not initialized properly. Check credentials configuration.");
     return NextResponse.json(
       { success: false, error: "Server configuration error: GCS client failed to initialize." },
       { status: 500 }
@@ -91,51 +94,55 @@ export async function POST(req: NextRequest) {
 
   try {
     const formData = await req.formData();
-    const files = formData.getAll("files") as File[];
+    const files = formData.getAll("files") as File[]; // "files" should match your FormData key on the client
 
     if (!files || files.length === 0) {
-      return NextResponse.json({ success: false, error: "No files were uploaded." }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "No files were uploaded. Please select one or more files." },
+        { status: 400 }
+      );
     }
 
     const uploadedFileDetails: { fileName: string; gcsPath: string; contentType: string }[] = [];
-    let filesProcessed = 0;
+    const individualFileErrors: string[] = [];
+    let filesAttempted = 0;
 
     for (const file of files) {
-      filesProcessed++;
+      filesAttempted++;
       if (!file.name || !file.type || file.size === 0) {
-        console.warn(`Guest Uploads: Skipping invalid/empty file (${filesProcessed}/${files.length}): ${file.name || 'N/A'}`);
+        console.warn(`Guest Uploads: Skipping an invalid or empty file (File ${filesAttempted}/${files.length}): ${file.name || 'Unnamed file'}`);
+        individualFileErrors.push(`File ${file.name || 'Unnamed file'} is invalid or empty.`);
         continue;
       }
 
       const fileBuffer = Buffer.from(await file.arrayBuffer());
-      const originalFileName = file.name.replace(/[^\w.-]/g, '_');
-      const uniqueFileName = `${randomUUID()}-${originalFileName}`;
+      const originalFileNameClean = file.name.replace(/[^\w.-]+/g, '_'); // Sanitize filename
+      const uniqueFileName = `${randomUUID()}-${originalFileNameClean}`;
       const gcsFile = storage.bucket(gcsBucketName).file(uniqueFileName);
 
-      console.log(`Guest Uploads: Attempting to upload ${uniqueFileName} (Size: ${fileBuffer.length} bytes)`);
+      console.log(`Guest Uploads: Attempting to upload ${uniqueFileName} (Type: ${file.type}, Size: ${fileBuffer.length} bytes)`);
 
       try {
         await new Promise<void>((resolve, reject) => {
           const stream = gcsFile.createWriteStream({
             metadata: { contentType: file.type },
-            resumable: false, // Keep false for simplicity unless large file issues persist
+            resumable: false,
           });
 
-          let streamClosed = false; // Flag to prevent operations on a closed stream
+          let streamClosed = false;
 
           stream.on("error", (err: GcsApiError) => {
             if (streamClosed) return;
             streamClosed = true;
-            console.error(`Guest Uploads: GCS stream error for ${uniqueFileName}:`, err);
-            // Log more detailed GCS errors if available
+            console.error(`Guest Uploads: GCS stream error for ${uniqueFileName}:`, err.message, err.stack);
             if (err.errors && err.errors.length > 0) {
-              err.errors.forEach(e => console.error(` - GCS specific error: ${e.reason} - ${e.message}`));
+              err.errors.forEach(e => console.error(` - GCS specific error detail: ${e.reason} - ${e.message}`));
             }
-            reject(new Error(`GCS stream error for ${file.name}: ${err.message}`));
+            reject(new Error(`Upload failed for ${file.name}: ${err.message}`));
           });
 
           stream.on("finish", () => {
-            if (streamClosed) return; // Should not happen if 'error' fired and rejected
+            if (streamClosed) return;
             streamClosed = true;
             uploadedFileDetails.push({
               fileName: file.name,
@@ -146,46 +153,60 @@ export async function POST(req: NextRequest) {
             resolve();
           });
 
-          // Important: Call end() only once and ensure stream is not already closed
-          // The 'error' event should lead to rejection before 'end' could cause issues
-          // if the stream was already destroyed.
           try {
             stream.end(fileBuffer);
           } catch (endError: unknown) {
-            // This catch is for synchronous errors from stream.end() itself
             if (!streamClosed) {
                 streamClosed = true;
-                console.error(`Guest Uploads: Synchronous error on stream.end() for ${uniqueFileName}:`, endError);
-                reject(new Error(`Error ending stream for ${file.name}: ${(endError as Error).message}`));
+                const e = endError as Error;
+                console.error(`Guest Uploads: Synchronous error on stream.end() for ${uniqueFileName}:`, e.message, e.stack);
+                reject(new Error(`Error ending stream for ${file.name}: ${e.message}`));
             }
           }
         });
       } catch (uploadError: unknown) {
-        // This catches rejections from the new Promise (e.g., from stream.on('error'))
-        // or synchronous errors if createWriteStream failed badly (though less likely to be "cannot write")
-        console.error(`Guest Uploads: Failed to process upload for ${file.name}:`, (uploadError as Error).message);
-        // We will not add this file to uploadedFileDetails and let the loop continue for other files.
-        // The function will later respond based on how many files were *successfully* uploaded.
-        // You could collect these errors to return to the client if needed.
-        // For now, just ensuring it doesn't stop other uploads.
+        const e = uploadError as Error;
+        console.error(`Guest Uploads: Failed to process upload for ${file.name}:`, e.message, e.stack);
+        individualFileErrors.push(`Failed to upload ${file.name}: ${e.message}`);
+        // Continue to the next file
       }
-    }
+    } // End of for...of loop for files
 
     if (uploadedFileDetails.length === 0 && files.length > 0) {
       return NextResponse.json(
-        { success: false, error: "No files were successfully uploaded. Check server logs for details." },
+        {
+          success: false,
+          error: "No files were successfully uploaded. Check server logs for details.",
+          individualErrors: individualFileErrors
+        },
         { status: 400 }
       );
     }
-    if (uploadedFileDetails.length === 0 && files.length === 0) {
-      // Should be caught by earlier check, but for safety
-      return NextResponse.json({ success: false, error: "No files were provided." }, { status: 400 });
-    }
+
+    // --- Optional: Save file metadata to your Prisma database ---
+    // if (uploadedFileDetails.length > 0 && typeof prisma !== 'undefined') {
+    //   try {
+    //     await prisma.guestMedia.createMany({
+    //       data: uploadedFileDetails.map(detail => ({
+    //         originalFileName: detail.fileName,
+    //         gcsPath: detail.gcsPath,
+    //         contentType: detail.contentType,
+    //         uploadedAt: new Date(),
+    //       })),
+    //     });
+    //     console.log("Guest Uploads: Successfully saved media metadata to database.");
+    //   } catch (dbError: unknown) {
+    //     const e = dbError as Error;
+    //     console.error("Guest Uploads: Database error saving media metadata:", e.message, e.stack);
+    //   }
+    // }
+    // --- End Optional Database Save ---
 
     return NextResponse.json({
       success: true,
-      message: `${uploadedFileDetails.length} of ${files.length} file(s) processed successfully.`,
+      message: `${uploadedFileDetails.length} of ${files.length} file(s) uploaded successfully.`,
       uploadedFiles: uploadedFileDetails,
+      errors: individualFileErrors.length > 0 ? individualFileErrors : undefined,
     });
 
   } catch (e: unknown) {
