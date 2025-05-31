@@ -53,7 +53,14 @@ const LightboxModal = ({ src, alt, type, onClose }: { src: string; alt: string; 
       <div className={styles.lightboxContent} ref={modalContentRef} onClick={(e) => e.stopPropagation()}>
         <button className={styles.lightboxClose} onClick={onClose} aria-label="Close media view">&times;</button>
         {type?.startsWith("image/") ? (
-          <img src={src} alt={alt} className={styles.lightboxMedia} />
+          <Image
+            src={src}
+            alt={alt}
+            className={styles.lightboxMedia}
+            width={800} // Adjust width as needed
+            height={600} // Adjust height as needed
+            unoptimized={true} // Important for GCS Signed URLs if domain isn't configured
+          />
         ) : type?.startsWith("video/") ? (
           <video src={src} controls autoPlay className={styles.lightboxMedia} aria-label={alt}>
             Your browser does not support the video tag.
