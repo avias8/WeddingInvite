@@ -1,60 +1,221 @@
-/* Header container */
+/* app/components/Header.css */
+
+/* --- Base Header Styles --- */
 .header {
-    background-color: var(--color-background);
-    border-bottom: 2px solid var(--color-border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 2rem;
+  background-color: var(--color-background);
+  border-bottom: 1px solid var(--color-border); /* Subtle border */
+  padding: 0 1.5rem; /* Horizontal padding */
+  height: 75px; /* Consistent height */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center the content wrapper */
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03); /* Very subtle shadow */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.header-content-wrapper {
+  width: 100%;
+  max-width: 1200px; /* Max width for content */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* --- Header Left (Logo & Site Title) --- */
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--color-secondary-accent); /* Title color */
+}
+
+.header-icon {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy effect */
+  margin-right: 0.75rem;
+}
+
+.header-logo-link:hover .header-icon {
+  transform: scale(1.15) rotate(10deg);
+}
+
+.header-site-title {
+  font-family: var(--font-wedding);
+  font-size: 1.6rem;
+  font-weight: 700; /* Bold for title */
+  letter-spacing: 0.5px;
+  display: none; /* Hidden by default, shown on larger screens */
+}
+
+/* --- Desktop Navigation (header-right on desktop) --- */
+.header-nav-desktop {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem; /* Spacing between links */
+}
+
+.header-link {
+  font-family: var(--font-wedding);
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  padding: 0.6rem 0.4rem; /* Vertical and horizontal padding for clickable area */
+  position: relative;
+  transition: color 0.3s ease;
+  display: inline-flex; /* For icon alignment */
+  align-items: center;
+  gap: 0.5rem; /* Space between icon and text */
+  white-space: nowrap; /* Prevent links from wrapping */
+}
+
+.header-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0.2rem; /* Position underline slightly above bottom */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--color-accent);
+  transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.header-link:hover {
+  color: var(--color-accent);
+}
+
+.header-link:hover::after {
+  width: 80%; /* Underline doesn't span full width for a lighter feel */
+}
+
+.icon-link .link-icon {
+  font-size: 1.1em; /* Icon size relative to text */
+  margin-bottom: -2px; /* Fine-tune vertical alignment */
+}
+
+.management-link .header-cog-icon {
+  font-size: 1.3em; /* Cog icon size */
+  transition: transform 0.3s ease;
+}
+
+.management-link:hover .header-cog-icon {
+  transform: rotate(90deg);
+}
+
+.management-text {
+  /* Displayed alongside cog on desktop */
+}
+
+/* --- Mobile Menu Toggle Button --- */
+.mobile-menu-toggle {
+  display: none; /* Hidden on desktop */
+  background: none;
+  border: none;
+  color: var(--color-secondary-accent);
+  font-size: 1.8rem; /* Size of hamburger/close icon */
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 1002; /* Above mobile menu overlay background, but below content */
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+.mobile-menu-toggle:hover {
+  color: var(--color-accent);
+  transform: scale(1.1);
+}
+
+
+/* --- Mobile Menu Overlay & Navigation --- */
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0; /* Start from below the header */
+  left: 0;
+  width: 100%;
+  height: 100vh; /* Full viewport height */
+  background-color: rgba(var(--color-background-rgb, 243, 239, 228), 0.98); /* Use RGB for opacity */
+  backdrop-filter: blur(5px);
+  z-index: 999; /* Below toggle button if it needs to overlap */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 75px; /* Account for header height */
+  overflow-y: auto;
+  animation: slideDown 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20%);
   }
-  
-  /* Left (Favicon) and Right (Links & Cog Icon) containers */
-  .header-left,
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  /* Styling for the favicon in the header-left */
-  .header-left .header-icon {
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
-    transition: transform 0.2s ease-in-out;
+}
+
+.header-nav-mobile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem; /* Spacing between links in mobile menu */
+  width: 100%;
+  padding: 2rem 0;
+}
+
+.header-nav-mobile .header-link {
+  font-size: 1.5rem; /* Larger font for mobile menu links */
+  padding: 0.8rem 1rem;
+  width: 80%;
+  text-align: center;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.header-nav-mobile .header-link:hover {
+  background-color: rgba(0,0,0,0.05); /* Subtle hover for mobile links */
+  color: var(--color-accent);
+}
+.header-nav-mobile .header-link::after {
+  display: none; /* No underline for mobile menu items */
+}
+
+
+/* --- Responsive Breakpoints --- */
+@media (min-width: 769px) {
+  .header-site-title {
+    display: inline; /* Show site title on larger screens */
   }
-  
-  /* Add a slight hover effect to the favicon */
-  .header-left .header-icon:hover {
-    transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 0 1rem; /* Adjust padding for smaller screens */
+    height: 65px;
   }
-  
-  /* Common style for all links in the header */
-  .header-link {
-    font-family: var(--font-wedding);
-    font-weight: 400;
-    color: var(--color-text-primary);
-    text-decoration: none;
-    letter-spacing: 0.5px;
-    transition: color 0.2s ease-in-out;
+  .header-nav-desktop {
+    display: none; /* Hide desktop nav */
   }
-  
-  /* Hover effect for the links */
-  .header-link:hover {
-    color: var(--color-accent);
+  .mobile-menu-toggle {
+    display: block; /* Show hamburger */
   }
-  
-  /* Cog icon styling */
-  .header-cog {
-    font-size: 24px; /* Adjust the size of the cog icon */
-    color: var(--color-text-primary);
-    cursor: pointer;
-    transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
+  .header-site-title {
+    font-size: 1.3rem; /* Slightly smaller title on mobile */
   }
-  
-  /* Hover effect for the cog icon */
-  .header-cog:hover {
-    transform: scale(1.1);
-    color: var(--color-accent);
-  }
-  
+}
+
+/* Add this to your :root in globals.css if you haven't already, for the RGBA background */
+/*
+:root {
+  ...
+  --color-background-rgb: 243, 239, 228; // Corresponds to #f3efe4
+}
+*/
