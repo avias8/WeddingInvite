@@ -4,13 +4,18 @@ import { Storage, StorageOptions } from "@google-cloud/storage";
 import { randomUUID } from "crypto"; // For generating unique filenames
 
 // --- Google Cloud Storage Client Initialization ---
-let storage: Storage; // Declare storage variable
+let storage: Storage | null = null; // Initialize storage to null
 const gcsBucketName = process.env.GCS_BUCKET_NAME;
 const serviceAccountJsonString = process.env.GOOGLE_SERVICE_ACCOUNT;
 const gcsCredentialsFilePath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
+// Define a type for expected GCS error structure (can be shared if used in multiple files)
+interface GcsApiError extends Error {
+  code?: number | string;
+}
+
 // Primary: Try to use the JSON string from GOOGLE_SERVICE_ACCOUNT
-if (serviceAccountJsonString) {
+if (storage === null && serviceAccountJsonString) {
   try {
     const serviceAccountCredentials = JSON.parse(serviceAccountJsonString);
     // Basic validation of the parsed credentials object
@@ -27,39 +32,42 @@ if (serviceAccountJsonString) {
     };
     storage = new Storage(storageConfig);
     console.log("Guest Uploads: Initialized Google Cloud Storage with credentials from GOOGLE_SERVICE_ACCOUNT environment variable.");
-  } catch (error) {
+  } catch (e: unknown) {
+    const initError = e as Error;
     console.error(
       "Guest Uploads: Failed to parse or use GOOGLE_SERVICE_ACCOUNT environment variable:",
-      error instanceof Error ? error.message : String(error)
+      initError.message
     );
     // Fall through to allow other initialization methods if this one fails
   }
 }
 
 // Secondary: Fallback to GOOGLE_APPLICATION_CREDENTIALS file path if storage not yet initialized
-if (!storage && gcsCredentialsFilePath) {
+if (storage === null && gcsCredentialsFilePath) {
   try {
     storage = new Storage(); // Uses GOOGLE_APPLICATION_CREDENTIALS by default if set
     console.log("Guest Uploads: Initialized Google Cloud Storage using GOOGLE_APPLICATION_CREDENTIALS file path.");
-  } catch (error) {
-     console.error(
+  } catch (e: unknown) {
+    const initError = e as Error;
+    console.error(
       "Guest Uploads: Failed to initialize Storage with GOOGLE_APPLICATION_CREDENTIALS:",
-      error instanceof Error ? error.message : String(error)
+      initError.message
     );
   }
 }
 
 // Tertiary: Attempt default ADC if storage still not initialized
-if (!storage) {
+if (storage === null) {
   try {
     storage = new Storage();
     console.warn(
       "Guest Uploads: GOOGLE_SERVICE_ACCOUNT and GOOGLE_APPLICATION_CREDENTIALS not set or failed. Attempting default ADC for Storage."
     );
-  } catch (error) {
+  } catch (e: unknown) {
+    const initError = e as Error;
     console.error(
       "Guest Uploads: Failed to initialize Storage with default ADC:",
-      error instanceof Error ? error.message : String(error)
+      initError.message
     );
     // At this point, storage is likely uninitialized, and POST requests will fail.
   }
@@ -124,10 +132,10 @@ export async function POST(req: NextRequest) {
 
       // Using a Promise to handle stream events
       await new Promise<void>((resolve, reject) => {
-        stream.on("error", (err) => {
+        stream.on("error", (err: GcsApiError) => { // Explicitly type err
           console.error(
             `Guest Uploads: Error uploading ${uniqueFileName} to GCS:`,
-            err
+            err.message // Access message property
           );
           reject(new Error(`Failed to upload ${file.name}. Error: ${err.message}`));
         });
@@ -187,11 +195,12 @@ export async function POST(req: NextRequest) {
       uploadedFiles: uploadedFileDetails,
     });
 
-  } catch (error) {
-    console.error("Guest Uploads: Overall file upload process error:", error);
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred during file upload.";
+  } catch (e: unknown) { // Catch error as unknown
+    const error = e as GcsApiError; // Assert to our GcsApiError type
+    console.error("Guest Uploads: Overall file upload process error:", error.message, error.stack);
+    const errorMessage = error.message || "An unknown error occurred during file upload.";
     // Provide more specific error messages if possible
-    if (error instanceof Error && error.message.includes("socket hang up")) {
+    if (error.message && error.message.includes("socket hang up")) { // Check if error.message exists
         return NextResponse.json(
           { success: false, error: `Network error during upload. Please try again. Details: ${errorMessage}` },
           { status: 500 }

@@ -1,6 +1,7 @@
 // app/api/get-guest-media/route.ts
 import { NextResponse } from "next/server";
-import { Storage, StorageOptions, File, GetFilesResponse } from "@google-cloud/storage"; // Added GetFilesResponse for clarity
+// Removed 'File' from this import as it's implicitly used via GetFilesResponse
+import { Storage, StorageOptions, GetFilesResponse } from "@google-cloud/storage";
 
 // --- Google Cloud Storage Client Initialization ---
 let storage: Storage | null = null; // Initialize to null
@@ -101,6 +102,7 @@ export async function GET() {
 
   try {
     // Correctly destructure the GetFilesResponse. We are interested in the first element (File[]).
+    // The type of 'files' here will be File[] from @google-cloud/storage, inferred from GetFilesResponse.
     const [files]: GetFilesResponse = await storage.bucket(gcsBucketName).getFiles();
 
     if (!files || files.length === 0) {
@@ -114,6 +116,7 @@ export async function GET() {
     const mediaItems: MediaItem[] = [];
     const oneHourInMs = 60 * 60 * 1000;
 
+    // Each 'file' in this loop is of type File (from @google-cloud/storage) due to type inference.
     for (const file of files) {
       if (file.name.endsWith('/')) { // Skip "folders" if any exist
           continue;
