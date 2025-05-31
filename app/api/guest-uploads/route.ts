@@ -6,8 +6,10 @@ import { randomUUID } from "crypto"; // For generating unique filenames
 // --- Google Cloud Storage Client Initialization ---
 let storage: Storage | null = null; // Initialize storage to null
 const gcsBucketName = process.env.GCS_BUCKET_NAME;
-const serviceAccountJsonString = process.env.GOOGLE_SERVICE_ACCOUNT;
-const gcsCredentialsFilePath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+
+// Environment variables for credentials
+const serviceAccountJsonStringEnv = process.env.GOOGLE_SERVICE_ACCOUNT; // Preferred for JSON string
+const gcsApplicationCredentialsEnv = process.env.GOOGLE_APPLICATION_CREDENTIALS; // User's Vercel setup (JSON string) OR library default (file path)
 
 // Define a type for expected GCS error structure
 interface GcsApiError extends Error {
@@ -15,59 +17,92 @@ interface GcsApiError extends Error {
   errors?: Array<{ message: string; reason: string }>; // Common in GCS errors
 }
 
-// Primary: Try to use the JSON string from GOOGLE_SERVICE_ACCOUNT
-if (storage === null && serviceAccountJsonString) {
+// Helper function to create Storage instance from parsed credentials
+const createStorageInstance = (credentials: any, sourceDescription: string): Storage | null => {
+  if (!credentials.project_id || !credentials.client_email || !credentials.private_key) {
+    console.error(`Guest Uploads: ${sourceDescription} JSON is missing required fields (project_id, client_email, private_key).`);
+    return null;
+  }
+  const storageConfig: StorageOptions = {
+    projectId: credentials.project_id,
+    credentials: {
+      client_email: credentials.client_email,
+      private_key: credentials.private_key.replace(/\\n/g, "\n"),
+    },
+  };
+  console.log(`Guest Uploads: Initialized Google Cloud Storage with credentials from ${sourceDescription}.`);
+  return new Storage(storageConfig);
+};
+
+// Attempt 1: Use GOOGLE_SERVICE_ACCOUNT if it contains the JSON string
+if (serviceAccountJsonStringEnv) {
   try {
-    const serviceAccountCredentials = JSON.parse(serviceAccountJsonString);
-    if (!serviceAccountCredentials.project_id || !serviceAccountCredentials.client_email || !serviceAccountCredentials.private_key) {
-      throw new Error("GOOGLE_SERVICE_ACCOUNT JSON is missing required fields (project_id, client_email, private_key).");
+    const credentials = JSON.parse(serviceAccountJsonStringEnv);
+    storage = createStorageInstance(credentials, "GOOGLE_SERVICE_ACCOUNT (JSON string)");
+  } catch (e: unknown) {
+    console.error(
+      "Guest Uploads: Failed to parse GOOGLE_SERVICE_ACCOUNT as JSON:",
+      (e as Error).message
+    );
+  }
+}
+
+// Attempt 2: If not initialized by GOOGLE_SERVICE_ACCOUNT, and GOOGLE_APPLICATION_CREDENTIALS is set,
+// try to parse IT as a JSON string (as per user's Vercel setup).
+if (storage === null && gcsApplicationCredentialsEnv) {
+  let gcsAppCredsIsJson = false;
+  try {
+    const credentials = JSON.parse(gcsApplicationCredentialsEnv);
+    // If parsing succeeds, it's a JSON string.
+    storage = createStorageInstance(credentials, "GOOGLE_APPLICATION_CREDENTIALS (as JSON string)");
+    if (storage) {
+        gcsAppCredsIsJson = true; // Mark that it was successfully used as JSON
     }
-    const storageConfig: StorageOptions = {
-      projectId: serviceAccountCredentials.project_id,
-      credentials: {
-        client_email: serviceAccountCredentials.client_email,
-        private_key: serviceAccountCredentials.private_key.replace(/\\n/g, "\n"),
-      },
-    };
-    storage = new Storage(storageConfig);
-    console.log("Guest Uploads: Initialized Google Cloud Storage with credentials from GOOGLE_SERVICE_ACCOUNT environment variable.");
-  } catch (e: unknown) {
-    const initError = e as Error;
-    console.error(
-      "Guest Uploads: Failed to parse or use GOOGLE_SERVICE_ACCOUNT environment variable:",
-      initError.message
-    );
-  }
-}
-
-// Secondary: Fallback to GOOGLE_APPLICATION_CREDENTIALS file path if storage not yet initialized
-if (storage === null && gcsCredentialsFilePath) {
-  try {
-    storage = new Storage(); // Uses GOOGLE_APPLICATION_CREDENTIALS by default if set
-    console.log("Guest Uploads: Initialized Google Cloud Storage using GOOGLE_APPLICATION_CREDENTIALS file path.");
-  } catch (e: unknown) {
-    const initError = e as Error;
-    console.error(
-      "Guest Uploads: Failed to initialize Storage with GOOGLE_APPLICATION_CREDENTIALS:",
-      initError.message
-    );
-  }
-}
-
-// Tertiary: Attempt default ADC if storage still not initialized
-if (storage === null) {
-  try {
-    storage = new Storage();
+  } catch (jsonParseError) {
+    // JSON.parse failed. This means gcsApplicationCredentialsEnv is NOT a valid JSON string.
+    // It MIGHT be a file path, or it's just malformed.
+    // Log this, and then proceed to Attempt 3 where the library will try it as a path.
     console.warn(
-      "Guest Uploads: GOOGLE_SERVICE_ACCOUNT and GOOGLE_APPLICATION_CREDENTIALS not set or failed. Attempting default ADC for Storage."
+      "Guest Uploads: GOOGLE_APPLICATION_CREDENTIALS was set, but failed to parse as JSON. Will attempt to use it as a file path if applicable. Parse error:",
+      (jsonParseError as Error).message
+    );
+  }
+
+  // Attempt 3: If GOOGLE_APPLICATION_CREDENTIALS was set but NOT successfully used as JSON (i.e., gcsAppCredsIsJson is false),
+  // let the GCS library try to use it as a file path.
+  // This also covers the case where GOOGLE_APPLICATION_CREDENTIALS was intended as a path from the start.
+  if (storage === null && !gcsAppCredsIsJson) {
+    // The GCS library will automatically look at process.env.GOOGLE_APPLICATION_CREDENTIALS if it's set
+    // and no credentials were provided to the constructor.
+    try {
+      storage = new Storage();
+      // If new Storage() succeeds here, it means it found credentials,
+      // likely via GOOGLE_APPLICATION_CREDENTIALS as a file path or another ADC mechanism.
+      console.log("Guest Uploads: Initialized Google Cloud Storage using library's default credential discovery (e.g., GOOGLE_APPLICATION_CREDENTIALS as file path, or ADC).");
+    } catch (e: unknown) {
+      console.error(
+        "Guest Uploads: Failed to initialize Storage using library's default credential discovery:",
+        (e as Error).message
+      );
+    }
+  }
+}
+
+// Attempt 4: If storage is STILL null (neither env var provided usable JSON,
+// and GOOGLE_APPLICATION_CREDENTIALS wasn't set or wasn't a usable path for the library),
+// try default ADC one last time (for environments with implicit ADC or local gcloud auth)
+if (storage === null && !gcsApplicationCredentialsEnv && !serviceAccountJsonStringEnv) {
+  // This condition ensures we only try this if no explicit credential env vars were even set.
+  try {
+    storage = new Storage(); // Default ADC
+    console.warn(
+      "Guest Uploads: No explicit credential environment variables (GOOGLE_SERVICE_ACCOUNT, GOOGLE_APPLICATION_CREDENTIALS) were set. Attempting default ADC for Storage."
     );
   } catch (e: unknown) {
-    const initError = e as Error;
     console.error(
-      "Guest Uploads: Failed to initialize Storage with default ADC:",
-      initError.message
+      "Guest Uploads: Failed to initialize Storage with default ADC (no explicit env vars set):",
+      (e as Error).message
     );
-    // At this point, storage is likely uninitialized, and POST requests will fail.
   }
 }
 // --- End of GCS Client Initialization ---
@@ -85,9 +120,9 @@ export async function POST(req: NextRequest) {
 
   // Check if storage client was successfully initialized
   if (!storage || typeof storage.bucket !== 'function') {
-    console.error("Guest Uploads: Google Cloud Storage client not initialized properly. Check credentials configuration.");
+    console.error("Guest Uploads: Google Cloud Storage client not initialized properly. Check credentials configuration and server logs for details.");
     return NextResponse.json(
-      { success: false, error: "Server configuration error: GCS client failed to initialize." },
+      { success: false, error: "Server configuration error: GCS client failed to initialize. Review server logs for credential issues." },
       { status: 500 }
     );
   }
