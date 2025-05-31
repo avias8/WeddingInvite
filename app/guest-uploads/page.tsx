@@ -151,6 +151,11 @@ export default function GuestUploadPage() {
           <p className={styles.thankYouNote}>
             Thank you for sharing your memories with us!
           </p>
+          <p className={styles.photoFeedLink}>
+            <a href="/photo-feed" className={styles.link}>
+              View the Photo Feed
+            </a>
+          </p>
         </div>
       </div>
     </>
