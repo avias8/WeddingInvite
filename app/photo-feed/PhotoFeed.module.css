@@ -1,14 +1,85 @@
 /* app/photo-feed/PhotoFeed.module.css */
 
+/* --- Global Variables (Assuming these are defined elsewhere, e.g., in globals.css) --- */
+/*
+:root {
+  --color-background: #f8f9fa;
+  --color-text-primary: #343a40;
+  --color-text-secondary: #6c757d;
+  --color-accent: #e85a4f; // Example: Warm accent
+  --color-secondary-accent: #5cb85c; // Example: Green for success/positive
+  --color-border: #dee2e6;
+  --font-body: 'Inter', sans-serif;
+  --font-wedding: 'Dancing Script', cursive; // Example: Elegant script font
+  --box-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --box-shadow-md: 0 4px 10px rgba(0, 0, 0, 0.08);
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+}
+*/
+
+/* --- Base Button Style --- */
+.button {
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--border-radius-md, 8px);
+  font-family: var(--font-body, sans-serif);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--box-shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.05));
+}
+
+.button:active {
+  transform: translateY(0px);
+}
+
+.buttonPrimary {
+  background-color: var(--color-accent, #e85a4f);
+  color: white;
+}
+.buttonPrimary:hover {
+  background-color: color-mix(in srgb, var(--color-accent, #e85a4f) 90%, black);
+}
+
+.buttonSecondary {
+  background-color: var(--color-background, #f8f9fa);
+  color: var(--color-text-primary, #343a40);
+  border: 1px solid var(--color-border, #dee2e6);
+}
+.buttonSecondary:hover {
+  background-color: color-mix(in srgb, var(--color-border, #dee2e6) 20%, white);
+}
+
+.buttonDanger {
+  background-color: #dc3545;
+  color: white;
+}
+.buttonDanger:hover {
+  background-color: #c82333;
+}
+
+/* --- Page Structure --- */
 .pageContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: calc(100vh - 75px); /* Adjust 75px based on your header height */
+  min-height: calc(100vh - 75px); /* Adjust based on your header height */
   padding: 2rem 1rem;
-  background-color: var(--color-background);
-  font-family: var(--font-body);
-  color: var(--color-text-primary);
+  background-color: var(--color-background, #f8f9fa);
+  font-family: var(--font-body, sans-serif);
+  color: var(--color-text-primary, #343a40);
   box-sizing: border-box;
 }
 
@@ -17,67 +88,62 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 700px; /* Match feed container width for alignment */
-  margin-bottom: 0.5rem;
+  max-width: 900px; /* Wider for better title/button spacing */
+  margin-bottom: 1rem;
+  padding: 0 1rem; /* Ensure padding on smaller screens */
 }
 
 .pageTitle {
-  font-family: var(--font-wedding);
-  font-size: clamp(1.8rem, 5vw, 2.8rem); /* Slightly adjusted for space */
-  color: var(--color-secondary-accent);
-  text-align: left; /* Align to left, button will be on right */
+  font-family: var(--font-wedding, 'Georgia', serif); /* Fallback font */
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  color: var(--color-accent, #e85a4f);
+  text-align: left;
   flex-grow: 1;
+  line-height: 1.2;
 }
-
-.authToggleButton {
-  background-color: transparent;
-  color: var(--color-accent);
-  border: 1px solid var(--color-accent);
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  cursor: pointer;
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  transition: background-color 0.2s, color 0.2s;
-}
-
-.authToggleButton:hover {
-  background-color: var(--color-accent);
-  color: white;
-}
-
 
 .pageSubtitle {
-  font-family: var(--font-wedding);
-  font-size: clamp(1rem, 3vw, 1.3rem);
-  color: var(--color-accent);
-  margin-bottom: 2.5rem;
+  font-family: var(--font-wedding, 'Georgia', serif);
+  font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+  color: var(--color-text-secondary, #6c757d);
+  margin-bottom: 3rem;
   text-align: center;
   font-style: italic;
   width: 100%;
   max-width: 700px;
 }
 
+/* --- Auth Toggle Button --- */
+.authToggleButton {
+  background-color: transparent;
+  color: var(--color-accent, #e85a4f);
+  border: 1px solid var(--color-accent, #e85a4f);
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-lg, 20px); /* More rounded */
+  font-size: 0.9rem;
+}
+
+.authToggleButton:hover {
+  background-color: var(--color-accent, #e85a4f);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* --- Loading & Error States --- */
 .loadingIndicator {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem;
-  color: var(--color-text-secondary);
+  padding: 4rem;
+  color: var(--color-text-secondary, #6c757d);
+  gap: 1rem;
 }
 
-.spinner {
-  border: 5px solid var(--color-border);
-  border-top: 5px solid var(--color-accent);
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
+.spinnerIcon {
+  font-size: 3rem; /* Larger spinner */
+  color: var(--color-accent, #e85a4f);
+  animation: spin 1.2s linear infinite;
 }
 
 @keyframes spin {
@@ -85,66 +151,93 @@
   100% { transform: rotate(360deg); }
 }
 
-.errorMessage {
-  background-color: #fdecea;
-  color: #5c2121;
-  border: 1px solid #f5c6cb;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  text-align: center;
-  width: 100%;
-  max-width: 600px;
-  margin-top: 2rem;
-}
-
-.feedContainer {
+.emptyStateContainer {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  margin-top: 2rem;
+  background-color: color-mix(in srgb, var(--color-background, #f8f9fa) 90%, var(--color-border, #dee2e6));
+  border-radius: var(--border-radius-lg, 12px);
   width: 100%;
-  max-width: 700px;
+  max-width: 600px;
+  text-align: center;
+}
+
+.emptyStateIcon {
+  font-size: 2.5rem;
+  color: var(--color-text-secondary, #6c757d);
+  margin-bottom: 1rem;
+}
+
+.errorMessage { /* Used by emptyStateContainer */
+  color: var(--color-text-primary, #343a40);
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+
+/* --- Feed Grid & Items --- */
+.feedGrid {
+  display: grid;
+  /* Masonry-like effect for varying heights, if items have different aspect ratios */
+  /* For a simpler grid, use: grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 2rem; /* Increased gap */
+  width: 100%;
+  max-width: 1200px; /* Allow wider feed */
+  padding: 0 1rem;
 }
 
 .feedItem {
   background-color: #ffffff;
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.07);
+  border: 1px solid var(--color-border, #dee2e6);
+  border-radius: var(--border-radius-lg, 12px); /* Softer radius */
+  box-shadow: var(--box-shadow-md, 0 4px 10px rgba(0, 0, 0, 0.08));
   overflow: hidden;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1), box-shadow 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+  display: flex;
+  flex-direction: column; /* Ensure info stays below media */
 }
 
 .feedItem:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
 }
 
 .mediaWrapper {
   width: 100%;
-  background-color: #f0f0f0;
+  background-color: #e9ecef; /* Lighter placeholder */
   position: relative;
-  cursor: pointer; /* Indicate clickable for lightbox */
+  cursor: pointer;
+  aspect-ratio: 4 / 3; /* Default aspect ratio, adjust if needed */
+  overflow: hidden; /* Ensure media content respects wrapper bounds */
 }
 
 .mediaContent {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* Cover ensures the aspect ratio is filled */
+  transition: transform 0.3s ease-out;
+}
+.feedItem:hover .mediaContent {
+  transform: scale(1.03);
 }
 
 .videoPlaceholder {
   position: relative;
   width: 100%;
+  height: 100%; /* Make it fill the mediaWrapper */
   background-color: #000;
-  aspect-ratio: 16 / 9;
 }
 
 .videoPlaceholder video {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: contain; /* Contain for videos to show full frame */
 }
 
 .playIconOverlay {
@@ -152,17 +245,24 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 3rem;
-  color: rgba(255, 255, 255, 0.8);
-  background-color: rgba(0, 0, 0, 0.4);
+  font-size: 3.5rem; /* Slightly larger */
+  color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(0, 0, 0, 0.3);
   border-radius: 50%;
   width: 70px;
   height: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
-  opacity: 0.8;
+  pointer-events: none; /* Allow clicks on video */
+  opacity: 0; /* Hidden by default */
+  transition: opacity 0.2s ease;
+}
+.mediaWrapper:hover .playIconOverlay {
+  opacity: 1;
+}
+.mediaWrapper:focus-within .playIconOverlay { /* Show on focus for keyboard nav */
+    opacity: 1;
 }
 
 
@@ -172,113 +272,293 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background-color: #f8f8f8;
-  color: var(--color-text-secondary);
-  min-height: 200px;
+  background-color: #f1f3f5;
+  color: var(--color-text-secondary, #6c757d);
+  min-height: 200px; /* Ensure it has some height */
+  text-align: center;
+  height: 100%;
+}
+.unsupportedIcon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
 }
 .unsupportedMedia p {
-  font-weight: bold;
+  font-weight: 500;
   margin-bottom: 0.5rem;
+  color: var(--color-text-primary, #343a40);
 }
-.unsupportedMedia span {
-  font-size: 0.85rem;
+.fileNameText { /* For unsupported file name */
+  font-size: 0.8rem;
+  color: var(--color-text-secondary, #6c757d);
   word-break: break-all;
+  max-width: 90%;
 }
+
 
 .itemInfo {
   padding: 1rem 1.2rem;
-  background-color: #fcfaf6;
-  display: flex; /* For aligning date and delete button */
+  background-color: #fff; /* Cleaner look */
+  display: flex;
   justify-content: space-between;
   align-items: center;
+  border-top: 1px solid var(--color-border, #dee2e6);
+  margin-top: auto; /* Pushes info to bottom if item flex height varies */
 }
 
 .uploadDate {
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
-  font-style: italic;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary, #6c757d);
+  font-style: normal; /* Removed italic for cleaner look */
 }
 
 .deleteButton {
   background: none;
   border: none;
-  color: #cc0000; /* Red color for delete */
+  color: #e74c3c; /* Softer red */
   cursor: pointer;
-  font-size: 1.1rem;
-  padding: 0.3rem;
-  transition: color 0.2s ease, transform 0.2s ease;
+  font-size: 1.2rem; /* Slightly larger icon */
+  padding: 0.4rem; /* Better touch target */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 }
 
 .deleteButton:hover {
-  color: #ff0000; /* Brighter red on hover */
+  color: #c0392b; /* Darker red on hover */
+  background-color: rgba(231, 76, 60, 0.1);
   transform: scale(1.1);
 }
 
-
-/* Lightbox Styles (same as before) */
+/* --- Lightbox Modal --- */
 .lightboxOverlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.85);
+  background-color: rgba(0, 0, 0, 0.9); /* Darker overlay */
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
   padding: 1rem;
   box-sizing: border-box;
-  animation: fadeInLightbox 0.3s ease;
+  animation: fadeInLightbox 0.3s ease-out;
 }
 
 @keyframes fadeInLightbox {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .lightboxContent {
   position: relative;
-  max-width: 90vw;
-  max-height: 90vh;
-  background-color: #000;
-  box-shadow: 0 0 30px rgba(0,0,0,0.5);
-  border-radius: 5px;
-  overflow: hidden;
+  max-width: 95vw; /* Allow slightly larger */
+  max-height: 95vh;
+  background-color: #000; /* Keep black for media focus */
+  box-shadow: 0 10px 40px rgba(0,0,0,0.7); /* Stronger shadow */
+  border-radius: var(--border-radius-md, 8px);
+  overflow: hidden; /* Important for rounded corners on media */
+  display: flex; /* Helps center media if it's smaller than max */
+  align-items: center;
+  justify-content: center;
 }
 
 .lightboxMedia {
   display: block;
   max-width: 100%;
-  max-height: 90vh;
+  max-height: calc(95vh - 40px); /* Account for potential padding/close button */
   width: auto;
   height: auto;
-  margin: auto;
   object-fit: contain;
+  border-radius: var(--border-radius-sm, 4px); /* Subtle rounding for the media itself */
+}
+.unsupportedText { /* For unsupported media in lightbox */
+    color: #fff;
+    padding: 2rem;
+    font-size: 1.1rem;
 }
 
 .lightboxClose {
   position: absolute;
-  top: 10px;
+  top: 15px;
   right: 15px;
-  background: none;
+  background: rgba(30,30,30,0.7);
   border: none;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 2.5rem;
-  font-weight: bold;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.8rem; /* Adjusted size */
+  font-weight: normal;
   cursor: pointer;
   line-height: 1;
-  padding: 0.2rem 0.5rem;
-  transition: color 0.2s ease;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
   z-index: 2001;
 }
 
 .lightboxClose:hover {
+  background-color: rgba(0,0,0,0.9);
   color: #fff;
+  transform: rotate(90deg);
 }
 
-/* Auth Modal Styles */
+/* --- Auth Modal --- */
 .authModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); /* Darker overlay */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1500;
+  padding: 1rem;
+  box-sizing: border-box;
+  animation: fadeInAuthModal 0.2s ease-out;
+}
+
+@keyframes fadeInAuthModal {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.authModalContent {
+  background-color: white;
+  padding: 2.5rem; /* More padding */
+  border-radius: var(--border-radius-lg, 12px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 400px; /* Slightly wider */
+  text-align: center;
+  position: relative;
+}
+
+.modalCloseButton { /* Generic close button for modals */
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: var(--color-text-secondary, #aaa);
+  cursor: pointer;
+  padding: 0.2rem;
+  line-height: 1;
+}
+.modalCloseButton:hover {
+  color: var(--color-text-primary, #333);
+}
+
+.authModalContent h2 {
+  font-family: var(--font-wedding, 'Georgia', serif);
+  color: var(--color-text-primary, #343a40);
+  margin-bottom: 2rem; /* More space */
+  font-size: 1.8rem;
+}
+
+.authInput {
+  width: 100%;
+  padding: 0.85rem 1rem; /* More padding */
+  margin-bottom: 1.2rem;
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: var(--border-radius-md, 8px);
+  font-family: var(--font-body, sans-serif);
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.authInput:focus {
+  border-color: var(--color-accent, #e85a4f);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent, #e85a4f) 20%, transparent);
+  outline: none;
+}
+
+.authError {
+  color: #D8000C;
+  background-color: #FFD2D2;
+  border: 1px solid #D8000C;
+  padding: 0.75rem;
+  border-radius: var(--border-radius-sm, 4px);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.authSubmitButton { /* Uses .button base style */
+  background-color: var(--color-secondary-accent, #5cb85c);
+  color: white;
+  width: 100%; /* Full width */
+  padding: 0.8rem 1.5rem; /* Consistent padding */
+}
+.authSubmitButton:hover {
+  background-color: color-mix(in srgb, var(--color-secondary-accent, #5cb85c) 85%, black);
+}
+
+
+/* --- Notification Bar --- */
+.notificationBar {
+  position: fixed;
+  top: 20px; /* Adjust if you have a fixed header */
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1rem 1.5rem;
+  border-radius: var(--border-radius-md, 8px);
+  box-shadow: var(--box-shadow-md, 0 4px 10px rgba(0, 0, 0, 0.1));
+  z-index: 2500;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  animation: slideDownNotification 0.3s ease-out;
+}
+
+@keyframes slideDownNotification {
+  from { top: -100px; opacity: 0; }
+  to { top: 20px; opacity: 1; }
+}
+
+.notificationBar.success {
+  background-color: var(--color-secondary-accent, #5cb85c);
+  color: white;
+  border: 1px solid color-mix(in srgb, var(--color-secondary-accent, #5cb85c) 80%, black);
+}
+
+.notificationBar.error {
+  background-color: #dc3545; /* Red for error */
+  color: white;
+  border: 1px solid #c82333;
+}
+
+.notificationIcon {
+  font-size: 1.2rem;
+}
+
+.notificationClose {
+  background: none;
+  border: none;
+  color: inherit; /* Inherits color from parent (white) */
+  opacity: 0.7;
+  font-size: 1.5rem;
+  margin-left: auto; /* Pushes to the right */
+  padding: 0 0.3rem;
+  cursor: pointer;
+  line-height: 1;
+}
+.notificationClose:hover {
+  opacity: 1;
+}
+
+/* --- Confirmation Modal --- */
+.confirmationModalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -288,88 +568,108 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1500; /* Below lightbox, above page content */
+  z-index: 2100; /* Above lightbox but below notification if needed */
+  padding: 1rem;
+  animation: fadeInAuthModal 0.2s ease-out; /* Re-use animation */
 }
 
-.authModalContent {
+.confirmationModalContent {
   background-color: white;
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  border-radius: var(--border-radius-lg, 12px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
   width: 100%;
-  max-width: 350px;
-  text-align: center;
-  position: relative;
+  max-width: 450px;
+  text-align: left;
 }
 
-.authModalClose {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: #888;
-  cursor: pointer;
-}
-.authModalClose:hover {
-  color: #333;
+.confirmationModalContent h3 {
+  font-family: var(--font-body, sans-serif); /* Use body font for modal titles */
+  font-weight: 600;
+  color: var(--color-text-primary, #343a40);
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
 }
 
-.authModalContent h2 {
-  font-family: var(--font-wedding);
-  color: var(--color-text-primary);
+.confirmationModalContent p {
   margin-bottom: 1.5rem;
-  font-size: 1.5rem;
-}
-
-.authInput {
-  width: 100%;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  font-family: var(--font-body);
   font-size: 1rem;
-  box-sizing: border-box;
+  line-height: 1.6;
+  color: var(--color-text-secondary, #6c757d);
 }
 
-.authError {
-  color: #D8000C; /* Red for error messages */
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
+.confirmationModalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
 }
 
-.authSubmitButton {
-  background-color: var(--color-secondary-accent);
-  color: white;
-  padding: 0.7rem 1.5rem;
-  border: none;
-  border-radius: 20px;
-  font-family: var(--font-body);
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  width: 100%;
-}
 
-.authSubmitButton:hover {
-  background-color: #1a5a13; /* Darker shade */
-}
-
-/* Responsive adjustments */
+/* --- Responsive Adjustments --- */
 @media (max-width: 768px) {
-    .titleContainer {
-        flex-direction: column;
-        gap: 0.8rem;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-    .pageTitle {
-        text-align: center;
-    }
-    .authToggleButton {
-        font-size: 0.8rem;
-        padding: 0.3rem 0.7rem;
-    }
+  .titleContainer {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 0 0.5rem;
+  }
+  .pageTitle {
+    text-align: center;
+  }
+  .authToggleButton {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.9rem;
+  }
+  .feedGrid {
+    /* Switch to single column on smaller screens */
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 0 0.5rem;
+  }
+  .pageSubtitle {
+    margin-bottom: 2rem;
+  }
+  .notificationBar {
+    width: calc(100% - 2rem);
+    top: 10px;
+  }
+  @keyframes slideDownNotification { /* Adjust for smaller screens */
+    from { top: -100px; opacity: 0; }
+    to { top: 10px; opacity: 1; }
+  }
+}
+
+@media (max-width: 480px) {
+  .pageContainer {
+    padding: 1.5rem 0.5rem;
+  }
+  .pageTitle {
+    font-size: clamp(1.8rem, 7vw, 2.5rem);
+  }
+  .pageSubtitle {
+    font-size: clamp(1rem, 4vw, 1.2rem);
+  }
+  .authModalContent, .confirmationModalContent {
+    padding: 1.5rem;
+  }
+  .authModalContent h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .button { /* Slightly smaller buttons on mobile */
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  .itemInfo {
+    padding: 0.75rem 1rem;
+  }
+  .uploadDate {
+    font-size: 0.75rem;
+  }
+  .deleteButton {
+    font-size: 1.1rem;
+    padding: 0.3rem;
+  }
 }

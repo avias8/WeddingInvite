@@ -3,12 +3,12 @@
 
 import React, { useState, useEffect, useRef, FormEvent, ChangeEvent } from "react";
 import Header from "../components/Header"; // Adjust path as needed
-import styles from "./PhotoFeed.module.css"; // We'll create this CSS module
-import Image from "next/image"; // For optimized images
-import { FaTrash, FaLock, FaUnlock } from "react-icons/fa"; // Icons
+import styles from "./PhotoFeed.module.css";
+import Image from "next/image";
+import { FaTrash, FaLock, FaUnlock, FaSpinner, FaExclamationTriangle, FaCheckCircle } from "react-icons/fa"; // Added more icons
 
 interface MediaItem {
-  name: string; // This is the GCS object name
+  name: string;
   url: string;
   contentType: string | undefined;
   timeCreated: string | undefined;
@@ -22,7 +22,65 @@ interface ApiResponse {
   error?: string;
 }
 
-// Lightbox Modal Component (remains the same as you provided)
+// Notification Bar Component
+const NotificationBar = ({ message, type, onClose }: { message: string; type: "success" | "error"; onClose: () => void }) => {
+  if (!message) return null;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, 5000); // Auto-close after 5 seconds
+    return () => clearTimeout(timer);
+  }, [message, onClose]);
+
+  return (
+    <div className={`${styles.notificationBar} ${type === "success" ? styles.success : styles.error}`}>
+      {type === "success" ? <FaCheckCircle className={styles.notificationIcon} /> : <FaExclamationTriangle className={styles.notificationIcon} />}
+      <span>{message}</span>
+      <button onClick={onClose} className={styles.notificationClose}>&times;</button>
+    </div>
+  );
+};
+
+// Confirmation Modal Component
+const ConfirmationModal = ({
+  isOpen,
+  title,
+  message,
+  onConfirm,
+  onCancel,
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+}: {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  confirmText?: string;
+  cancelText?: string;
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className={styles.confirmationModalOverlay}>
+      <div className={styles.confirmationModalContent}>
+        <h3>{title}</h3>
+        <p>{message}</p>
+        <div className={styles.confirmationModalActions}>
+          <button onClick={onCancel} className={`${styles.button} ${styles.buttonSecondary}`}>
+            {cancelText}
+          </button>
+          <button onClick={onConfirm} className={`${styles.button} ${styles.buttonDanger}`}>
+            {confirmText}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 const LightboxModal = ({ src, alt, type, onClose }: { src: string; alt: string; type: string | undefined; onClose: () => void }) => {
   const modalContentRef = useRef<HTMLDivElement>(null);
 
@@ -57,14 +115,15 @@ const LightboxModal = ({ src, alt, type, onClose }: { src: string; alt: string; 
             className={styles.lightboxMedia}
             width={800}
             height={600}
-            unoptimized={true}
+            unoptimized={true} // Preserving user's choice
+            priority // Good for LCP element in a lightbox
           />
         ) : type?.startsWith("video/") ? (
           <video src={src} controls autoPlay className={styles.lightboxMedia} aria-label={alt}>
             Your browser does not support the video tag.
           </video>
         ) : (
-          <p id="lightboxTitle">Unsupported media type: {alt}</p>
+          <p id="lightboxTitle" className={styles.unsupportedText}>Unsupported media type: {alt}</p>
         )}
       </div>
     </div>
@@ -75,19 +134,22 @@ const LightboxModal = ({ src, alt, type, onClose }: { src: string; alt: string; 
 export default function PhotoFeedPage() {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [pageError, setPageError] = useState<string | null>(null); // Renamed from 'error' to avoid conflict
   const [lightboxItem, setLightboxItem] = useState<MediaItem | null>(null);
 
-  // --- Authentication State ---
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [password, setPassword] = useState<string>("");
   const [authError, setAuthError] = useState<string | null>(null);
-  // --- End Authentication State ---
+
+  const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
+  const [itemToDelete, setItemToDelete] = useState<MediaItem | null>(null);
+
 
   const fetchMedia = async () => {
     setIsLoading(true);
-    setError(null);
+    setPageError(null);
     try {
       const response = await fetch("/api/get-guest-media");
       const data: ApiResponse = await response.json();
@@ -96,14 +158,14 @@ export default function PhotoFeedPage() {
         throw new Error(data.error || data.message || "Failed to load media.");
       }
       setMediaItems(data.media || []);
-      if (data.media?.length === 0 && !error) { // Avoid overwriting existing errors
-        setError("No photos or videos have been shared yet. Check back soon!");
+      if (data.media?.length === 0 && !pageError) {
+        setPageError("No photos or videos have been shared yet. Check back soon!");
       }
     } catch (err) {
       console.error("Error fetching media:", err);
-      setError(
-        err instanceof Error ? err.message : "An unknown error occurred."
-      );
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+      setPageError(errorMessage);
+      setNotification({ message: `Error fetching media: ${errorMessage}`, type: "error" });
     } finally {
       setIsLoading(false);
     }
@@ -111,12 +173,11 @@ export default function PhotoFeedPage() {
 
   useEffect(() => {
     fetchMedia();
-    // Check session storage for authentication status
     const authStatus = sessionStorage.getItem("photoFeedAdminAuthenticated");
     if (authStatus === "true") {
       setIsAuthenticated(true);
     }
-  }, []); // Removed 'error' from dependency array to prevent re-fetch on error state change
+  }, []);
 
   const openLightbox = (item: MediaItem) => {
     setLightboxItem(item);
@@ -130,23 +191,25 @@ export default function PhotoFeedPage() {
     if (!dateString) return "Unknown date";
     try {
       return new Date(dateString).toLocaleDateString(undefined, {
-        year: 'numeric', month: 'long', day: 'numeric'
+        year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
       });
     } catch {
       return "Invalid date";
     }
   };
 
-  // --- Authentication Handlers ---
   const handleAuthSubmit = (e: FormEvent) => {
     e.preventDefault();
     setAuthError(null);
+    // IMPORTANT: This is not secure for a real application.
+    // Password should be validated on the backend.
     const correctPassword = process.env.NEXT_PUBLIC_MANAGEMENT_PASSWORD || "eW9zZGZlZGJhcg==";
     if (password === correctPassword) {
       setIsAuthenticated(true);
       sessionStorage.setItem("photoFeedAdminAuthenticated", "true");
       setShowAuthModal(false);
       setPassword("");
+      setNotification({ message: "Admin login successful.", type: "success" });
     } else {
       setAuthError("Incorrect password.");
     }
@@ -155,26 +218,30 @@ export default function PhotoFeedPage() {
   const handleLogout = () => {
     setIsAuthenticated(false);
     sessionStorage.removeItem("photoFeedAdminAuthenticated");
+    setNotification({ message: "Logged out successfully.", type: "success" });
   };
-  // --- End Authentication Handlers ---
 
-  // --- Delete Media Handler ---
-  const handleDeleteMedia = async (gcsObjectName: string) => {
+  const requestDeleteMedia = (item: MediaItem) => {
     if (!isAuthenticated) {
-      alert("You must be authenticated to delete media.");
+      setNotification({ message: "You must be authenticated to delete media.", type: "error" });
       return;
     }
-    // eslint-disable-next-line no-alert
-    if (!window.confirm(`Are you sure you want to delete this item: ${gcsObjectName}? This action cannot be undone.`)) {
-      return;
-    }
+    setItemToDelete(item);
+    setShowDeleteConfirmModal(true);
+  };
+
+  const confirmDeleteMedia = async () => {
+    if (!itemToDelete || !isAuthenticated) return;
+
+    setShowDeleteConfirmModal(false);
+    setIsLoading(true); // Show loading indicator during deletion
 
     try {
-      const adminPassword = process.env.NEXT_PUBLIC_MANAGEMENT_PASSWORD || "eW9zZGZlZGJhcg=="; // Use the same password for API auth
+      const adminPassword = process.env.NEXT_PUBLIC_MANAGEMENT_PASSWORD || "eW9zZGZlZGJhcg==";
       const response = await fetch("/api/delete-guest-media", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ gcsObjectName, password: adminPassword }),
+        body: JSON.stringify({ gcsObjectName: itemToDelete.name, password: adminPassword }),
       });
 
       const result = await response.json();
@@ -183,34 +250,42 @@ export default function PhotoFeedPage() {
         throw new Error(result.error || "Failed to delete media item.");
       }
 
-      // Refresh media list after deletion
-      setMediaItems(prevItems => prevItems.filter(item => item.name !== gcsObjectName));
-      alert(result.message || "Media item deleted successfully."); // eslint-disable-line no-alert
-      if (mediaItems.length -1 === 0) {
-          setError("No photos or videos have been shared yet. Check back soon!");
+      setMediaItems(prevItems => prevItems.filter(item => item.name !== itemToDelete.name));
+      setNotification({ message: result.message || "Media item deleted successfully.", type: "success" });
+      if (mediaItems.length - 1 === 0) {
+          setPageError("No photos or videos have been shared yet. Check back soon!");
       }
-
-
     } catch (err) {
       console.error("Error deleting media:", err);
-      alert(`Error: ${err instanceof Error ? err.message : "An unknown error occurred."}`); // eslint-disable-line no-alert
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+      setNotification({ message: `Error: ${errorMessage}`, type: "error" });
+    } finally {
+      setItemToDelete(null);
+      setIsLoading(false);
     }
   };
-  // --- End Delete Media Handler ---
+
 
   return (
     <>
       <Header />
+      {notification && (
+        <NotificationBar
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
       <div className={styles.pageContainer}>
         <div className={styles.titleContainer}>
             <h1 className={styles.pageTitle}>Moments From The Wedding</h1>
             {isAuthenticated ? (
-            <button onClick={handleLogout} className={styles.authToggleButton} title="Logout Admin">
-                <FaUnlock /> Admin Mode
+            <button onClick={handleLogout} className={`${styles.button} ${styles.authToggleButton}`} title="Logout Admin">
+                <FaUnlock aria-hidden="true" /> Admin Mode
             </button>
             ) : (
-            <button onClick={() => setShowAuthModal(true)} className={styles.authToggleButton} title="Admin Login">
-                <FaLock /> Admin
+            <button onClick={() => setShowAuthModal(true)} className={`${styles.button} ${styles.authToggleButton}`} title="Admin Login">
+                <FaLock aria-hidden="true" /> Admin
             </button>
             )}
         </div>
@@ -218,11 +293,10 @@ export default function PhotoFeedPage() {
           See the moments captured by you, our wonderful guests!
         </p>
 
-        {/* Auth Modal */}
         {showAuthModal && !isAuthenticated && (
           <div className={styles.authModalOverlay}>
             <div className={styles.authModalContent}>
-              <button className={styles.authModalClose} onClick={() => setShowAuthModal(false)}>&times;</button>
+              <button className={styles.modalCloseButton} onClick={() => { setShowAuthModal(false); setAuthError(null); setPassword("");}} aria-label="Close admin login">&times;</button>
               <h2>Admin Login</h2>
               <form onSubmit={handleAuthSubmit}>
                 <input
@@ -231,9 +305,10 @@ export default function PhotoFeedPage() {
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                   placeholder="Enter password"
                   className={styles.authInput}
+                  aria-label="Admin password"
                 />
-                {authError && <p className={styles.authError}>{authError}</p>}
-                <button type="submit" className={styles.authSubmitButton}>Login</button>
+                {authError && <p className={styles.authError} role="alert">{authError}</p>}
+                <button type="submit" className={`${styles.button} ${styles.authSubmitButton}`}>Login</button>
               </form>
             </div>
           </div>
@@ -241,17 +316,22 @@ export default function PhotoFeedPage() {
 
         {isLoading && (
           <div className={styles.loadingIndicator}>
-            <div className={styles.spinner}></div>
+            <FaSpinner className={styles.spinnerIcon} aria-label="Loading" />
             <p>Loading memories...</p>
           </div>
         )}
-        {error && !isLoading && <p className={styles.errorMessage}>{error}</p>}
+        {pageError && !isLoading && mediaItems.length === 0 && (
+            <div className={styles.emptyStateContainer}>
+                <FaExclamationTriangle className={styles.emptyStateIcon} />
+                <p className={styles.errorMessage}>{pageError}</p>
+            </div>
+        )}
 
-        {!isLoading && !error && mediaItems.length > 0 && (
-          <div className={styles.feedContainer}>
+        {!isLoading && mediaItems.length > 0 && (
+          <div className={styles.feedGrid}> {/* Changed to feedGrid for potential multi-column layout */}
             {mediaItems.map((item) => (
               <div key={item.name} className={styles.feedItem}>
-                <div className={styles.mediaWrapper} onClick={() => openLightbox(item)}>
+                <div className={styles.mediaWrapper} onClick={() => openLightbox(item)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && openLightbox(item)}>
                   {item.contentType?.startsWith("image/") ? (
                     <Image
                       src={item.url}
@@ -259,39 +339,46 @@ export default function PhotoFeedPage() {
                       width={400}
                       height={300}
                       className={styles.mediaContent}
-                      style={{ objectFit: "cover" }}
-                      unoptimized={true}
+                      style={{ objectFit: "cover" }} // Or "contain" if you prefer not to crop
+                      unoptimized={true} // Preserving user's choice
+                      priority={mediaItems.indexOf(item) < 3} // Prioritize loading for first few images
                     />
                   ) : item.contentType?.startsWith("video/") ? (
                     <div className={styles.videoPlaceholder}>
                       <video
-                        src={item.url}
+                        src={item.url + '#t=0.1'} // #t=0.1 helps with poster frame on some browsers
                         className={styles.mediaContent}
                         preload="metadata"
-                        width="100%"
-                        height="auto"
                         aria-label={`Shared by guest: ${item.name}`}
+                        muted // Good practice for autoplaying previews if you were to add them
+                        playsInline
                       >
                         Your browser does not support the video tag.
                       </video>
-                      <div className={styles.playIconOverlay}>▶</div>
+                      <div className={styles.playIconOverlay}>
+                        <svg viewBox="0 0 24 24" fill="currentColor" height="1em" width="1em">
+                            <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </div>
                     </div>
                   ) : (
                     <div className={styles.unsupportedMedia}>
-                      <p>Unsupported file type</p>
-                      <span>{item.name}</span>
+                      <FaExclamationTriangle className={styles.unsupportedIcon} />
+                      <p>Unsupported file</p>
+                      <span className={styles.fileNameText}>{item.name}</span>
                     </div>
                   )}
                 </div>
                 <div className={styles.itemInfo}>
                   <span className={styles.uploadDate}>
-                    Shared on: {formatDate(item.timeCreated)}
+                    {formatDate(item.timeCreated)}
                   </span>
                   {isAuthenticated && (
                     <button
-                      onClick={() => handleDeleteMedia(item.name)}
+                      onClick={() => requestDeleteMedia(item)}
                       className={styles.deleteButton}
                       title="Delete this item"
+                      aria-label={`Delete media item ${item.name}`}
                     >
                       <FaTrash />
                     </button>
@@ -310,6 +397,14 @@ export default function PhotoFeedPage() {
           onClose={closeLightbox}
         />
       )}
+      <ConfirmationModal
+        isOpen={showDeleteConfirmModal}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete "${itemToDelete?.name}"? This action cannot be undone.`}
+        onConfirm={confirmDeleteMedia}
+        onCancel={() => setShowDeleteConfirmModal(false)}
+        confirmText="Delete"
+      />
     </>
   );
 }
