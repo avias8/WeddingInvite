@@ -5,14 +5,20 @@ import React, { useState, useEffect, useRef, FormEvent, ChangeEvent } from "reac
 import Header from "../components/Header"; // Adjust path as needed
 import styles from "./PhotoFeed.module.css";
 import Image from "next/image";
-import { FaTrash, FaLock, FaUnlock, FaSpinner, FaExclamationTriangle, FaCheckCircle } from "react-icons/fa"; // Added more icons
+import { FaTrash, FaLock, FaUnlock, FaSpinner, FaExclamationTriangle, FaCheckCircle, FaHeart, FaComment } from "react-icons/fa"; // Added FaHeart, FaComment
 
+// --- Updated MediaItem Interface ---
 interface MediaItem {
+  id: number; // Assuming each media item will have a unique ID from the database
   name: string;
   url: string;
   contentType: string | undefined;
   timeCreated: string | undefined;
   updated: string | undefined;
+  likesCount?: number;
+  commentsCount?: number;
+  currentUserHasLiked?: boolean; // To manage the like button state for the current user
+  uploaderName?: string; // Optional: if you want to display who uploaded it
 }
 
 interface ApiResponse {
@@ -21,6 +27,8 @@ interface ApiResponse {
   message?: string;
   error?: string;
 }
+
+// (NotificationBar, ConfirmationModal, LightboxModal components remain the same)
 
 // Notification Bar Component
 const NotificationBar = ({ message, type, onClose }: { message: string; type: "success" | "error"; onClose: () => void }) => {
@@ -130,11 +138,67 @@ const LightboxModal = ({ src, alt, type, onClose }: { src: string; alt: string; 
   );
 };
 
+// --- (Comment Modal - Placeholder) ---
+const CommentModal = ({
+  isOpen,
+  mediaItem,
+  onClose,
+  onCommentSubmit,
+}: {
+  isOpen: boolean;
+  mediaItem: MediaItem | null;
+  onClose: () => void;
+  onCommentSubmit: (mediaId: number, commentText: string) => void;
+}) => {
+  const [commentText, setCommentText] = useState("");
+
+  useEffect(() => {
+    if (isOpen) {
+      setCommentText(""); // Reset comment text when modal opens
+    }
+  }, [isOpen]);
+
+  if (!isOpen || !mediaItem) return null;
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (commentText.trim()) {
+      onCommentSubmit(mediaItem.id, commentText.trim());
+      onClose(); // Close modal after submission
+    }
+  };
+
+  return (
+    <div className={styles.authModalOverlay}> {/* Reusing authModalOverlay style for simplicity */}
+      <div className={styles.authModalContent}> {/* Reusing authModalContent style */}
+        <button className={styles.modalCloseButton} onClick={onClose} aria-label="Close comments">&times;</button>
+        <h3>Comments for {mediaItem.name}</h3>
+        {/* Placeholder for displaying existing comments */}
+        <div className={styles.commentsListPlaceholder}>
+          <p><em>Existing comments would appear here.</em></p>
+        </div>
+        <form onSubmit={handleSubmit} className={styles.commentForm}>
+          <textarea
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+            placeholder="Write a comment..."
+            className={styles.commentTextarea}
+            rows={3}
+          />
+          <button type="submit" className={`${styles.button} ${styles.buttonPrimary} ${styles.commentSubmitButton}`}>
+            Post Comment
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 
 export default function PhotoFeedPage() {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [pageError, setPageError] = useState<string | null>(null); // Renamed from 'error' to avoid conflict
+  const [pageError, setPageError] = useState<string | null>(null);
   const [lightboxItem, setLightboxItem] = useState<MediaItem | null>(null);
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -146,19 +210,34 @@ export default function PhotoFeedPage() {
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
   const [itemToDelete, setItemToDelete] = useState<MediaItem | null>(null);
 
+  // --- State for social features ---
+  const [showCommentModal, setShowCommentModal] = useState<boolean>(false);
+  const [commentingOnItem, setCommentingOnItem] = useState<MediaItem | null>(null);
+  // For guest identification - this is a placeholder.
+  // In a real app, this would come from an auth context or similar.
+  const [currentGuestId, setCurrentGuestId] = useState<number | null>(1); // Example: Guest ID 1
+
 
   const fetchMedia = async () => {
     setIsLoading(true);
     setPageError(null);
     try {
-      const response = await fetch("/api/get-guest-media");
+      const response = await fetch("/api/get-guest-media"); // This API needs to be updated
       const data: ApiResponse = await response.json();
 
       if (!response.ok || !data.success) {
         throw new Error(data.error || data.message || "Failed to load media.");
       }
-      setMediaItems(data.media || []);
-      if (data.media?.length === 0 && !pageError) {
+      // Ensure media items have default social counts if not provided by API yet
+      const processedMedia = (data.media || []).map(item => ({
+        ...item,
+        likesCount: item.likesCount || 0,
+        commentsCount: item.commentsCount || 0,
+        currentUserHasLiked: item.currentUserHasLiked || false,
+      }));
+      setMediaItems(processedMedia);
+
+      if (processedMedia.length === 0 && !pageError) {
         setPageError("No photos or videos have been shared yet. Check back soon!");
       }
     } catch (err) {
@@ -201,8 +280,6 @@ export default function PhotoFeedPage() {
   const handleAuthSubmit = (e: FormEvent) => {
     e.preventDefault();
     setAuthError(null);
-    // IMPORTANT: This is not secure for a real application.
-    // Password should be validated on the backend.
     const correctPassword = process.env.NEXT_PUBLIC_MANAGEMENT_PASSWORD || "eW9zZGZlZGJhcg==";
     if (password === correctPassword) {
       setIsAuthenticated(true);
@@ -232,10 +309,8 @@ export default function PhotoFeedPage() {
 
   const confirmDeleteMedia = async () => {
     if (!itemToDelete || !isAuthenticated) return;
-
     setShowDeleteConfirmModal(false);
-    setIsLoading(true); // Show loading indicator during deletion
-
+    setIsLoading(true);
     try {
       const adminPassword = process.env.NEXT_PUBLIC_MANAGEMENT_PASSWORD || "eW9zZGZlZGJhcg==";
       const response = await fetch("/api/delete-guest-media", {
@@ -243,17 +318,14 @@ export default function PhotoFeedPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ gcsObjectName: itemToDelete.name, password: adminPassword }),
       });
-
       const result = await response.json();
-
       if (!response.ok || !result.success) {
         throw new Error(result.error || "Failed to delete media item.");
       }
-
       setMediaItems(prevItems => prevItems.filter(item => item.name !== itemToDelete.name));
       setNotification({ message: result.message || "Media item deleted successfully.", type: "success" });
       if (mediaItems.length - 1 === 0) {
-          setPageError("No photos or videos have been shared yet. Check back soon!");
+        setPageError("No photos or videos have been shared yet. Check back soon!");
       }
     } catch (err) {
       console.error("Error deleting media:", err);
@@ -263,6 +335,93 @@ export default function PhotoFeedPage() {
       setItemToDelete(null);
       setIsLoading(false);
     }
+  };
+
+  // --- Placeholder Handlers for Like/Comment ---
+  const handleLike = async (mediaId: number) => {
+    if (!currentGuestId) {
+        setNotification({ message: "Please log in to like photos.", type: "error"}); // Or some way to identify user
+        return;
+    }
+    console.log(`Like action for media ID: ${mediaId} by guest ID: ${currentGuestId}`);
+    // Optimistic UI update
+    setMediaItems(prevItems =>
+      prevItems.map(item => {
+        if (item.id === mediaId) {
+          const currentlyLiked = !item.currentUserHasLiked;
+          return {
+            ...item,
+            likesCount: currentlyLiked
+              ? (item.likesCount || 0) + 1
+              : Math.max(0, (item.likesCount || 0) - 1),
+            currentUserHasLiked: currentlyLiked,
+          };
+        }
+        return item;
+      })
+    );
+
+    try {
+      // API call to POST /api/media/[mediaId]/like with { guestId: currentGuestId }
+      // The backend should handle creating/deleting a MediaLike record
+      const response = await fetch(`/api/media/${mediaId}/like`, { // TODO: Create this API endpoint
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guestId: currentGuestId }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update like status.");
+      }
+      // Optional: Refetch media or update based on API response if not purely optimistic
+      // For now, the optimistic update handles the immediate UI change.
+      // fetchMedia(); // Or smarter update
+    } catch (error) {
+      console.error("Error liking media:", error);
+      setNotification({ message: (error as Error).message || "Failed to update like.", type: "error" });
+      // Revert optimistic update on error
+      fetchMedia(); // Simplest way to revert
+    }
+  };
+
+  const handleOpenCommentModal = (item: MediaItem) => {
+     if (!currentGuestId) {
+        setNotification({ message: "Please log in to comment.", type: "error"});
+        return;
+    }
+    setCommentingOnItem(item);
+    setShowCommentModal(true);
+  };
+
+  const handleCommentSubmit = async (mediaId: number, commentText: string) => {
+    if (!currentGuestId) {
+        setNotification({ message: "Cannot submit comment without user identification.", type: "error"});
+        return;
+    }
+    console.log(`Comment on media ID: ${mediaId} by guest ID: ${currentGuestId}: "${commentText}"`);
+    // API call to POST /api/media/[mediaId]/comment with { guestId: currentGuestId, text: commentText }
+    // For now, just closes the modal and updates comment count optimistically
+    try {
+        const response = await fetch(`/api/media/${mediaId}/comment`, { // TODO: Create this API endpoint
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ guestId: currentGuestId, text: commentText }),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to post comment.");
+        }
+        setMediaItems(prevItems =>
+            prevItems.map(item =>
+                item.id === mediaId ? { ...item, commentsCount: (item.commentsCount || 0) + 1 } : item
+            )
+        );
+        setNotification({ message: "Comment posted!", type: "success"});
+    } catch (error) {
+        console.error("Error posting comment:", error);
+        setNotification({ message: (error as Error).message || "Failed to post comment.", type: "error" });
+    }
+    setShowCommentModal(false);
   };
 
 
@@ -328,9 +487,9 @@ export default function PhotoFeedPage() {
         )}
 
         {!isLoading && mediaItems.length > 0 && (
-          <div className={styles.feedGrid}> {/* Changed to feedGrid for potential multi-column layout */}
+          <div className={styles.feedGrid}>
             {mediaItems.map((item) => (
-              <div key={item.name} className={styles.feedItem}>
+              <div key={item.id || item.name} className={styles.feedItem}> {/* Use item.id if available */}
                 <div className={styles.mediaWrapper} onClick={() => openLightbox(item)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && openLightbox(item)}>
                   {item.contentType?.startsWith("image/") ? (
                     <Image
@@ -339,18 +498,18 @@ export default function PhotoFeedPage() {
                       width={400}
                       height={300}
                       className={styles.mediaContent}
-                      style={{ objectFit: "cover" }} // Or "contain" if you prefer not to crop
-                      unoptimized={true} // Preserving user's choice
-                      priority={mediaItems.indexOf(item) < 3} // Prioritize loading for first few images
+                      style={{ objectFit: "cover" }}
+                      unoptimized={true}
+                      priority={mediaItems.indexOf(item) < 3}
                     />
                   ) : item.contentType?.startsWith("video/") ? (
                     <div className={styles.videoPlaceholder}>
                       <video
-                        src={item.url + '#t=0.1'} // #t=0.1 helps with poster frame on some browsers
+                        src={item.url + '#t=0.1'}
                         className={styles.mediaContent}
                         preload="metadata"
                         aria-label={`Shared by guest: ${item.name}`}
-                        muted // Good practice for autoplaying previews if you were to add them
+                        muted
                         playsInline
                       >
                         Your browser does not support the video tag.
@@ -370,6 +529,20 @@ export default function PhotoFeedPage() {
                   )}
                 </div>
                 <div className={styles.itemInfo}>
+                  {/* Social Interaction Buttons */}
+                  <div className={styles.socialActions}>
+                    <button
+                      onClick={() => handleLike(item.id)}
+                      className={`${styles.socialButton} ${item.currentUserHasLiked ? styles.liked : ''}`}
+                      aria-pressed={item.currentUserHasLiked}
+                      title={item.currentUserHasLiked ? "Unlike" : "Like"}
+                    >
+                      <FaHeart /> <span>{item.likesCount || 0}</span>
+                    </button>
+                    <button onClick={() => handleOpenCommentModal(item)} className={styles.socialButton} title="Comment">
+                      <FaComment /> <span>{item.commentsCount || 0}</span>
+                    </button>
+                  </div>
                   <span className={styles.uploadDate}>
                     {formatDate(item.timeCreated)}
                   </span>
@@ -395,6 +568,14 @@ export default function PhotoFeedPage() {
           alt={`Media: ${lightboxItem.name}`}
           type={lightboxItem.contentType}
           onClose={closeLightbox}
+        />
+      )}
+      {showCommentModal && commentingOnItem && (
+        <CommentModal
+            isOpen={showCommentModal}
+            mediaItem={commentingOnItem}
+            onClose={() => setShowCommentModal(false)}
+            onCommentSubmit={handleCommentSubmit}
         />
       )}
       <ConfirmationModal
