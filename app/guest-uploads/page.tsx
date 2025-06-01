@@ -30,6 +30,11 @@ export default function GuestUploadPage() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  /**
+   * Handles the change event of the file input.
+   * Updates the selected files and initializes their status.
+   * @param event - The change event from the file input.
+   */
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSelectedFiles(event.target.files);
     setOverallMessage(null);
@@ -47,30 +52,44 @@ export default function GuestUploadPage() {
     }
   };
 
+  /**
+   * Updates the status and progress of a specific file in the filesStatus array.
+   * @param index - The index of the file in the filesStatus array.
+   * @param status - The new status of the file.
+   * @param gcsObjectName - (Optional) The GCS object name if upload is successful.
+   * @param errorMessage - (Optional) An error message if the upload failed.
+   * @param progress - (Optional) The upload progress percentage.
+   */
   const updateFileStatus = (
     index: number,
     status: IndividualFileStatus["status"],
     gcsObjectName?: string,
     errorMessage?: string,
-    progress?: number // Optional progress parameter
+    progress?: number
   ) => {
     setFilesStatus(prev =>
       prev.map((fs, i) => {
         if (i === index) {
-          const newStatus = { ...fs, status, gcsObjectName, errorMessage };
+          const newStatusUpdate = { ...fs, status, gcsObjectName, errorMessage };
           if (progress !== undefined) {
-            newStatus.progress = progress;
+            newStatusUpdate.progress = progress;
           }
-          // Ensure progress is 100 on success, 0 on error if not already set
-          if (status === "success" && newStatus.progress !== 100) newStatus.progress = 100;
-          if (status === "error" && progress === undefined) newStatus.progress = 0; // Reset progress on error if not specified
-          return newStatus;
+          // Ensure progress is 100 on success, 0 on error if not already set by progress event
+          if (status === "success" && newStatusUpdate.progress !== 100) newStatusUpdate.progress = 100;
+          if (status === "error" && progress === undefined) newStatusUpdate.progress = 0;
+          return newStatusUpdate;
         }
         return fs;
       })
     );
   };
 
+  /**
+   * Handles the form submission for uploading files.
+   * Iterates through selected files, gets a signed URL for each,
+   * and uploads them to GCS using XMLHttpRequest to track progress.
+   * @param event - The form submission event.
+   */
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedFiles || selectedFiles.length === 0) {
@@ -91,7 +110,7 @@ export default function GuestUploadPage() {
       updateFileStatus(i, "uploading", undefined, undefined, 0); // Start progress at 0
 
       try {
-        // 1. Get signed URL from your API
+        // 1. Get signed URL from the API
         const signedUrlResponse = await fetch("/api/generate-upload-url", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -107,31 +126,32 @@ export default function GuestUploadPage() {
         // 2. Upload file directly to GCS using XMLHttpRequest for progress
         await new Promise<void>((resolve, reject) => {
           const xhr = new XMLHttpRequest();
-          xhr.open("PUT", signedUrlData.signedUrl as string);
+          xhr.open("PUT", signedUrlData.signedUrl as string, true); // Ensure async is true
           xhr.setRequestHeader("Content-Type", file.type);
 
           // Progress event listener
-          xhr.upload.onprogress = (event) => {
-            if (event.lengthComputable) {
-              const percentComplete = Math.round((event.loaded / event.total) * 100);
+          xhr.upload.onprogress = (progressEvent) => {
+            if (progressEvent.lengthComputable) {
+              const percentComplete = Math.round((progressEvent.loaded / progressEvent.total) * 100);
               updateFileStatus(i, "uploading", undefined, undefined, percentComplete);
             }
           };
 
           // On successful upload
           xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
+            if (xhr.status >= 200 && xhr.status < 300) { // Check for successful HTTP status codes
               updateFileStatus(i, "success", signedUrlData.gcsObjectName, undefined, 100);
               successfulUploadsCount++;
               resolve();
             } else {
-              reject(new Error(`Upload failed for ${file.name}. Status: ${xhr.status} ${xhr.statusText}`));
+              reject(new Error(`Upload failed for ${file.name}. Status: ${xhr.status} ${xhr.statusText || 'Unknown error'}`));
             }
           };
 
           // On upload error
           xhr.onerror = () => {
-            reject(new Error(`Network error during upload for ${file.name}.`));
+            // This typically handles network errors
+            reject(new Error(`Network error during upload for ${file.name}. Please check your connection.`));
           };
 
           // On upload abort
@@ -145,25 +165,29 @@ export default function GuestUploadPage() {
       } catch (error) {
         allSuccessful = false;
         const errMsg = error instanceof Error ? error.message : "An unknown error occurred during upload.";
-        console.error(`Error uploading ${file.name}:`, error);
+        // Conditional console logging for production
+        if (process.env.NODE_ENV !== 'production') {
+          console.error(`Error uploading ${file.name}:`, error);
+        }
         updateFileStatus(i, "error", undefined, errMsg, 0); // Reset progress on error
       }
     }
 
     setIsSubmitting(false);
+    // Update overall message based on upload results
     if (allSuccessful) {
       setOverallMessage(`${successfulUploadsCount} file(s) uploaded successfully! Thank you!`);
       setOverallMessageType("success");
-      setSelectedFiles(null);
-      setFilesStatus([]);
+      setSelectedFiles(null); // Clear selection
+      setFilesStatus([]);     // Clear file statuses
       if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+        fileInputRef.current.value = ""; // Reset file input
       }
     } else if (successfulUploadsCount > 0) {
       setOverallMessage(
         `Finished: ${successfulUploadsCount} file(s) uploaded successfully, but some failed. Check individual statuses.`
       );
-      setOverallMessageType("error"); // Or a "warning" type
+      setOverallMessageType("error"); // Or a "warning" type if you have one
     } else {
       setOverallMessage("All file uploads failed. Please try again or contact support.");
       setOverallMessageType("error");
@@ -178,7 +202,7 @@ export default function GuestUploadPage() {
           <h1 className={styles.title}>Share Your Wedding Moments!</h1>
           <p className={styles.instructions}>
             We&apos;d love to see the wedding through your eyes! Please upload your
-            favorite photos and videos from our special day right here. (Large videos are now supported!)
+            favorite photos and videos from our special day right here.
           </p>
 
           <form onSubmit={handleSubmit} className={styles.uploadForm}>
@@ -193,7 +217,7 @@ export default function GuestUploadPage() {
                 id="fileUpload"
                 ref={fileInputRef}
                 multiple
-                accept="image/*,video/*"
+                accept="image/*,video/*" // Restrict file types
                 onChange={handleFileChange}
                 className={styles.fileInput}
                 disabled={isSubmitting}
@@ -219,6 +243,11 @@ export default function GuestUploadPage() {
                           <div
                             className={`${styles.progressBar} ${fs.status === "success" ? styles.progressSuccess : ""}`}
                             style={{ width: `${fs.progress}%` }}
+                            role="progressbar"
+                            aria-valuenow={fs.progress}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-label={`Upload progress for ${fs.file.name}`}
                           >
                             {fs.status === "uploading" && fs.progress > 0 && `${fs.progress}%`}
                             {fs.status === "success" && `✓`}
@@ -252,6 +281,7 @@ export default function GuestUploadPage() {
                   ? styles.errorMessage
                   : styles.loadingMessage // For neutral "Processing uploads..."
               }`}
+              role="alert" // For accessibility
             >
               {overallMessage}
             </div>
