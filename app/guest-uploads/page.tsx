@@ -99,7 +99,7 @@ export default function GuestUploadPage() {
     }
 
     setIsSubmitting(true);
-    setOverallMessage("Processing uploads...");
+    setOverallMessage("✨ Processing your beautiful memories...");
     setOverallMessageType(null); // Neutral message type while processing
 
     let allSuccessful = true;
@@ -176,7 +176,7 @@ export default function GuestUploadPage() {
     setIsSubmitting(false);
     // Update overall message based on upload results
     if (allSuccessful) {
-      setOverallMessage(`${successfulUploadsCount} file(s) uploaded successfully! Thank you!`);
+      setOverallMessage(`🎉 Amazing! ${successfulUploadsCount} precious ${successfulUploadsCount === 1 ? 'memory' : 'memories'} uploaded successfully! Thank you for sharing your moments with us! ✨`);
       setOverallMessageType("success");
       setSelectedFiles(null); // Clear selection
       setFilesStatus([]);     // Clear file statuses
@@ -185,12 +185,40 @@ export default function GuestUploadPage() {
       }
     } else if (successfulUploadsCount > 0) {
       setOverallMessage(
-        `Finished: ${successfulUploadsCount} file(s) uploaded successfully, but some failed. Check individual statuses.`
+        `📸 Great progress! ${successfulUploadsCount} ${successfulUploadsCount === 1 ? 'file' : 'files'} uploaded successfully, but some encountered issues. Please check the details below and try again for the failed uploads.`
       );
       setOverallMessageType("error"); // Or a "warning" type if you have one
     } else {
-      setOverallMessage("All file uploads failed. Please try again or contact support.");
+      setOverallMessage("😔 Oops! All uploads encountered issues. Please try again or contact us if the problem persists.");
       setOverallMessageType("error");
+    }
+  };
+
+  /**
+   * Formats file size in a human-readable format
+   * @param bytes - File size in bytes
+   * @returns Formatted file size string
+   */
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  /**
+   * Gets the appropriate icon for file status
+   * @param status - Current file status
+   * @returns Icon string
+   */
+  const getStatusIcon = (status: IndividualFileStatus["status"]): string => {
+    switch (status) {
+      case "pending": return "⏳";
+      case "uploading": return "📤";
+      case "success": return "✅";
+      case "error": return "❌";
+      default: return "📄";
     }
   };
 
@@ -202,15 +230,16 @@ export default function GuestUploadPage() {
           <h1 className={styles.title}>Share Your Wedding Moments!</h1>
           <p className={styles.instructions}>
             We&apos;d love to see the wedding through your eyes! Please upload your
-            favorite photos and videos from our special day right here.
+            favorite photos and videos from our special day. Every moment you captured
+            is a treasure to us! 💕
           </p>
 
           <form onSubmit={handleSubmit} className={styles.uploadForm}>
             <div className={styles.fileInputContainer}>
               <label htmlFor="fileUpload" className={styles.fileInputLabel}>
                 {selectedFiles && selectedFiles.length > 0
-                  ? `${selectedFiles.length} file(s) selected`
-                  : "Choose Files (Photos/Videos)"}
+                  ? `${selectedFiles.length} beautiful ${selectedFiles.length === 1 ? 'file' : 'files'} selected`
+                  : "Choose Your Favorite Memories"}
               </label>
               <input
                 type="file"
@@ -226,17 +255,22 @@ export default function GuestUploadPage() {
 
             {filesStatus.length > 0 && (
               <div className={styles.selectedFilesList}>
-                <p>Selected Files:</p>
+                <p>✨ Your Selected Memories:</p>
                 <ul>
                   {filesStatus.map((fs, index) => (
                     <li key={index} className={styles.fileStatusItem}>
                       <div className={styles.fileInfo}>
-                        <span className={styles.fileName}>{fs.file.name}</span>
-                        <span className={styles.fileSize}> ({(fs.file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                        <span className={styles.fileName}>
+                          {getStatusIcon(fs.status)} {fs.file.name}
+                        </span>
+                        <span className={styles.fileSize}>
+                          ({formatFileSize(fs.file.size)})
+                        </span>
                         <span className={`${styles.statusText} ${styles[fs.status]}`}>
-                          {fs.status.toUpperCase()}
+                          {fs.status === "uploading" ? `${fs.progress}%` : fs.status}
                         </span>
                       </div>
+                      
                       {/* Progress Bar */}
                       {(fs.status === "uploading" || fs.status === "success") && (
                         <div className={styles.progressBarContainer}>
@@ -249,13 +283,16 @@ export default function GuestUploadPage() {
                             aria-valuemax={100}
                             aria-label={`Upload progress for ${fs.file.name}`}
                           >
-                            {fs.status === "uploading" && fs.progress > 0 && `${fs.progress}%`}
-                            {fs.status === "success" && `✓`}
+                            {fs.status === "uploading" && fs.progress > 15 && `${fs.progress}%`}
+                            {fs.status === "success" && `Complete! ✨`}
                           </div>
                         </div>
                       )}
+                      
                       {fs.status === "error" && fs.errorMessage && (
-                        <span className={styles.fileErrorMessage}>Error: {fs.errorMessage}</span>
+                        <div className={styles.fileErrorMessage}>
+                          <strong>Upload Issue:</strong> {fs.errorMessage}
+                        </div>
                       )}
                     </li>
                   ))}
@@ -268,7 +305,15 @@ export default function GuestUploadPage() {
               className={styles.uploadButton}
               disabled={isSubmitting || !selectedFiles || selectedFiles.length === 0}
             >
-              {isSubmitting ? "Uploading..." : "Upload Memories"}
+              {isSubmitting ? (
+                <>
+                  <span>✨ Uploading Magic...</span>
+                </>
+              ) : (
+                <>
+                  <span>Share the Love</span>
+                </>
+              )}
             </button>
           </form>
 
@@ -286,12 +331,14 @@ export default function GuestUploadPage() {
               {overallMessage}
             </div>
           )}
+          
           <p className={styles.thankYouNote}>
-            Thank you for sharing your memories with us!
+            Every photo tells our story... Thank you for being part of it! 💫
           </p>
+          
           <p className={styles.photoFeedLink}>
             <a href="/photo-feed" className={styles.link}>
-              View the Photo Feed
+              🖼️ Explore Our Memory Gallery
             </a>
           </p>
         </div>
