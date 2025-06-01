@@ -4,8 +4,8 @@
 import React, { useState, ChangeEvent, FormEvent, useRef, useEffect } from "react";
 import Header from "../components/Header";
 import styles from "./GuestUploads.module.css";
-import GuestSelector from "../components/GuestSelector"; // Import GuestSelector
-import { FaUserCircle } from "react-icons/fa"; // For displaying identified guest
+import GuestSelector from "../components/GuestSelector";
+import { FaUserCircle, FaCamera } from "react-icons/fa";
 
 interface UploadResponse {
   success: boolean;
@@ -14,8 +14,6 @@ interface UploadResponse {
   gcsObjectName?: string;
   error?: string;
   details?: string;
-  // If your API for generate-upload-url is updated to save GuestMedia record immediately
-  // it might return the new GuestMedia ID, which could be useful.
   guestMediaId?: number;
 }
 
@@ -29,9 +27,6 @@ interface IndividualFileStatus {
   gcsObjectName?: string;
 }
 
-// --- NotificationBar (assuming it exists or you'll add it) ---
-// You can copy the NotificationBar component from the photo-feed page or create a shared one.
-// For brevity, I'll assume it's available and works similarly.
 const NotificationBar = ({ message, type, onClose }: { message: string; type: "success" | "error"; onClose: () => void }) => {
   if (!message) return null;
   useEffect(() => {
@@ -45,7 +40,6 @@ const NotificationBar = ({ message, type, onClose }: { message: string; type: "s
     </div>
   );
 };
-
 
 const VideoIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" width="24px" height="24px" className={styles.videoIcon}>
@@ -61,26 +55,21 @@ export default function GuestUploadPage() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // --- Guest Identification State ---
   const [currentGuestId, setCurrentGuestId] = useState<number | null>(null);
   const [currentGuestName, setCurrentGuestName] = useState<string | null>(null);
   const [showGuestIdentifyModal, setShowGuestIdentifyModal] = useState<boolean>(false);
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
-
   useEffect(() => {
-    // Load guest identity from session storage on mount
     const storedGuestId = sessionStorage.getItem("uploadGuestId");
     const storedGuestName = sessionStorage.getItem("uploadGuestName");
     if (storedGuestId && storedGuestName) {
       setCurrentGuestId(parseInt(storedGuestId, 10));
       setCurrentGuestName(storedGuestName);
     } else {
-      // If no guest is identified, prompt them immediately on page load.
       setShowGuestIdentifyModal(true);
     }
   }, []);
-
 
   useEffect(() => {
     return () => {
@@ -137,7 +126,7 @@ export default function GuestUploadPage() {
     sessionStorage.setItem("uploadGuestId", guest.id.toString());
     sessionStorage.setItem("uploadGuestName", guest.name);
     setShowGuestIdentifyModal(false);
-    setNotification({ message: `Uploading as ${guest.name}. Welcome!`, type: "success" });
+    setNotification({ message: `Welcome, ${guest.name}! You're all set to share your memories.`, type: "success" });
   };
 
   const handleChangeGuest = () => {
@@ -146,20 +135,17 @@ export default function GuestUploadPage() {
     setCurrentGuestId(null);
     setCurrentGuestName(null);
     setShowGuestIdentifyModal(true);
-     setNotification(null);
+    setNotification(null);
   };
-
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     if (!currentGuestId) {
       setOverallMessage("Please identify yourself before uploading files.");
       setOverallMessageType("error");
-      setShowGuestIdentifyModal(true); // Prompt to identify
+      setShowGuestIdentifyModal(true);
       return;
     }
-
     if (!selectedFiles || selectedFiles.length === 0) {
       setOverallMessage("Please select at least one file to upload.");
       setOverallMessageType("error");
@@ -169,24 +155,17 @@ export default function GuestUploadPage() {
     setIsSubmitting(true);
     setOverallMessage(`✨ Processing your beautiful memories, ${currentGuestName}...`);
     setOverallMessageType(null);
-
     let successfulUploadsCount = 0;
 
     const uploadPromises = filesStatus.map((fs, i) => {
       const file = fs.file;
       updateFileStatus(i, "uploading", undefined, undefined, 0);
-
       return (async () => {
         try {
-          // Include currentGuestId when requesting a signed URL
           const signedUrlResponse = await fetch("/api/generate-upload-url", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              filename: file.name,
-              contentType: file.type,
-              guestId: currentGuestId, // Pass the identified guest's ID
-            }),
+            body: JSON.stringify({ filename: file.name, contentType: file.type }),
           });
           const signedUrlData: UploadResponse = await signedUrlResponse.json();
           if (!signedUrlResponse.ok || !signedUrlData.success || !signedUrlData.signedUrl || !signedUrlData.gcsObjectName) {
@@ -206,11 +185,7 @@ export default function GuestUploadPage() {
             xhr.onload = () => {
               if (xhr.status >= 200 && xhr.status < 300) {
                 updateFileStatus(i, "success", signedUrlData.gcsObjectName, undefined, 100);
-                
-                // Optional: AFTER successful GCS upload, inform backend to create GuestMedia record
-                // This assumes your /api/generate-upload-url doesn't create the DB record,
-                // and you have another endpoint like /api/media/finalize-upload
-                fetch('/api/media/finalize-upload', { // TODO: Create this backend endpoint
+                fetch('/api/media/finalize-upload', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -220,7 +195,6 @@ export default function GuestUploadPage() {
                         uploaderId: currentGuestId
                     })
                 }).catch(finalizeError => console.error("Error finalizing upload metadata:", finalizeError));
-
                 resolve();
               } else {
                 reject(new Error(`Upload failed for ${file.name}. Status: ${xhr.status} ${xhr.statusText || 'Unknown error'}`));
@@ -281,6 +255,18 @@ export default function GuestUploadPage() {
     }
   };
 
+  // User Badge for upper left as a card
+  const SelectedUserBadge = () =>
+    currentGuestName ? (
+      <div className={styles.selectedUserBadgeCard}>
+        <span className={styles.userAvatar}><FaUserCircle /></span>
+        <span className={styles.userName}>{currentGuestName}</span>
+        <button className={styles.changeUserBtn} onClick={handleChangeGuest}>
+          Change
+        </button>
+      </div>
+    ) : null;
+
   return (
     <>
       <Header />
@@ -292,17 +278,17 @@ export default function GuestUploadPage() {
         />
       )}
       <div className={styles.pageContainer}>
+        <SelectedUserBadge />
         <div className={styles.uploadCard}>
-            {currentGuestName && (
-                <div className={styles.identifiedGuestInfo}>
-                    <FaUserCircle className={styles.identifiedGuestIcon} />
-                    <span>Uploading as: <strong>{currentGuestName}</strong></span>
-                    <button onClick={handleChangeGuest} className={styles.changeGuestButton}>
-                        (Change User)
-                    </button>
-                </div>
-            )}
-
+          {!currentGuestName && (
+            <div className={`${styles.identifiedGuestBanner} ${styles.guestNotIdentifiedBanner}`}>
+              <FaCamera className={styles.guestAvatar} />
+              <span className={styles.uploadingAsText}>Please identify yourself to share photos!</span>
+              <button onClick={() => setShowGuestIdentifyModal(true)} className={styles.identifyButton}>
+                Identify Yourself
+              </button>
+            </div>
+          )}
           <h1 className={styles.title}>Share Your Wedding Moments!</h1>
           <p className={styles.instructions}>
             We&apos;d love to see the wedding through your eyes! Please upload your
@@ -324,14 +310,14 @@ export default function GuestUploadPage() {
                 accept="image/*,video/*"
                 onChange={handleFileChange}
                 className={styles.fileInput}
-                disabled={isSubmitting || !currentGuestId} // Disable if no guest identified
+                disabled={isSubmitting || !currentGuestId}
               />
             </div>
 
             {filesStatus.length > 0 && (
               <div className={styles.selectedFilesList}>
                 <p>✨ Your Selected Memories:</p>
-                <ul> {/* List items remain the same */}
+                <ul>
                   {filesStatus.map((fs, index) => (
                     <li key={index} className={styles.fileStatusItem}>
                       <div className={styles.fileInfoRow}>
@@ -387,6 +373,7 @@ export default function GuestUploadPage() {
                 if (!currentGuestId) setNotification({message: "Please identify yourself to upload photos.", type: "error"});
             }}
             onGuestIdentified={handleGuestIdentified}
+            context="upload"
         />
       )}
     </>

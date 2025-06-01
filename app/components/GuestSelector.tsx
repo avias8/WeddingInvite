@@ -2,175 +2,180 @@
 "use client";
 
 import React, { useState, FormEvent, ChangeEvent, useEffect } from 'react';
-import styles from './GuestSelector.module.css';
-import type { Invitee, Guest } from '@/app/types'; // Assuming your types are in this path
+import styles from './GuestSelector.module.css'; // Using the existing CSS module
+import type { Invitee, Guest } from '@/app/types'; // Adjust path if necessary
 
 interface GuestSelectorProps {
   isOpen: boolean;
   onClose: () => void;
   onGuestIdentified: (guest: { id: number; name: string; inviteeId: number }) => void;
-  // Optional: to pre-fill token if known by parent
-  initialToken?: string;
+  context?: 'upload' | 'photoFeed'; // Optional: to slightly change messaging
 }
 
 interface InviteeWithGuests extends Invitee {
-  guestsList?: Guest[];
+  guestsList?: Guest[]; // Expect this from the API: GET /api/invitees
 }
 
 export default function GuestSelector({
   isOpen,
   onClose,
   onGuestIdentified,
-  initialToken = "",
+  context = 'photoFeed',
 }: GuestSelectorProps) {
-  const [token, setToken] = useState<string>(initialToken);
-  const [step, setStep] = useState<'tokenInput' | 'guestSelect' | 'noGuests' | 'error'>('tokenInput');
+  const [step, setStep] = useState<'inviteeSelect' | 'guestSelect' | 'errorState' | 'infoState'>('inviteeSelect');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [inviteeData, setInviteeData] = useState<InviteeWithGuests | null>(null);
-  const [selectedGuestId, setSelectedGuestId] = useState<string>('');
+  const [message, setMessage] = useState<string | null>(null);
+  
+  const [allInvitees, setAllInvitees] = useState<InviteeWithGuests[]>([]);
+  const [selectedInviteeId, setSelectedInviteeId] = useState<string>('');
+  const [selectedInvitee, setSelectedInvitee] = useState<InviteeWithGuests | null>(null);
+  const [guestsOfSelectedInvitee, setGuestsOfSelectedInvitee] = useState<Guest[]>([]);
+  const [finalSelectedGuestId, setFinalSelectedGuestId] = useState<string>('');
 
+  // State for custom name input
+  const [isUsingCustomName, setIsUsingCustomName] = useState<boolean>(false);
+  const [customNameValue, setCustomNameValue] = useState<string>('');
+
+  // Fetch all invitees when the modal opens
   useEffect(() => {
-    // Reset state when modal is reopened or closed, or initial token changes
     if (isOpen) {
-      setToken(initialToken);
-      setStep('tokenInput');
-      setError(null);
-      setInviteeData(null);
-      setSelectedGuestId('');
+      setIsLoading(true);
+      setMessage(null);
+      setStep('inviteeSelect');
+      setSelectedInviteeId('');
+      setSelectedInvitee(null);
+      setGuestsOfSelectedInvitee([]);
+      setFinalSelectedGuestId('');
+      setIsUsingCustomName(false); // Reset custom name state
+      setCustomNameValue('');    // Reset custom name state
+
+      fetch('/api/invitees') 
+        .then(res => {
+          if (!res.ok) {
+            throw new Error('Failed to fetch invitee list. Please try again.');
+          }
+          return res.json();
+        })
+        .then((data: InviteeWithGuests[]) => {
+          const attendingInvitees = data.filter(inv => inv.isAttending === true || inv.isAttending === null);
+          if (attendingInvitees.length === 0) {
+            setMessage("No attending or pending invitees found to select from.");
+            setStep('infoState');
+            setAllInvitees([]);
+          } else {
+            setAllInvitees(attendingInvitees);
+          }
+        })
+        .catch(err => {
+          setMessage(err instanceof Error ? err.message : "An unknown error occurred.");
+          setStep('errorState');
+        })
+        .finally(() => setIsLoading(false));
     }
-  }, [isOpen, initialToken]);
+  }, [isOpen]);
 
-  const handleTokenSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!token.trim()) {
-      setError("Please enter your invitation token.");
-      return;
-    }
-    setIsLoading(true);
-    setError(null);
-    setInviteeData(null);
+  // Handle Invitee (Family) Selection
+  const handleInviteeSelectionChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const inviteeId = e.target.value;
+    setSelectedInviteeId(inviteeId);
+    setMessage(null);
+    setIsUsingCustomName(false); // Reset custom name when family changes
+    setCustomNameValue('');
 
-    try {
-      const response = await fetch(`/api/invitees/${token.trim()}`);
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error("Invitation token not found. Please check your token and try again.");
-        }
-        throw new Error("Failed to fetch invitation details. Please try again later.");
-      }
-      const data: InviteeWithGuests = await response.json();
+    if (inviteeId) {
+      const foundInvitee = allInvitees.find(inv => inv.id.toString() === inviteeId);
+      if (foundInvitee) {
+        setSelectedInvitee(foundInvitee);
+        const guests = foundInvitee.guestsList || [];
+        setGuestsOfSelectedInvitee(guests);
 
-      if (!data.isAttending) {
-        setError("This RSVP indicates you are not attending. Social features are for attending guests.");
-        setStep('error');
-        setIsLoading(false);
-        return;
-      }
-      
-      setInviteeData(data);
-
-      // Check if guestsList exists and has entries
-      // The API /api/invitees/[token] should ideally return guestsList if the relation is set up in Prisma
-      // For now, we assume it might be missing or needs to be fetched separately if not included.
-      // A more robust API `/api/auth/identify-guest-via-token` would handle this logic.
-      // For this component, let's simulate based on what /api/invitees/[token] would give if guestsList is included.
-
-      // To properly get guestsList, you might need to adjust the /api/invitees/[token]
-      // to include guestsList: e.g., prisma.invitee.findUnique({ where: {token}, include: { guestsList: true }})
-      
-      // SIMULATED: Assuming data.guestsList is populated by the API
-      // If your API doesn't populate guestsList, this part needs adjustment or a different API call.
-      // For now, we'll rely on the Invitee.guests count and Invitee.name as a fallback for single-guest parties if guestsList is empty.
-
-      const guestsAssociated = await fetch(`/api/guests?inviteeId=${data.id}`);
-      if (!guestsAssociated.ok) {
-          console.warn("Could not fetch specific guest records for this invitee. Falling back to invitee details.");
-          // Fallback logic if guestsList isn't directly available or fetchable this way
-           if (data.guests === 1 && data.name) {
-                // This is a simplification. Ideally, a Guest record should exist.
-                // The `onGuestIdentified` expects a Guest ID. We are using invitee.id as a placeholder if no guest record exists
-                // This implies that the backend for like/comment might need to handle an "inviteeId" if a "guestId" isn't found
-                // OR the admin process ensures a Guest record is created for the main invitee.
-                // For now, we'll assume a primary guest record might share the invitee's name and needs an ID.
-                // This part is a bit of a hack due to not having the actual guest record ID.
-                // A dedicated API for identification would solve this better.
-                
-                // Let's try to find if a guest record matches the invitee name
-                const primaryGuest = data.guestsList?.find(g => g.name.toLowerCase() === data.name.toLowerCase());
-                if (primaryGuest) {
-                    onGuestIdentified({ id: primaryGuest.id, name: primaryGuest.name, inviteeId: data.id });
-                    onClose();
-                } else if (data.guestsList && data.guestsList.length === 1) { // If only one guest record, assume it's the one
-                    onGuestIdentified({ id: data.guestsList[0].id, name: data.guestsList[0].name, inviteeId: data.id });
-                    onClose();
-                } else if (data.guestsList && data.guestsList.length > 1) {
-                    setStep('guestSelect');
-                    setSelectedGuestId(data.guestsList[0].id.toString());
-                } else {
-                     // If no specific guest records, and it's a single guest party
-                     // This scenario is problematic as we need a Guest.id.
-                     // The backend "identify" API should handle creating a Guest record for the Invitee if one doesn't exist.
-                    setError("Could not identify a specific guest. Please ensure guest details are complete in the RSVP or contact hosts.");
-                    setStep('error');
-                }
-           } else if (data.guestsList && data.guestsList.length > 0) {
-                setStep('guestSelect');
-                if (data.guestsList.length > 0) {
-                    setSelectedGuestId(data.guestsList[0].id.toString());
-                }
-           } else {
-                setError("No specific guest records found for this invitation, or party size is zero. Please contact hosts if this is an error.");
-                setStep('noGuests');
-           }
-
-      } else {
-        const specificGuests: Guest[] = await guestsAssociated.json();
-        if (specificGuests && specificGuests.length > 0) {
-            setInviteeData(prev => prev ? { ...prev, guestsList: specificGuests } : null);
-            setStep('guestSelect');
-            setSelectedGuestId(specificGuests[0].id.toString());
-        } else if (data.guests === 1 && data.name) {
-            // Fallback if no specific guest records, and it's a single-guest party
-            // This is still less than ideal as it relies on creating/finding a Guest record implicitly.
-            // A dedicated API like `/api/auth/identify-guest-via-token` should handle this better.
-            // For now, we'll assume a placeholder or that an admin has created a guest record for the invitee.
-            // The `onGuestIdentified` needs a proper guest ID.
-            // Let's prompt for admin action here.
-            setError(`No specific guest record for ${data.name}. An admin may need to add them to the guest list for this RSVP.`);
-            setStep('error');
+        if (guests.length === 0) {
+          if (foundInvitee.guests === 1) {
+             setMessage(`No specific guest names found for ${foundInvitee.name}'s party. We'll assume you are ${foundInvitee.name}.`);
+             setStep('infoState');
+             onGuestIdentified({ id: foundInvitee.id, name: foundInvitee.name, inviteeId: foundInvitee.id });
+             onClose();
+             return;
+          } else {
+            setMessage(`No guest names are currently listed for ${foundInvitee.name}'s party. Please contact the hosts to update details.`);
+            setStep('infoState');
+            setFinalSelectedGuestId('');
+            return;
+          }
+        } else if (guests.length === 1) {
+          setFinalSelectedGuestId(guests[0].id.toString());
+          setCustomNameValue(guests[0].name); // Pre-fill custom name input
+          // Do not auto-submit here, let them confirm or customize name
+          setStep('guestSelect');
         } else {
-            setError("No guest details found for this invitation. Please contact the hosts.");
-            setStep('noGuests');
+          setFinalSelectedGuestId(guests.length > 0 ? guests[0].id.toString() : '');
+          if (guests.length > 0) {
+            setCustomNameValue(guests.find(g => g.id.toString() === (guests[0].id.toString()))?.name || '');
+          }
+          setStep('guestSelect');
         }
+      } else {
+        setSelectedInvitee(null);
+        setGuestsOfSelectedInvitee([]);
+        setStep('inviteeSelect');
       }
-
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred.");
-      setStep('error');
-    } finally {
-      setIsLoading(false);
+    } else {
+      setSelectedInvitee(null);
+      setGuestsOfSelectedInvitee([]);
+      setFinalSelectedGuestId('');
+      setStep('inviteeSelect');
     }
   };
 
-  const handleGuestSelectionSubmit = (e: FormEvent) => {
+  // Update customNameValue when finalSelectedGuestId changes and not using custom name
+  useEffect(() => {
+    if (finalSelectedGuestId && !isUsingCustomName) {
+      const guest = guestsOfSelectedInvitee.find(g => g.id.toString() === finalSelectedGuestId);
+      if (guest) {
+        setCustomNameValue(guest.name);
+      }
+    }
+  }, [finalSelectedGuestId, guestsOfSelectedInvitee, isUsingCustomName]);
+
+
+  // Handle Final Guest Selection and Submission
+  const handleGuestConfirmation = (e: FormEvent) => {
     e.preventDefault();
-    if (!selectedGuestId || !inviteeData || !inviteeData.guestsList) {
-      setError("Please select a guest.");
+    if (!selectedInvitee || !finalSelectedGuestId) {
+      setMessage("Please select your family and then your name.");
+      setStep('errorState');
       return;
     }
-    const guest = inviteeData.guestsList.find(g => g.id.toString() === selectedGuestId);
-    if (guest) {
-      onGuestIdentified({ id: guest.id, name: guest.name, inviteeId: inviteeData.id });
-      onClose();
-    } else {
-      setError("Selected guest not found. Please try again.");
+    
+    const originalGuest = guestsOfSelectedInvitee.find(g => g.id.toString() === finalSelectedGuestId);
+    if (!originalGuest) {
+      setMessage("Selected guest not found. Please try again.");
+      setStep('errorState');
+      return;
     }
+
+    const nameToUse = (isUsingCustomName && customNameValue.trim()) ? customNameValue.trim() : originalGuest.name;
+
+    if (!nameToUse) {
+        setMessage("Name cannot be empty.");
+        // Optionally keep them on guestSelect step if custom name was attempted and failed
+        setStep('guestSelect'); 
+        return;
+    }
+
+    onGuestIdentified({ id: originalGuest.id, name: nameToUse, inviteeId: selectedInvitee.id });
+    onClose();
+  };
+  
+  const getActionText = () => {
+    return context === 'upload' ? "upload photos" : "like and comment";
   };
 
   if (!isOpen) {
     return null;
   }
+
+  const selectedGuestForDisplay = guestsOfSelectedInvitee.find(g => g.id.toString() === finalSelectedGuestId);
 
   return (
     <div className={styles.modalOverlay}>
@@ -179,74 +184,124 @@ export default function GuestSelector({
           &times;
         </button>
 
-        {isLoading && <p className={styles.loadingText}>Verifying...</p>}
-        {error && <p className={styles.errorText}>{error}</p>}
+        {isLoading && <div className={styles.loadingSpinnerContainer}><div className={styles.loadingSpinner}></div><p>Loading details...</p></div>}
+        
+        {!isLoading && (
+          <form onSubmit={handleGuestConfirmation} className={styles.form}>
+            <h3 className={styles.modalTitle}>Identify Yourself to {getActionText()}</h3>
+            
+            {message && <p className={`${styles.messageBox} ${step === 'errorState' ? styles.errorText : styles.infoText}`}>{message}</p>}
 
-        {step === 'tokenInput' && !isLoading && (
-          <form onSubmit={handleTokenSubmit}>
-            <h3 className={styles.modalTitle}>Identify Yourself</h3>
-            <p className={styles.modalInstructions}>
-              Please enter your invitation token to like and comment on photos.
-              This token is found in your wedding invitation email.
-            </p>
-            <div className={styles.formGroup}>
-              <label htmlFor="inviteToken" className={styles.label}>Invitation Token:</label>
-              <input
-                type="text"
-                id="inviteToken"
-                value={token}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setToken(e.target.value)}
-                className={styles.input}
-                placeholder="Enter your token"
-                required
-              />
-            </div>
-            <button type="submit" className={styles.submitButton} disabled={isLoading}>
-              {isLoading ? "Verifying..." : "Verify Token"}
-            </button>
+            {step === 'inviteeSelect' || step === 'guestSelect' ? (
+              <>
+                <div className={styles.formGroup}>
+                  <label htmlFor="inviteeSelector" className={styles.label}>Select Your Family / Party Name:</label>
+                  <select
+                    id="inviteeSelector"
+                    value={selectedInviteeId}
+                    onChange={handleInviteeSelectionChange}
+                    className={styles.select}
+                    required={step === 'inviteeSelect'}
+                    disabled={allInvitees.length === 0}
+                  >
+                    <option value="">-- Select Family/Party --</option>
+                    {allInvitees.map((inv) => (
+                      <option key={inv.id} value={inv.id.toString()}>
+                        {inv.name} (Party of {inv.maxInvites})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {step === 'guestSelect' && selectedInvitee && guestsOfSelectedInvitee.length > 0 && (
+                  <>
+                    <div className={styles.formGroup}>
+                      <label htmlFor="guestSelector" className={styles.label}>Select Your Name:</label>
+                      <select
+                        id="guestSelector"
+                        value={finalSelectedGuestId}
+                        onChange={(e) => {
+                            setFinalSelectedGuestId(e.target.value);
+                            // If not using custom name, prefill with selected guest's name
+                            if (!isUsingCustomName) {
+                                const guest = guestsOfSelectedInvitee.find(g => g.id.toString() === e.target.value);
+                                setCustomNameValue(guest ? guest.name : '');
+                            }
+                        }}
+                        className={styles.select}
+                        required
+                      >
+                        <option value="">-- Select Your Name --</option>
+                        {guestsOfSelectedInvitee.map((guest) => (
+                          <option key={guest.id} value={guest.id.toString()}>
+                            {guest.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {finalSelectedGuestId && (
+                      <div className={styles.formGroup}>
+                        <div className={styles.customNameToggle}>
+                          <input
+                            type="checkbox"
+                            id="useCustomName"
+                            checked={isUsingCustomName}
+                            onChange={(e) => {
+                              setIsUsingCustomName(e.target.checked);
+                              if (!e.target.checked && selectedGuestForDisplay) {
+                                // If unchecking, revert customNameValue to the selected guest's actual name
+                                setCustomNameValue(selectedGuestForDisplay.name);
+                              } else if (e.target.checked && selectedGuestForDisplay && !customNameValue) {
+                                // If checking and customNameValue is empty, prefill from selected guest
+                                setCustomNameValue(selectedGuestForDisplay.name);
+                              }
+                            }}
+                            className={styles.checkbox}
+                          />
+                          <label htmlFor="useCustomName" className={styles.checkboxLabel}>
+                            Use a different name for this session?
+                          </label>
+                        </div>
+                      </div>
+                    )}
+
+                    {isUsingCustomName && finalSelectedGuestId && (
+                      <div className={styles.formGroup}>
+                        <label htmlFor="customNameInput" className={styles.label}>Preferred Name:</label>
+                        <input
+                          type="text"
+                          id="customNameInput"
+                          value={customNameValue}
+                          onChange={(e) => setCustomNameValue(e.target.value)}
+                          className={styles.input}
+                          placeholder="Enter your preferred name"
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
+                
+                {step === 'guestSelect' && guestsOfSelectedInvitee.length > 0 && (
+                   <button type="submit" className={styles.submitButton} disabled={!finalSelectedGuestId || (isUsingCustomName && !customNameValue.trim())}>
+                     Confirm Identity
+                   </button>
+                )}
+              </>
+            ) : null}
+
+            {(step === 'errorState' || step === 'infoState') && !message && (
+                 <p className={styles.modalInstructions}>
+                    {step === 'errorState' ? "An error occurred. Please try again or contact the hosts." : "Please follow the instructions above."}
+                 </p>
+            )}
+             {(step === 'errorState' || step === 'infoState') && (
+                <button type="button" onClick={onClose} className={styles.submitButton} style={{marginTop: '1rem', backgroundColor: 'var(--color-text-secondary)'}}>
+                  Close
+                </button>
+            )}
           </form>
         )}
-
-        {step === 'guestSelect' && inviteeData && inviteeData.guestsList && inviteeData.guestsList.length > 0 && !isLoading && (
-          <form onSubmit={handleGuestSelectionSubmit}>
-            <h3 className={styles.modalTitle}>Who are you, {inviteeData.name}&apos;s party?</h3>
-            <p className={styles.modalInstructions}>Select your name from the list to continue.</p>
-            <div className={styles.formGroup}>
-              <label htmlFor="guestSelector" className={styles.label}>Select Your Name:</label>
-              <select
-                id="guestSelector"
-                value={selectedGuestId}
-                onChange={(e: ChangeEvent<HTMLSelectElement>) => setSelectedGuestId(e.target.value)}
-                className={styles.select}
-                required
-              >
-                {inviteeData.guestsList.map((guest) => (
-                  <option key={guest.id} value={guest.id.toString()}>
-                    {guest.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <button type="submit" className={styles.submitButton}>
-              Confirm Identity
-            </button>
-          </form>
-        )}
-        {step === 'noGuests' && !isLoading && (
-            <div>
-                <h3 className={styles.modalTitle}>Guest Details Needed</h3>
-                <p className={styles.modalInstructions}>
-                    It seems specific guest names haven&apos;t been added for this invitation yet.
-                    Please ask the wedding hosts to update the guest list for your party.
-                </p>
-                <button onClick={onClose} className={styles.submitButton}>Okay</button>
-            </div>
-        )}
-         {step === 'error' && !isLoading && (
-             <div>
-                <button onClick={onClose} className={styles.submitButton}>Close</button>
-            </div>
-         )}
       </div>
     </div>
   );

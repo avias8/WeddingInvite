@@ -5,56 +5,73 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.7); /* Darker overlay for better focus */
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1100; /* Ensure it's above photo feed modals */
+  z-index: 1100;
   padding: 1rem;
+  backdrop-filter: blur(3px); /* Subtle blur */
 }
 
 .modalContent {
-  background-color: var(--color-background, #f8f9fa);
+  background-color: var(--color-background, #fdfdfd); /* Use a light, clean background */
   color: var(--color-text-primary, #343a40);
-  padding: 2rem;
-  border-radius: var(--border-radius-lg, 12px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+  padding: 2rem 2.5rem; /* More padding */
+  border-radius: var(--border-radius-lg, 16px); /* Softer radius */
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15); /* Enhanced shadow */
   width: 100%;
-  max-width: 450px;
+  max-width: 480px; /* Slightly wider */
   position: relative;
   font-family: var(--font-body, sans-serif);
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(-20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .closeButton {
   position: absolute;
-  top: 10px;
-  right: 15px;
-  background: none;
+  top: 12px;
+  right: 12px;
+  background: transparent;
   border: none;
-  font-size: 2rem;
+  font-size: 2.2rem; /* Larger close icon */
+  font-weight: 300;
   color: var(--color-text-secondary, #6c757d);
   cursor: pointer;
   line-height: 1;
+  padding: 0.2rem;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 .closeButton:hover {
-  color: var(--color-text-primary, #343a40);
+  color: var(--color-accent, #e85a4f);
+  transform: rotate(90deg);
 }
 
 .modalTitle {
   font-family: var(--font-wedding, 'Georgia', serif);
-  font-size: 1.6rem;
+  font-size: clamp(1.5rem, 5vw, 1.8rem); /* Responsive title */
   color: var(--color-accent, #e85a4f);
   text-align: center;
   margin-top: 0;
   margin-bottom: 1rem;
+  font-weight: 600;
 }
 
 .modalInstructions {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--color-text-secondary, #6c757d);
   line-height: 1.6;
   margin-bottom: 1.5rem;
   text-align: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
 }
 
 .formGroup {
@@ -63,65 +80,347 @@
 
 .label {
   display: block;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+  font-weight: 500; /* Slightly less bold */
+  margin-bottom: 0.6rem;
+  font-size: 0.85rem; /* Smaller label */
+  color: var(--color-text-primary);
 }
 
 .input,
 .select {
   width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--color-border, #ccc);
+  padding: 0.8rem 1rem; /* Comfortable padding */
+  border: 1px solid var(--color-border, #d1d5db); /* Softer border */
   border-radius: var(--border-radius-md, 8px);
   font-size: 1rem;
   box-sizing: border-box;
   background-color: #fff;
+  color: var(--color-text-primary);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input::placeholder {
+  color: #9ca3af;
 }
 
 .input:focus,
 .select:focus {
   border-color: var(--color-accent, #e85a4f);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent, #e85a4f) 20%, transparent);
+  box-shadow: 0 0 0 3.5px color-mix(in srgb, var(--color-accent, #e85a4f) 15%, transparent);
   outline: none;
 }
 
 .submitButton {
-  background-color: var(--color-secondary-accent, #5cb85c);
+  background: linear-gradient(135deg, var(--color-secondary-accent, #5cb85c) 0%, color-mix(in srgb, var(--color-secondary-accent, #5cb85c) 80%, black) 100%);
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
+  padding: 0.85rem 1.5rem; /* Good padding */
   border-radius: var(--border-radius-md, 8px);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background 0.2s ease, transform 0.1s ease;
   width: 100%;
+  margin-top: 0.5rem; /* Space above button */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .submitButton:hover:not(:disabled) {
-  background-color: color-mix(in srgb, var(--color-secondary-accent, #5cb85c) 85%, black);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-secondary-accent, #5cb85c) 90%, black) 0%, color-mix(in srgb, var(--color-secondary-accent, #5cb85c) 70%, black) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .submitButton:disabled {
-  background-color: #aaa;
+  background: #b0bec5; /* Muted color for disabled */
   cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
-.loadingText {
+.loadingSpinnerContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+  gap: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.loadingSpinner {
+  border: 4px solid color-mix(in srgb, var(--color-accent, #e85a4f) 30%, transparent);
+  border-top: 4px solid var(--color-accent, #e85a4f);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.messageContainer {
   text-align: center;
-  font-size: 1.1rem;
-  color: var(--color-text-secondary, #6c757d);
-  padding: 1rem 0;
+}
+
+.messageBox {
+  padding: 0.8rem 1rem;
+  border-radius: var(--border-radius-md, 8px);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  border-width: 1px;
+  border-style: solid;
 }
 
 .errorText {
-  color: #D8000C; /* Red for error */
-  background-color: #FFD2D2;
-  border: 1px solid #D8000C;
-  padding: 0.75rem;
-  border-radius: var(--border-radius-sm, 4px);
+  color: #b91c1c; /* Darker red for text */
+  background-color: #fee2e2; /* Light red background */
+  border-color: #fca5a5; /* Red border */
+}
+
+.infoText {
+  color: #1e40af; /* Darker blue for text */
+  background-color: #dbeafe; /* Light blue background */
+  border-color: #93c5fd; /* Blue border */
+}
+
+/* --- Enhanced Identified Guest Banner --- */
+.identifiedGuestBanner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem; /* Increased padding */
+  background-color: color-mix(in srgb, var(--color-secondary-accent) 10%, transparent); /* Lighter, more subtle */
+  color: var(--color-secondary-accent);
+  border-radius: var(--border-radius-lg, 12px); /* Softer radius */
+  margin-bottom: 2rem; /* More space below */
+  border: 1px solid color-mix(in srgb, var(--color-secondary-accent) 25%, transparent);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  text-align: left; /* Align text to the left */
+}
+
+.guestNotIdentifiedBanner {
+  background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  color: var(--color-accent);
+  border-color: color-mix(in srgb, var(--color-accent) 25%, transparent);
+  justify-content: space-between; /* Space out items */
+}
+
+.guestAvatar {
+  font-size: 2.5rem; /* Larger icon */
+  color: var(--color-secondary-accent);
+  flex-shrink: 0;
+}
+.guestNotIdentifiedBanner .guestAvatar {
+    color: var(--color-accent);
+}
+
+.guestText {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Allow text to take available space */
+}
+
+.uploadingAsText {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  display: block; /* Ensure it takes its own line */
+  line-height: 1.2;
+}
+
+.identifiedGuestName {
+  font-size: 1.1rem;
+  font-weight: 600; /* Bolder name */
+  display: block;
+  line-height: 1.3;
+}
+
+.changeGuestButton {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--color-accent);
+  text-decoration: underline;
+  cursor: pointer;
   font-size: 0.9rem;
-  margin-bottom: 1rem;
-  text-align: center;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--border-radius-md);
+  transition: background-color 0.2s ease, color 0.2s ease;
+  white-space: nowrap; /* Prevent button text from wrapping */
+}
+.changeGuestButton:hover {
+  background-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
+  text-decoration: none;
+}
+
+.identifyButton {
+  background-color: var(--color-accent);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--border-radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+.identifyButton:hover {
+  background-color: color-mix(in srgb, var(--color-accent) 85%, black);
+}
+
+/* --- Notification Bar (ensure these styles are present or adapt) --- */
+.notificationBar {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1rem 1.5rem;
+  border-radius: var(--border-radius-md, 8px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* var(--box-shadow-md) */
+  z-index: 2500;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: white; 
+}
+
+.notificationBar.successMessage {
+  background-color: var(--color-secondary-accent, #5cb85c);
+}
+
+.notificationBar.errorMessage {
+  background-color: #dc3545; 
+}
+
+.notificationCloseButton {
+  background: none;
+  border: none;
+  color: inherit;
+  opacity: 0.7;
+  font-size: 1.5rem;
+  margin-left: auto;
+  padding: 0 0.3rem;
+  cursor: pointer;
+  line-height: 1;
+}
+.notificationCloseButton:hover {
+  opacity: 1;
+}
+
+/* Ensure file input is visually distinct if disabled */
+.fileInput:disabled,
+.fileInputLabel[disabled] { 
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.fileInputContainer:has(.fileInput:disabled) {
+  background-color: #f0f0f0; 
+  opacity: 0.6; /* Make the whole container look more disabled */
+}
+
+.uploadButton:disabled {
+  background: linear-gradient(135deg, #e0e0e0, #bdbdbd); /* More distinct disabled gradient */
+  color: #757575; /* Darker grey for text */
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* Inner shadow for pressed look */
+}
+
+.message.successMessage {
+  background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+  color: #2e7d2e;
+  border-left-color: var(--color-secondary-accent);
+}
+.message.errorMessage {
+  background: linear-gradient(135deg, #ffebee, #fce4ec);
+  color: #c62828;
+  border-left-color: #ef5350;
+}
+
+/* --- User Badge in Upper Left --- */
+.selectedUserBadge {
+  position: absolute;
+  top: 1.5rem;
+  left: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  background: rgba(255,255,255,0.85);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border-radius: 2rem;
+  padding: 0.5rem 1.2rem 0.5rem 0.8rem;
+  font-size: 1rem;
+  color: var(--color-secondary-accent, #388e3c);
+  z-index: 1200;
+  font-family: var(--font-body, sans-serif);
+  border: 1px solid #e0e0e0;
+  min-width: 0;
+  transition: box-shadow 0.2s;
+}
+
+.selectedUserBadge .userAvatar {
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+  border-radius: 50%;
+  padding: 0.2rem 0.4rem;
+  color: var(--color-secondary-accent, #388e3c);
+  box-shadow: 0 1px 4px rgba(56,142,60,0.08);
+}
+
+.selectedUserBadge .userName {
+  font-weight: 600;
+  font-size: 1.05rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.selectedUserBadge .changeUserBtn {
+  background: none;
+  border: none;
+  color: var(--color-accent, #e85a4f);
+  font-size: 0.95rem;
+  margin-left: 0.7rem;
+  cursor: pointer;
+  text-decoration: underline;
+  border-radius: 8px;
+  padding: 0.2rem 0.5rem;
+  transition: background 0.15s, color 0.15s;
+}
+.selectedUserBadge .changeUserBtn:hover {
+  background: #fbeee6;
+  color: #b23c17;
+  text-decoration: none;
+}
+
+/* Responsive: move badge inwards on small screens */
+@media (max-width: 600px) {
+  .selectedUserBadge {
+    top: 0.7rem;
+    left: 0.7rem;
+    padding: 0.4rem 0.8rem 0.4rem 0.6rem;
+    font-size: 0.95rem;
+  }
+  .selectedUserBadge .userName {
+    max-width: 70px;
+  }
+  .identifiedGuestBanner {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+  .guestText {
+    align-items: center;
+  }
+  .changeGuestButton, .identifyButton {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.8rem; /* Make buttons easier to tap */
+  }
 }
