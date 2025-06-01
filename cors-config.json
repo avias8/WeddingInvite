@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["https://wedding.avivarma.ca"],
+    "method": ["PUT", "GET", "HEAD", "POST"],
+    "responseHeader": ["Content-Type", "Authorization", "X-Goog-Resumable"],
+    "maxAgeSeconds": 3600
+  }
+]
