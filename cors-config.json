@@ -1,8 +1,15 @@
 [
   {
-    "origin": ["https://wedding.avivarma.ca"],
+    "origin": [
+      "https://wedding.avivarma.ca",
+      "http://localhost:3000"
+    ],
     "method": ["PUT", "GET", "HEAD", "POST"],
-    "responseHeader": ["Content-Type", "Authorization", "X-Goog-Resumable"],
+    "responseHeader": [
+      "Content-Type",
+      "Authorization",
+      "X-Goog-Resumable"
+    ],
     "maxAgeSeconds": 3600
   }
 ]
