@@ -12,13 +12,43 @@
   box-sizing: border-box;
 }
 
+.titleContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 700px; /* Match feed container width for alignment */
+  margin-bottom: 0.5rem;
+}
+
 .pageTitle {
   font-family: var(--font-wedding);
-  font-size: clamp(2rem, 6vw, 3rem);
+  font-size: clamp(1.8rem, 5vw, 2.8rem); /* Slightly adjusted for space */
   color: var(--color-secondary-accent);
-  margin-bottom: 0.5rem;
-  text-align: center;
+  text-align: left; /* Align to left, button will be on right */
+  flex-grow: 1;
 }
+
+.authToggleButton {
+  background-color: transparent;
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.authToggleButton:hover {
+  background-color: var(--color-accent);
+  color: white;
+}
+
 
 .pageSubtitle {
   font-family: var(--font-wedding);
@@ -27,6 +57,8 @@
   margin-bottom: 2.5rem;
   text-align: center;
   font-style: italic;
+  width: 100%;
+  max-width: 700px;
 }
 
 .loadingIndicator {
@@ -68,9 +100,9 @@
 .feedContainer {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem; /* Space between feed items */
+  gap: 2.5rem;
   width: 100%;
-  max-width: 700px; /* Typical width for a feed */
+  max-width: 700px;
 }
 
 .feedItem {
@@ -78,8 +110,7 @@
   border: 1px solid var(--color-border);
   border-radius: 10px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.07);
-  overflow: hidden; /* Ensures content respects border-radius */
-  cursor: pointer;
+  overflow: hidden;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
@@ -90,32 +121,30 @@
 
 .mediaWrapper {
   width: 100%;
-  /* Maintain aspect ratio for images/videos, e.g., 4:3 or 16:9 */
-  /* For a square-ish look: aspect-ratio: 1 / 1; */
-  /* For a more landscape look: aspect-ratio: 16 / 10; */
-  background-color: #f0f0f0; /* Placeholder background */
-  position: relative; /* For play icon overlay */
+  background-color: #f0f0f0;
+  position: relative;
+  cursor: pointer; /* Indicate clickable for lightbox */
 }
 
 .mediaContent {
   display: block;
   width: 100%;
-  height: 100%; /* Make it fill the wrapper */
-  object-fit: cover; /* Cover ensures the media fills, might crop */
+  height: 100%;
+  object-fit: cover;
 }
 
 .videoPlaceholder {
   position: relative;
   width: 100%;
-  background-color: #000; /* Black background for videos */
-  aspect-ratio: 16 / 9; /* Common video aspect ratio */
+  background-color: #000;
+  aspect-ratio: 16 / 9;
 }
 
 .videoPlaceholder video {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain; /* Contain ensures whole video is visible */
+  object-fit: contain;
 }
 
 .playIconOverlay {
@@ -132,7 +161,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none; /* So it doesn't interfere with video controls if they appear */
+  pointer-events: none;
   opacity: 0.8;
 }
 
@@ -158,7 +187,10 @@
 
 .itemInfo {
   padding: 1rem 1.2rem;
-  background-color: #fcfaf6; /* Slightly off-white footer for the card */
+  background-color: #fcfaf6;
+  display: flex; /* For aligning date and delete button */
+  justify-content: space-between;
+  align-items: center;
 }
 
 .uploadDate {
@@ -167,7 +199,23 @@
   font-style: italic;
 }
 
-/* Lightbox Styles */
+.deleteButton {
+  background: none;
+  border: none;
+  color: #cc0000; /* Red color for delete */
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0.3rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.deleteButton:hover {
+  color: #ff0000; /* Brighter red on hover */
+  transform: scale(1.1);
+}
+
+
+/* Lightbox Styles (same as before) */
 .lightboxOverlay {
   position: fixed;
   top: 0;
@@ -178,7 +226,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000; /* Ensure it's above everything */
+  z-index: 2000;
   padding: 1rem;
   box-sizing: border-box;
   animation: fadeInLightbox 0.3s ease;
@@ -193,20 +241,20 @@
   position: relative;
   max-width: 90vw;
   max-height: 90vh;
-  background-color: #000; /* Black background for media focus */
+  background-color: #000;
   box-shadow: 0 0 30px rgba(0,0,0,0.5);
   border-radius: 5px;
-  overflow: hidden; /* If media is larger than container */
+  overflow: hidden;
 }
 
 .lightboxMedia {
   display: block;
   max-width: 100%;
-  max-height: 90vh; /* Ensure media fits viewport */
+  max-height: 90vh;
   width: auto;
   height: auto;
-  margin: auto; /* Center media if smaller than container */
-  object-fit: contain; /* Ensure whole media is visible */
+  margin: auto;
+  object-fit: contain;
 }
 
 .lightboxClose {
@@ -229,3 +277,99 @@
   color: #fff;
 }
 
+/* Auth Modal Styles */
+.authModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1500; /* Below lightbox, above page content */
+}
+
+.authModalContent {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  width: 100%;
+  max-width: 350px;
+  text-align: center;
+  position: relative;
+}
+
+.authModalClose {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #888;
+  cursor: pointer;
+}
+.authModalClose:hover {
+  color: #333;
+}
+
+.authModalContent h2 {
+  font-family: var(--font-wedding);
+  color: var(--color-text-primary);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.authInput {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.authError {
+  color: #D8000C; /* Red for error messages */
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.authSubmitButton {
+  background-color: var(--color-secondary-accent);
+  color: white;
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 20px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.authSubmitButton:hover {
+  background-color: #1a5a13; /* Darker shade */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .titleContainer {
+        flex-direction: column;
+        gap: 0.8rem;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .pageTitle {
+        text-align: center;
+    }
+    .authToggleButton {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.7rem;
+    }
+}
