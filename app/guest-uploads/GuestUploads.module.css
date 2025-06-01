@@ -5,8 +5,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* Align content to the top */
-  min-height: calc(100vh - 80px); /* Adjust 80px based on your header height */
+  justify-content: flex-start;
+  min-height: calc(100vh - 75px); /* Adjust based on your actual header height */
   padding: 2rem 1rem;
   background-color: var(--color-background);
   font-family: var(--font-body);
@@ -15,67 +15,75 @@
 }
 
 .uploadCard {
-  background-color: #ffffff; /* White card for contrast */
-  padding: 2rem 2.5rem;
-  border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  padding: 2.5rem 3rem; /* Increased padding */
+  border-radius: 16px; /* Softer radius */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Softer, more spread shadow */
   width: 100%;
-  max-width: 600px;
+  max-width: 650px; /* Slightly wider card */
   text-align: center;
   border: 1px solid var(--color-border);
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+}
+
+.uploadCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
 }
 
 .title {
   font-family: var(--font-wedding);
-  font-size: clamp(1.8rem, 5vw, 2.5rem); /* Responsive title */
+  font-size: clamp(2rem, 5.5vw, 2.8rem); /* Larger title */
   color: var(--color-secondary-accent);
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  line-height: 1.3;
 }
 
 .instructions {
-  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-  line-height: 1.6;
-  margin-bottom: 2rem;
+  font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+  line-height: 1.7; /* Improved readability */
+  margin-bottom: 2.5rem;
   color: var(--color-text-secondary);
 }
 
 .uploadForm {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.75rem; /* Increased gap */
 }
 
 .fileInputContainer {
   position: relative;
   border: 2px dashed var(--color-accent);
-  border-radius: 8px;
-  padding: 2rem 1rem;
-  transition: background-color 0.2s ease-in-out;
+  border-radius: 10px; /* Consistent with card */
+  padding: 2.5rem 1.5rem; /* More padding */
+  transition: background-color 0.25s ease-in-out, border-color 0.25s ease-in-out;
   cursor: pointer;
 }
 
 .fileInputContainer:hover {
-  background-color: #f9f6f0; /* Lighter shade of background for hover */
+  background-color: #fdfaf6; /* Slightly different hover */
+  border-color: var(--color-secondary-accent);
 }
 
 .fileInputLabel {
-  display: block; /* Make label block to fill container */
-  padding: 1rem;
+  display: block;
+  padding: 1.25rem; /* More prominent label */
   background-color: var(--color-accent);
   color: white;
-  border-radius: 6px;
+  border-radius: 8px; /* Softer radius */
   cursor: pointer;
   font-weight: bold;
-  transition: background-color 0.2s ease;
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  transition: background-color 0.25s ease, transform 0.15s ease;
+  font-size: clamp(1rem, 2.8vw, 1.1rem);
 }
 
 .fileInputLabel:hover {
   background-color: var(--color-secondary-accent);
+  transform: scale(1.02);
 }
 
 .fileInput {
-  /* Visually hide the default file input */
   opacity: 0;
   position: absolute;
   width: 100%;
@@ -86,21 +94,22 @@
 }
 
 .selectedFilesList {
-  margin-top: 1rem;
+  margin-top: 1.5rem; /* More space */
   text-align: left;
   font-size: 0.9rem;
   color: var(--color-text-secondary);
-  max-height: 250px; /* Increased height */
+  max-height: 280px; /* Slightly more max height */
   overflow-y: auto;
   border: 1px solid var(--color-border);
-  padding: 0.75rem; /* Increased padding */
-  border-radius: 4px;
+  padding: 1rem; /* More padding */
+  border-radius: 8px;
   background-color: #fdfdfd;
 }
 
 .selectedFilesList p {
   font-weight: bold;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem; /* More space */
+  color: var(--color-text-primary);
 }
 
 .selectedFilesList ul {
@@ -110,11 +119,11 @@
 }
 
 .fileStatusItem {
-  padding: 0.5rem 0.5rem;
-  border-bottom: 1px solid #eee;
+  padding: 0.75rem 0.5rem; /* Increased padding */
+  border-bottom: 1px solid #f0f0f0; /* Lighter border */
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem; /* Increased gap */
 }
 .fileStatusItem:last-child {
   border-bottom: none;
@@ -124,132 +133,143 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem; /* Increased gap */
 }
 
 .fileName {
-  font-weight: 500;
+  font-weight: 600; /* Bolder filename */
   color: var(--color-text-primary);
   word-break: break-all;
+  flex-grow: 1; /* Allow filename to take available space */
 }
 
 .fileSize {
-  font-size: 0.8em;
+  font-size: 0.85em; /* Slightly larger */
   color: var(--color-text-secondary);
+  white-space: nowrap;
 }
 
 .statusText {
   font-weight: bold;
-  padding: 0.1rem 0.4rem;
-  border-radius: 3px;
+  padding: 0.2rem 0.5rem; /* Adjusted padding */
+  border-radius: 4px; /* Slightly more radius */
   font-size: 0.8em;
-  margin-left: auto; /* Pushes status to the right */
+  margin-left: auto;
   color: white;
   white-space: nowrap;
+  text-transform: capitalize; /* Nicer casing */
 }
 
-.statusText.pending { background-color: #777; }
-.statusText.uploading { background-color: #2196F3; } /* Blue */
-.statusText.success { background-color: #4CAF50; } /* Green */
-.statusText.error { background-color: #F44336; }   /* Red */
+.statusText.pending { background-color: #90a4ae; } /* Material Grey */
+.statusText.uploading { background-color: #42a5f5; } /* Material Blue */
+.statusText.success { background-color: #66bb6a; } /* Material Green */
+.statusText.error { background-color: #ef5350; }   /* Material Red */
 
 .fileErrorMessage {
-  color: #D8000C;
-  font-size: 0.8em;
-  margin-top: 0.25rem;
+  color: #ef5350; /* Match error status text */
+  font-size: 0.85em;
+  margin-top: 0.3rem;
   width: 100%;
+  background-color: #ffebee; /* Light red background for error message */
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  border-left: 3px solid #ef5350;
 }
 
 /* Progress Bar Styles */
 .progressBarContainer {
   width: 100%;
   background-color: #e0e0e0;
-  border-radius: 4px;
-  height: 20px;
+  border-radius: 6px; /* Softer radius */
+  height: 22px; /* Slightly taller */
   overflow: hidden;
-  margin-top: 0.25rem;
+  margin-top: 0.3rem;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); /* Inner shadow for depth */
 }
 
 .progressBar {
   height: 100%;
-  background-color: #2196F3; /* Blue for uploading */
-  border-radius: 4px;
-  transition: width 0.3s ease-in-out;
+  background-color: #42a5f5; /* Material Blue for uploading */
+  border-radius: 6px;
+  transition: width 0.25s ease-out; /* Smoother transition */
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 0.8em;
+  font-size: 0.85em;
   font-weight: bold;
 }
 
 .progressBar.progressSuccess {
-  background-color: #4CAF50; /* Green for success */
+  background-color: #66bb6a; /* Material Green for success */
 }
 
 .uploadButton {
   background-color: var(--color-secondary-accent);
   color: white;
-  padding: 0.8rem 1.5rem;
+  padding: 0.9rem 1.75rem; /* Larger padding */
   border: none;
   border-radius: 2rem;
   font-family: var(--font-wedding);
-  font-size: clamp(1rem, 3vw, 1.2rem);
+  font-size: clamp(1.05rem, 3.2vw, 1.25rem); /* Slightly larger */
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: background-color 0.25s ease, transform 0.15s ease, box-shadow 0.25s ease;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.12);
 }
 
 .uploadButton:hover:not(:disabled) {
-  background-color: #1a5a13; /* Darker shade of secondary accent */
-  transform: translateY(-2px);
+  background-color: #164a12; /* Darker shade */
+  transform: translateY(-3px);
+  box-shadow: 0 5px 10px rgba(0,0,0,0.15);
 }
 
 .uploadButton:disabled {
-  background-color: #cccccc;
-  color: #666666;
+  background-color: #d0d0d0; /* Darker disabled color */
+  color: #888888;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
 
 .message {
-  margin-top: 1.5rem;
-  padding: 0.8rem 1rem;
-  border-radius: 6px;
-  font-size: 0.95rem;
+  margin-top: 1.75rem; /* More space */
+  padding: 1rem 1.25rem; /* Increased padding */
+  border-radius: 8px; /* Softer radius */
+  font-size: 1rem; /* Slightly larger */
   font-weight: 500;
+  border-left-width: 5px; /* Prominent side border */
+  border-left-style: solid;
 }
 
 .loadingMessage {
-  background-color: #eef2f7;
-  color: #3a5d8a;
-  border: 1px solid #c9d8e8;
+  background-color: #e3f2fd; /* Lighter blue */
+  color: #1e88e5; /* Darker blue text */
+  border-left-color: #1e88e5;
 }
 
 .successMessage {
-  background-color: #e6f4ea;
-  color: #1e4620;
-  border: 1px solid #b2d8b5;
+  background-color: #e8f5e9; /* Lighter green */
+  color: #388e3c; /* Darker green text */
+  border-left-color: #388e3c;
 }
 
 .errorMessage {
-  background-color: #fdecea;
-  color: #5c2121;
-  border: 1px solid #f5c6cb;
+  background-color: #ffebee; /* Lighter red */
+  color: #c62828; /* Darker red text */
+  border-left-color: #c62828;
 }
 
 .thankYouNote {
-  margin-top: 2rem;
-  font-size: clamp(1rem, 3vw, 1.2rem);
+  margin-top: 2.5rem; /* More space */
+  font-size: clamp(1.05rem, 3.2vw, 1.25rem);
   font-family: var(--font-wedding);
   color: var(--color-accent);
   font-style: italic;
 }
 
 .photoFeedLink {
-    margin-top: 1rem;
+    margin-top: 1.25rem; /* Adjusted space */
     font-size: 1rem;
 }
 
@@ -257,6 +277,7 @@
     color: var(--color-secondary-accent);
     text-decoration: none;
     font-weight: bold;
+    transition: color 0.2s ease;
 }
 
 .link:hover {
@@ -267,31 +288,65 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .uploadCard {
-    padding: 1.5rem;
+    padding: 1.75rem 1.5rem; /* Adjusted padding */
     margin: 1rem;
   }
 
   .title {
-    font-size: 1.8rem;
+    font-size: clamp(1.8rem, 5vw, 2.2rem); /* Adjusted clamp for mobile */
   }
 
   .instructions {
-    font-size: 0.95rem;
-    margin-bottom: 1.5rem;
+    font-size: clamp(0.9rem, 2.5vw, 1.05rem);
+    margin-bottom: 2rem;
   }
 
   .fileInputContainer {
-    padding: 1.5rem 0.5rem;
+    padding: 2rem 1rem;
   }
 
   .fileInfo {
-    flex-direction: column; /* Stack file name/size and status on small screens */
+    flex-direction: column;
     align-items: flex-start;
+    gap: 0.4rem; /* Adjusted gap */
   }
 
   .statusText {
-    margin-left: 0; /* Align to start in column layout */
-    margin-top: 0.25rem;
+    margin-left: 0;
+    margin-top: 0.3rem; /* Adjusted margin */
+    align-self: flex-start; /* Ensure it aligns left */
+  }
+
+  .fileName {
+    font-size: 0.95rem; /* Adjust for smaller screens */
+  }
+  .progressBarContainer {
+    height: 18px; /* Slightly smaller progress bar */
+  }
+  .progressBar {
+    font-size: 0.75em;
   }
 }
 
+@media (max-width: 480px) {
+  .uploadCard {
+    padding: 1.5rem 1rem;
+  }
+  .title {
+    font-size: clamp(1.6rem, 6vw, 2rem);
+  }
+  .fileInputLabel {
+    padding: 1rem;
+    font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+  }
+  .uploadButton {
+    padding: 0.7rem 1.25rem;
+    font-size: clamp(0.95rem, 3vw, 1.1rem);
+  }
+  .selectedFilesList {
+    padding: 0.5rem;
+  }
+  .fileStatusItem {
+    padding: 0.5rem 0.25rem;
+  }
+}
