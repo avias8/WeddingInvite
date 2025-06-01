@@ -71,71 +71,59 @@ if (storage === null && !gcsApplicationCredentialsEnv && !serviceAccountJsonStri
 // Define a more specific error type for GCS API errors
 interface GcsApiError extends Error {
     code?: number | string; // GCS errors might have a numeric or string code
-    // You could add other common GCS error properties if needed, e.g.:
-    // errors?: Array<{ message: string; reason: string }>;
 }
 
 export async function POST(req: NextRequest) {
-  // Check if GCS bucket name is configured
   if (!gcsBucketName) {
     return NextResponse.json({ success: false, error: "GCS_BUCKET_NAME not set." }, { status: 500 });
   }
-  // Check if GCS client is initialized
   if (!storage) {
     return NextResponse.json({ success: false, error: "GCS client not initialized." }, { status: 500 });
   }
 
-  try {
-    // Parse request body to get gcsObjectName and password
-    const { gcsObjectName, password } = await req.json();
+  // Declare gcsObjectName here so it's accessible in the catch block if req.json() succeeds
+  let gcsObjectNameForErrorHandling: string | undefined;
 
-    // --- Authentication Check ---
-    const correctPassword = process.env.NEXT_PUBLIC_MANAGEMENT_PASSWORD || "eW9zZGZlZGJhcg=="; // Fallback
+  try {
+    const body = await req.json();
+    const gcsObjectName = body.gcsObjectName; // Keep for try block usage
+    const password = body.password;
+    gcsObjectNameForErrorHandling = gcsObjectName; // Assign to the outer scope variable
+
+    const correctPassword = process.env.NEXT_PUBLIC_MANAGEMENT_PASSWORD || "eW9zZGZlZGJhcg==";
     if (password !== correctPassword) {
       return NextResponse.json({ success: false, error: "Unauthorized." }, { status: 401 });
     }
-    // --- End Authentication Check ---
 
-    // Validate gcsObjectName
     if (!gcsObjectName || typeof gcsObjectName !== 'string') {
       return NextResponse.json({ success: false, error: "gcsObjectName is required and must be a string." }, { status: 400 });
     }
 
     console.log(`Attempting to delete GCS object: ${gcsObjectName} from bucket: ${gcsBucketName}`);
 
-    // Get a reference to the file and delete it
     const file = storage.bucket(gcsBucketName).file(gcsObjectName);
     await file.delete();
 
     console.log(`Successfully deleted GCS object: ${gcsObjectName}`);
     return NextResponse.json({ success: true, message: `Successfully deleted ${gcsObjectName}` });
 
-  } catch (error: unknown) { // Catch block now explicitly types error as unknown
+  } catch (error: unknown) {
     console.error("Error deleting GCS object:", error);
 
     let displayErrorMessage = "An unknown error occurred while deleting the object.";
     let statusCode = 500;
 
     if (error instanceof Error) {
-      // Now 'error' is typed as 'Error'
       displayErrorMessage = error.message;
-
-      // Check for GCS-like error structure with a 'code' property
-      // We cast to 'GcsApiError' to safely access 'code'
       const potentialGcsError = error as GcsApiError;
       if (potentialGcsError.code !== undefined) {
         if (potentialGcsError.code === 404 || String(potentialGcsError.code) === '404') {
-          displayErrorMessage = `File not found in GCS bucket: ${ (req.json as any).gcsObjectName || 'unknown object'}`; // Safely access gcsObjectName if possible
+          // Use the gcsObjectNameForErrorHandling variable captured from the try block
+          displayErrorMessage = `File not found in GCS bucket: ${gcsObjectNameForErrorHandling || 'unknown object'}`;
           statusCode = 404;
         }
-        // You can add more specific GCS error code handling here if needed
-        // else if (potentialGcsError.code === 403) { /* ... */ }
       }
     }
-    // For the specific case where gcsObjectName might not be available if req.json() failed earlier,
-    // it's better to handle it this way, or ensure gcsObjectName is captured before this point.
-    // However, the primary error being handled here is the GCS delete operation itself.
-
     return NextResponse.json({ success: false, error: displayErrorMessage }, { status: statusCode });
   }
 }
