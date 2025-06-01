@@ -1,9 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>One Month To Go! - Avi & Shakthi's Wedding</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
   <style>
     /* --- Font Imports --- */
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
@@ -14,314 +23,385 @@
     }
 
     body {
-      margin: 0;
-      padding: 40px 20px; /* Responsive padding */
-      background: linear-gradient(135deg, #f8f5f0 0%, #e8e2d4 100%); /* Soft, elegant background */
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      color: #2d4a2b; /* Primary text color - dark green for good contrast */
-      line-height: 1.7;
+      margin: 0 !important;
+      padding: 0 !important;
+      background-color: #f8f5f0;
+      font-family: 'Inter', Arial, sans-serif;
+      color: #2d4a2b;
+      line-height: 1.6;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      animation: fadeIn 0.8s ease-out; /* Subtle page load animation (web browsers) */
+      width: 100% !important;
+      min-width: 100%;
     }
 
-    /* --- Animations (Progressive Enhancement - may not work in all email clients) --- */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* --- Email Client Compatibility --- */
+    table {
+      border-collapse: collapse;
     }
 
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
+    td {
+      border-collapse: collapse;
     }
 
-    @keyframes scaleIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    @keyframes rotate { /* Used for header background effect */
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-     @keyframes pulse { /* Used for countdown badge */
-      0%, 100% { transform: scale(1); box-shadow: 0 3px 10px rgba(212, 175, 55, 0.25); } /* Adjusted shadow for pulse */
-      50% { transform: scale(1.05); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4); } /* Adjusted shadow for pulse */
+    img {
+      border: 0;
+      outline: none;
+      text-decoration: none;
+      -ms-interpolation-mode: bicubic;
+      max-width: 100%;
+      height: auto;
     }
 
     /* --- Main Container --- */
+    .email-wrapper {
+      width: 100%;
+      background-color: #f8f5f0;
+      padding: 20px 0;
+    }
+
     .container {
-      max-width: 650px; /* Standard email width */
+      max-width: 650px;
       margin: 0 auto;
-      background: #ffffff; /* Clean white background for content */
-      border-radius: 24px; /* Softer, modern rounded corners */
-      padding: 0; /* Padding will be handled by inner sections */
-      box-shadow: 
-        0 20px 60px rgba(0, 0, 0, 0.12), /* Softer, more diffused main shadow */
-        0 8px 25px rgba(0, 0, 0, 0.06); /* Secondary subtle shadow */
-      border: 1px solid rgba(180, 195, 174, 0.2); /* Subtle border */
-      overflow: hidden; /* Ensures child elements respect border-radius */
-      animation: scaleIn 0.6s ease-out 0.2s both; /* Container entrance animation (web browsers) */
+      background-color: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      border: 1px solid #e8e2d4;
     }
 
     /* --- Header Section --- */
     .header-section {
-      background: linear-gradient(135deg, #4a6741 0%, #5d7a54 100%); /* Rich green gradient */
+      background: linear-gradient(135deg, #4a6741 0%, #5d7a54 100%);
       padding: 40px 30px;
       text-align: center;
-      position: relative; /* For pseudo-element positioning */
-      overflow: hidden; /* For background effect containment */
+      position: relative;
     }
 
-    /* Animated background effect - progressive enhancement, may not show in all email clients */
-    .header-section::before {
-      content: '';
+    .header-decoration {
       position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 65%); /* Slightly more subtle radial gradient */
-      animation: rotate 25s linear infinite; /* Slower rotation */
-      z-index: 0; /* Behind content */
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 30% 70%, rgba(255,255,255,0.1) 0%, transparent 50%);
+      pointer-events: none;
     }
 
     .cartoon-banner-image {
       width: 100%;
-      max-width: 450px; /* Max width for responsiveness */
+      max-width: 450px;
       height: auto;
       margin: 0 auto 20px auto;
       display: block;
-      border-radius: 16px; /* Consistent rounded corners */
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); /* Slightly enhanced shadow for pop */
-      transition: transform 0.3s ease;
-      position: relative; /* To ensure it's above the ::before pseudo-element */
-      z-index: 1;
+      border-radius: 12px;
+      position: relative;
+      z-index: 2;
     }
 
-    .cartoon-banner-image:hover { /* Hover effect (web browsers) */
-      transform: scale(1.02);
-    }
-
-    /* --- Content Section --- */
-    .content-section {
-      padding: 40px 40px 30px; /* Generous padding for readability */
-    }
-
-    /* --- Headings --- */
-    h1 {
-      font-family: 'Playfair Display', serif;
-      color: #ffffff; /* White text on dark header */
-      font-size: 2.8rem; /* Large, impactful title */
+    .main-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      color: #ffffff;
+      font-size: 48px;
       font-weight: 700;
       text-transform: uppercase;
       margin: 0;
       text-align: center;
-      letter-spacing: 0.15rem;
-      text-shadow: 0 2px 5px rgba(0,0,0,0.15); /* Slightly more defined text shadow */
-      position: relative; /* To ensure it's above the ::before pseudo-element */
-      z-index: 1;
-      animation: slideUp 0.6s ease-out 0.4s both; /* Animation (web browsers) */
+      letter-spacing: 3px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 2;
+      line-height: 1.2;
     }
 
-    h2 {
-      font-family: 'Playfair Display', serif;
-      color: #4a6741; /* Consistent accent green */
-      font-size: 2rem;
-      font-weight: 600;
-      margin: 45px 0 25px 0;
+    /* --- Website Banner Section --- */
+    .website-banner {
+      background: linear-gradient(135deg, #2c3e27 0%, #3a5235 100%);
+      padding: 25px 30px;
       text-align: center;
-      position: relative; /* For pseudo-element positioning */
-      animation: slideUp 0.6s ease-out both; /* Animation (web browsers) */
-      /* Delay animation for staggered effect if desired, e.g., animation-delay: 0.1s; */
+      border-bottom: 3px solid #D4AF37;
+      position: relative;
     }
 
-    /* Decorative underline for H2 */
-    h2::after {
-      content: '';
-      position: absolute;
-      bottom: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 3px;
-      background: linear-gradient(90deg, #4a6741, #8fa88c); /* Green gradient underline */
-      border-radius: 2px;
-    }
-
-    /* --- Paragraphs & Text Styling --- */
-    p {
-      margin: 0 0 20px 0;
-      font-size: 1.1rem; /* Comfortable reading size */
-      font-weight: 400;
-      animation: slideUp 0.6s ease-out both; /* Animation (web browsers) */
-      /* Stagger animations for content blocks if desired: e.g., animation-delay: 0.2s; */
-    }
-
-    .intro-text {
-      font-size: 1.2rem;
-      text-align: center;
-      margin-bottom: 30px;
-      font-weight: 500;
-      color: #4a6741; /* Accent green for emphasis */
-    }
-
-    .strong, strong { /* Custom styling for strong tags */
-      font-weight: 600;
-      color: #2d4a2b; /* Darker green for emphasis */
-      background: linear-gradient(120deg, transparent 0%, rgba(143, 168, 140, 0.15) 50%, transparent 100%); /* Subtle background highlight */
-      padding: 2px 4px;
-      border-radius: 4px;
-    }
-
-    /* --- Information Blocks (Venue, Contact) --- */
-    .venue-details, .contact-details { /* Shared style for info boxes */
-      background: linear-gradient(135deg, #f8fbf7 0%, #f0f5ef 100%); /* Very light green-tinted background */
-      padding: 30px;
-      border-radius: 16px; /* Consistent rounded corners */
-      margin-bottom: 30px;
-      border: 1px solid rgba(143, 168, 140, 0.25); /* Slightly more visible border */
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Softer shadow */
-      transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hover effects (web browsers) */
-      animation: slideUp 0.6s ease-out both;
-    }
-
-    .venue-details:hover, .contact-details:hover { /* Hover effects (web browsers) */
-      transform: translateY(-3px); /* Subtle lift */
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); /* Enhanced shadow on hover */
-    }
-
-    .venue-details p, .contact-details p {
-      margin-bottom: 12px;
-      font-size: 1.05rem;
-    }
-
-    /* --- Images within Content --- */
-    .venue-image,
-    .direction-image,
-    .video-thumbnail-link img {
-      width: 100%;
-      max-width: 550px; /* Ensure images are not overly large */
-      height: auto;
-      margin: 25px auto;
-      display: block;
-      border-radius: 16px; /* Consistent rounded corners */
-      border: 1px solid rgba(143, 168, 140, 0.2);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* Standard shadow for images */
-      transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hover effects (web browsers) */
-      animation: slideUp 0.6s ease-out both;
-    }
-
-    .venue-image:hover,
-    .direction-image:hover { /* Hover effects (web browsers) */
-      transform: translateY(-4px) scale(1.01); /* Slight lift and scale */
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12); /* Enhanced shadow on hover */
-    }
-
-    /* --- Video Thumbnail Link --- */
-    .video-thumbnail-link {
-      display: block;
-      text-decoration: none;
-      position: relative; /* For overlay and play icon */
-      max-width: 550px;
-      margin: 25px auto;
-      border-radius: 16px; /* Consistent rounded corners */
-      overflow: hidden; /* To contain overlay and image */
-      animation: slideUp 0.6s ease-out both;
-    }
-    /* Overlay for video thumbnail - progressive enhancement */
-    .video-thumbnail-link::before {
+    .website-banner::before {
       content: '';
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(135deg, rgba(74, 103, 65, 0.35) 0%, rgba(143, 168, 140, 0.25) 100%); /* Slightly adjusted gradient */
-      z-index: 1;
-      transition: opacity 0.3s ease;
+      background: linear-gradient(45deg, transparent 40%, rgba(212, 175, 55, 0.1) 50%, transparent 60%);
+      pointer-events: none;
     }
 
-    .video-thumbnail-link:hover::before { /* Hover effect (web browsers) */
-      opacity: 0.6; /* Darken overlay slightly more on hover */
+    .website-link {
+      display: inline-block;
+      background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+      color: #ffffff !important;
+      text-decoration: none !important;
+      padding: 15px 35px;
+      border-radius: 25px;
+      font-family: 'Inter', Arial, sans-serif;
+      font-weight: 600;
+      font-size: 18px;
+      border: 2px solid rgba(255,255,255,0.2);
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
     }
-    /* Play icon for video - progressive enhancement */
-    .video-thumbnail-link::after {
-      content: '▶'; /* Play symbol */
+
+    .website-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
+    }
+
+    .website-text {
+      color: #ffffff;
+      font-size: 16px;
+      margin: 15px 0 0 0;
+      font-weight: 400;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* --- Content Section --- */
+    .content-section {
+      padding: 40px 40px 30px;
+    }
+
+    /* --- Headings --- */
+    .section-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      color: #4a6741;
+      font-size: 32px;
+      font-weight: 600;
+      margin: 45px 0 25px 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, #4a6741, #8fa88c);
+      border-radius: 2px;
+    }
+
+    /* --- Paragraphs & Text Styling --- */
+    .intro-text {
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 500;
+      color: #4a6741;
+    }
+
+    .body-text {
+      margin: 0 0 20px 0;
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 1.7;
+    }
+
+    .emphasis {
+      font-weight: 600;
+      color: #2d4a2b;
+      background: linear-gradient(120deg, transparent 0%, rgba(143, 168, 140, 0.2) 50%, transparent 100%);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* --- Countdown Badge --- */
+    .countdown-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #D4AF37, #B8860B);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 16px;
+      margin: 0 5px;
+      box-shadow: 0 3px 12px rgba(212, 175, 55, 0.4);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    /* --- Information Blocks --- */
+    .info-block {
+      background: linear-gradient(135deg, #f8fbf7 0%, #f0f5ef 100%);
+      padding: 35px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(143, 168, 140, 0.3);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      position: relative;
+    }
+
+    .info-block::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(180deg, #4a6741 0%, #8fa88c 100%);
+      border-radius: 2px 0 0 2px;
+    }
+
+    .info-block p {
+      margin-bottom: 12px;
+      font-size: 17px;
+      line-height: 1.6;
+    }
+
+    .info-block p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* --- Images --- */
+    .content-image {
+      width: 100%;
+      max-width: 550px;
+      height: auto;
+      margin: 25px auto;
+      display: block;
+      border-radius: 12px;
+      border: 2px solid #e8e2d4;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+      transition: transform 0.3s ease;
+    }
+
+    .content-image:hover {
+      transform: scale(1.02);
+    }
+
+    /* --- Video Thumbnail --- */
+    .video-container {
+      position: relative;
+      max-width: 550px;
+      margin: 25px auto;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .video-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(74, 103, 65, 0.4) 0%, rgba(143, 168, 140, 0.3) 100%);
+      z-index: 1;
+    }
+
+    .play-button {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 70px;
-      color: white;
-      text-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+      width: 80px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: #4a6741;
       z-index: 2;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    /* --- Buttons --- */
+    .cta-button {
+      display: inline-block;
+      padding: 18px 40px;
+      background: linear-gradient(135deg, #4a6741 0%, #5d7a54 100%);
+      color: #ffffff !important;
+      text-decoration: none !important;
+      border-radius: 30px;
+      font-family: 'Inter', Arial, sans-serif;
+      font-weight: 600;
+      font-size: 18px;
       transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(74, 103, 65, 0.4);
+      border: 2px solid rgba(255,255,255,0.1);
     }
 
-    .video-thumbnail-link:hover::after { /* Hover effect (web browsers) */
-      transform: translate(-50%, -50%) scale(1.15); /* Slightly larger scale on hover */
+    .cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(74, 103, 65, 0.5);
     }
 
-    /* --- Map Link Button --- */
-    .map-link-container {
+    .button-container {
       text-align: center;
       margin: 35px 0;
-      animation: slideUp 0.6s ease-out both;
     }
 
-    .map-link {
-      display: inline-block;
-      padding: 18px 40px; /* Generous padding for a clickable button */
-      background: linear-gradient(135deg, #4a6741 0%, #5d7a54 100%); /* Consistent green gradient */
-      color: #ffffff !important; /* Ensure text is white */
-      text-decoration: none !important; /* Remove underline */
-      border-radius: 50px; /* Pill shape button */
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      font-size: 1.1rem;
-      transition: all 0.3s ease;
-      box-shadow: 0 6px 20px rgba(74, 103, 65, 0.35); /* Slightly stronger shadow */
-      position: relative; /* For shimmer effect */
-      overflow: hidden; /* For shimmer effect */
+    /* --- Highlight Box --- */
+    .highlight-box {
+      background: linear-gradient(135deg, #fffaf0 0%, #fef5e8 100%);
+      border-left: 5px solid #f39c12;
+      padding: 30px;
+      margin: 30px 0;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(243, 156, 18, 0.15);
+      position: relative;
     }
-    /* Shimmer effect on button - progressive enhancement */
-    .map-link::before {
-      content: '';
+
+    .highlight-box::before {
+      content: '⏰';
       position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent); /* Slightly more visible shimmer */
-      transition: left 0.6s ease; /* Slower shimmer */
+      top: 15px;
+      right: 20px;
+      font-size: 24px;
+      opacity: 0.7;
     }
 
-    .map-link:hover::before { /* Hover effect (web browsers) */
-      left: 100%;
+    .highlight-box p {
+      margin-bottom: 15px;
+      font-size: 17px;
+      font-weight: 500;
     }
 
-    .map-link:hover { /* Hover effect (web browsers) */
-      transform: translateY(-3px);
-      box-shadow: 0 12px 30px rgba(74, 103, 65, 0.45); /* More pronounced shadow on hover */
+    .highlight-box p:last-child {
+      margin-bottom: 0;
     }
 
     /* --- Section Divider --- */
     .section-divider {
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #b4c3b0, transparent); /* Softer divider color */
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #b4c3b0, transparent);
       margin: 50px auto;
-      width: 70%; /* Slightly narrower */
-      border-radius: 1px;
+      width: 60%;
+      border-radius: 2px;
+      position: relative;
+    }
+
+    .section-divider::before {
+      content: '❦';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ffffff;
+      color: #4a6741;
+      font-size: 20px;
+      padding: 0 15px;
     }
 
     /* --- Image Caption --- */
     .image-caption {
       text-align: center;
-      font-size: 0.95rem;
-      color: #555; /* Slightly darker for better readability */
-      margin-top: -15px; /* Pull up closer to image */
+      font-size: 15px;
+      color: #666;
+      margin-top: -10px;
       margin-bottom: 25px;
       font-style: italic;
       font-weight: 400;
@@ -330,89 +410,70 @@
     /* --- Footer --- */
     .footer {
       margin-top: 40px;
-      padding: 30px 40px;
-      background: linear-gradient(135deg, #f8fbf7 0%, #f0f5ef 100%); /* Consistent light background */
-      border-top: 1px solid rgba(143, 168, 140, 0.2);
-      font-size: 1rem;
-      color: #5c5c5c; /* Slightly darker footer text */
+      padding: 35px 40px;
+      background: linear-gradient(135deg, #f8fbf7 0%, #f0f5ef 100%);
+      border-top: 2px solid rgba(143, 168, 140, 0.3);
+      font-size: 16px;
+      color: #5c5c5c;
       text-align: center;
       font-weight: 400;
+      position: relative;
     }
 
-    /* --- Countdown Badge --- */
-    .countdown-badge {
-      display: inline-block;
-      background: linear-gradient(135deg, #D4AF37, #B8860B); /* Elegant gold gradient */
-      color: white;
-      padding: 6px 14px; /* Adjusted padding for a softer look */
-      border-radius: 8px; /* Softly rounded rectangle */
-      font-weight: 600;
-      font-size: 0.9rem;
-      margin: 0 5px;
-      /* Updated box-shadow to match new gold tones and be part of the pulse animation states */
-      animation: pulse 2s infinite ease-in-out; /* Pulse animation (web browsers) */
-      /* Initial shadow is set in the 0%/100% keyframe of pulse animation */
+    .footer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 2px;
+      background: linear-gradient(90deg, #4a6741, #8fa88c);
+      margin-top: -1px;
     }
 
-
-    /* --- Highlight Box (for important timings etc.) --- */
-    .highlight-box {
-      background: linear-gradient(135deg, #fffaf0 0%, #fef5e8 100%); /* Warmer, softer highlight background */
-      border-left: 4px solid #f39c12; /* Accent color border */
-      padding: 25px; /* More padding */
-      margin: 30px 0; /* More margin */
-      border-radius: 12px; /* More rounded */
-      box-shadow: 0 4px 20px rgba(243, 156, 18, 0.12); /* Softer shadow */
-      animation: slideUp 0.6s ease-out both;
-    }
-    .highlight-box p {
-        margin-bottom: 10px; /* Reduced margin for list-like items */
-    }
-    .highlight-box p:last-child {
-        margin-bottom: 0;
-    }
-
-
-    /* --- Responsive Adjustments --- */
-    @media screen and (max-width: 650px) {
-      body {
-        padding: 20px 10px; /* Reduced padding on small screens */
-      }
-      
+    /* --- Responsive Design --- */
+    @media only screen and (max-width: 650px) {
       .container {
-        margin: 0 5px; /* Small margin to prevent touching screen edges */
-        border-radius: 16px; /* Slightly smaller radius for smaller container */
+        margin: 0 10px;
+        border-radius: 12px;
       }
       
-      .header-section {
-        padding: 30px 20px;
+      .header-section,
+      .website-banner {
+        padding: 25px 20px;
       }
       
       .content-section {
         padding: 30px 25px 20px;
       }
       
-      h1 {
-        font-size: 2.2rem; /* Adjusted H1 size */
-        letter-spacing: 0.1rem;
+      .main-title {
+        font-size: 36px;
+        letter-spacing: 2px;
       }
       
-      h2 {
-        font-size: 1.7rem; /* Adjusted H2 size */
+      .section-title {
+        font-size: 28px;
         margin: 35px 0 20px 0;
       }
       
-      p, .intro-text {
-        font-size: 1.05rem; /* Slightly larger base font on mobile for readability */
+      .intro-text {
+        font-size: 18px;
       }
       
-      .venue-details, .contact-details {
+      .body-text {
+        font-size: 16px;
+      }
+      
+      .info-block {
         padding: 25px 20px;
       }
       
-      .map-link {
+      .cta-button,
+      .website-link {
         padding: 16px 32px;
-        font-size: 1rem;
+        font-size: 16px;
       }
       
       .footer {
@@ -420,102 +481,130 @@
       }
       
       .cartoon-banner-image {
-        max-width: 90%; /* Allow banner to be more responsive */
+        max-width: 90%;
         margin-bottom: 15px;
       }
+      
       .highlight-box {
-        padding: 20px;
+        padding: 25px 20px;
       }
+      
       .countdown-badge {
-        padding: 5px 12px; /* Slightly smaller padding on mobile */
-        font-size: 0.85rem;
+        padding: 6px 12px;
+        font-size: 14px;
+      }
+    }
+
+    /* --- Dark Mode Support --- */
+    @media (prefers-color-scheme: dark) {
+      .container {
+        background-color: #ffffff;
+      }
+    }
+
+    /* --- Print Styles --- */
+    @media print {
+      .email-wrapper {
+        background-color: white;
+      }
+      
+      .container {
+        box-shadow: none;
+        border: 1px solid #ccc;
       }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header-section">
-      <img src="https://storage.googleapis.com/my-wedding-assets/Images/WeddingReminder/Banner3.png" alt="Avi & Shakthi - One Month To Go!" class="cartoon-banner-image" />
-      <h1>One Month To Go!</h1>
+  <div class="email-wrapper">
+    <div class="container">
+      <!-- Header Section -->
+      <div class="header-section">
+        <div class="header-decoration"></div>
+        <img src="https://storage.googleapis.com/my-wedding-assets/Images/WeddingReminder/Banner3.png" alt="Avi & Shakthi - One Month To Go!" class="cartoon-banner-image" />
+        <h1 class="main-title">One Month To Go!</h1>
+      </div>
+
+      <!-- Website Banner Section -->
+      <div class="website-banner">
+        <a href="https://wedding.avivarma.ca" target="_blank" class="website-link">Visit Our Wedding Website</a>
+        <p class="website-text">wedding.avivarma.ca - All the details you need for our special day!</p>
+      </div>
+
+      <!-- Main Content -->
+      <div class="content-section">
+        <p class="intro-text">Dearest friends and family,</p>
+        <p class="body-text">Can you believe it? There's just <span class="countdown-badge">one month left</span> until our Hindu wedding ceremony on <span class="emphasis">June 29, 2025</span>! We are getting so excited to celebrate with all of you.</p>
+
+        <div class="section-divider"></div>
+
+        <h2 class="section-title">A Friendly Reminder: Our Venue</h2>
+        <img src="https://static.wixstatic.com/media/b2a746_766742926656475590bd9ed07a593b62~mv2.jpg/v1/fill/w_1600,h_779,al_c,q_85,enc_avif,quality_auto/b2a746_766742926656475590bd9ed07a593b62~mv2.jpg" alt="Hilltop Wedding Centre Venue" class="content-image" />
+
+        <div class="info-block">
+          <p><span class="emphasis">Hilltop Wedding Centre</span></p>
+          <p>Box 9077</p>
+          <p>Sylvan Lake, Alberta, T4S 1S6</p>
+          <p><span class="emphasis">Directions Note:</span> The venue is located 2km North of Sylvan Lake on Highway 20.</p>
+        </div>
+        
+        <div class="button-container">
+          <a href="https://www.google.com/maps/dir/?api=1&destination=Blue%20Sign%2039145,%20Sylvan%20Lake,%20AB%20T0M%200H0,%20Canada" target="_blank" class="cta-button">View Map & Directions</a>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <h2 class="section-title">Important Timings</h2>
+        <div class="highlight-box">
+          <p><span class="emphasis">Arrival Time:</span> Please arrive by <span class="emphasis">10:00 AM</span> to ensure you don't miss any part of the celebration.</p>
+          <p><span class="emphasis">Event Duration:</span> The main ceremonies will wrap up around <span class="emphasis">7:00 PM - 8:00 PM</span>. We'll continue celebrating with close friends and family into the evening!</p>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <h2 class="section-title">Plan Your Journey</h2>
+        <p class="body-text">If you haven't already, this is a great time to <span class="emphasis">book your hotels or finalize your travel plans</span> to Sylvan Lake. We want to make sure your journey to celebrate with us is as smooth as possible!</p>
+
+        <div class="section-divider"></div>
+
+        <h2 class="section-title">Finding Your Way & Parking</h2>
+        <p class="body-text">To help you find the Hilltop Wedding Centre easily, here are a few visual cues:</p>
+
+        <img src="https://storage.googleapis.com/my-wedding-assets/Images/WeddingReminder/RightTurnCartoon.png" alt="Stylized blue sign for Hilltop Wedding Centre" class="content-image" />
+        <p class="image-caption">You'll see a blue sign, before the turn in. <span class="emphasis">Watch for this</span>, shortly after the turn in right to the venue appears!</p>
+
+        <img src="https://storage.googleapis.com/my-wedding-assets/Images/WeddingReminder/TurnInAnnotated.png" alt="Illustration showing the turn off the main road towards Hilltop Wedding Center" class="content-image" />
+        <p class="image-caption">Then comes the sharp right turn to the venue! It's a 180 degree turn to the right! Be careful not to miss this as you'll have to go around!</p>
+
+        <img src="https://storage.googleapis.com/my-wedding-assets/Images/WeddingReminder/HilltopSign.png" alt="Main entrance sign for Hilltop Wedding Centre" class="content-image" />
+        <p class="image-caption">You're almost there! You'll see the sign for the venue after the turn, keep going up the drive to the main venue parking.</p>
+
+        <p class="body-text">And here's a short video of the drive-in to give you a better perspective:</p>
+        
+        <div class="video-container">
+          <a href="https://youtu.be/Hu0lM6AF5HA?feature=shared" target="_blank" style="display: block; text-decoration: none;">
+            <img src="https://storage.googleapis.com/my-wedding-assets/Images/WeddingReminder/RightTurn.png" alt="Video of the drive to Hilltop Wedding Centre" style="width: 100%; height: auto; display: block;" />
+            <div class="video-overlay"></div>
+            <div class="play-button">▶</div>
+          </a>
+        </div>
+        <p class="image-caption">Click the image above to watch a short video of the drive-in to Hilltop Wedding Centre.</p>
+
+        <p class="body-text"><span class="emphasis">A Note on Parking:</span> The first parking lot you'll see upon entering is primarily for overflow. You are welcome to park here if you wish; access from this lot might be easier for our elderly guests or those with mobility considerations. Ample parking is available closer to the main building as well.</p>
+
+        <div class="section-divider"></div>
+
+        <h2 class="section-title">We Can't Wait!</h2>
+        <p class="body-text">Thank you once again for being such an important part of our lives and for choosing to celebrate this momentous occasion with us. We are truly counting down the days and are so excited to share our special day with you!</p>
+        <p class="body-text">With much love and anticipation,</p>
+        <p class="body-text"><span class="emphasis">Avi & Shakthi</span></p>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        If you have any immediate questions, feel free to reply to this email or contact us directly.
+      </div>
     </div>
-
-    <div class="content-section">
-      <p class="intro-text">Dearest friends and family,</p>
-      <p>Can you believe it? There's just <span class="countdown-badge">one month left</span> until our Hindu wedding ceremony on <strong>June 29, 2025</strong>! We are getting so excited to celebrate with all of you.</p>
-
-      <div class="section-divider"></div>
-
-      <h2>A Friendly Reminder: Our Venue</h2>
-      <img src="https://static.wixstatic.com/media/b2a746_766742926656475590bd9ed07a593b62~mv2.jpg/v1/fill/w_1600,h_779,al_c,q_85,enc_avif,quality_auto/b2a746_766742926656475590bd9ed07a593b62~mv2.jpg" alt="Hilltop Wedding Centre Venue" class="venue-image" />
-
-      <div class="venue-details">
-        <p><strong>Hilltop Wedding Centre</strong></p>
-        <p>Box 9077</p>
-        <p>Sylvan Lake, Alberta, T4S 1S6</p>
-        <p><strong>Directions Note:</strong> The venue is located 2km North of Sylvan Lake on Highway 20.</p>
-      </div>
-      
-      <div class="map-link-container">
-        <a href="https://www.google.com/maps/dir/?api=1&destination=Blue%20Sign%2039145,%20Sylvan%20Lake,%20AB%20T0M%200H0,%20Canada" target="_blank" class="map-link">View Map & Directions</a>
-      </div>
-
-      <div class="section-divider"></div>
-
-      <h2>Important Timings</h2>
-      <div class="highlight-box">
-        <p><strong>Arrival Time:</strong> Please arrive by <strong>10:00 AM</strong> to ensure you don't miss any part of the celebration.</p>
-        <p><strong>Event Duration:</strong> The main ceremonies will wrap up around <strong>7:00 PM - 8:00 PM</strong>. We'll continue celebrating with close friends and family into the evening!</p>
-      </div>
-
-      <div class="section-divider"></div>
-
-      <h2>Plan Your Journey</h2>
-      <p>If you haven't already, this is a great time to <strong>book your hotels or finalize your travel plans</strong> to Sylvan Lake. We want to make sure your journey to celebrate with us is as smooth as possible!</p>
-
-      <div class="section-divider"></div>
-
-      <h2>Finding Your Way & Parking</h2>
-      <p>To help you find the Hilltop Wedding Centre easily, here are a few visual cues:</p>
-
-      <img src="https://storage.googleapis.com/my-wedding-assets/Images/WeddingReminder/RightTurnCartoon.png" alt="Stylized blue sign for Hilltop Wedding Centre" class="direction-image" />
-      <p class="image-caption">You'll see a blue sign, before the turn in. <strong>Watch for this</strong>, shortly after the turn in right to the venue appears!</p>
-
-      <img src="https://storage.googleapis.com/my-wedding-assets/Images/WeddingReminder/TurnInAnnotated.png" alt="Illustration showing the turn off the main road towards Hilltop Wedding Center" class="direction-image" />
-      <p class="image-caption">Then comes the sharp right turn to the venue! It's a 180 degree turn to the right! Be careful not to miss this as you'll have to go around!</p>
-
-      <img src="https://storage.googleapis.com/my-wedding-assets/Images/WeddingReminder/HilltopSign.png" alt="Main entrance sign for Hilltop Wedding Centre" class="direction-image" />
-      <p class="image-caption">You're almost there! You'll see the sign for the venue after the turn, keep going up the drive to the main venue parking.</p>
-
-      <p>And here's a short video of the drive-in to give you a better perspective:</p>
-      <a href="https://youtu.be/Hu0lM6AF5HA?feature=shared" target="_blank" class="video-thumbnail-link">
-        <img src="https://storage.googleapis.com/my-wedding-assets/Images/WeddingReminder/RightTurn.png" alt="Video of the drive to Hilltop Wedding Centre - Click to Play" />
-      </a>
-      <p class="image-caption">Click the image above to watch a short video of the drive-in to Hilltop Wedding Centre.</p>
-
-      <p><strong>A Note on Parking:</strong> The first parking lot you'll see upon entering is primarily for overflow. You are welcome to park here if you wish; access from this lot might be easier for our elderly guests or those with mobility considerations. Ample parking is available closer to the main building as well.</p>
-
-      <div class="section-divider"></div>
-
-      <h2>We Can't Wait!</h2>
-      <p>Thank you once again for being such an important part of our lives and for choosing to celebrate this momentous occasion with us. We are truly counting down the days and are so excited to share our special day with you!</p>
-      <p>With much love and anticipation,</p>
-      <p><strong>Avi & Shakthi</strong></p>
-    </div>
-
-    <div class="footer">
-      If you have any immediate questions, feel free to reply to this email or contact us directly.
-      </div>
   </div>
-  <!-- 
-    Email Client Compatibility Notes:
-    - Advanced CSS (animations, complex gradients, box-shadows, transforms) has varying support across email clients (especially older Outlook versions).
-    - Test this email thoroughly in different clients like Gmail, Outlook (various versions), Apple Mail, Yahoo Mail, etc.
-    - Consider using a tool like Litmus or Email on Acid for comprehensive testing.
-    - For maximum compatibility, critical styles are sometimes inlined directly into HTML tags. This template uses a <style> block, which is well-supported by modern clients.
-    - Animations are progressive enhancements; the email should still be perfectly readable and functional if they don't run.
-    - Ensure all image URLs are absolute and point to publicly accessible servers.
-    - Consider adding specific dark mode styles if many of your recipients use dark mode.
-  -->
 </body>
 </html>
