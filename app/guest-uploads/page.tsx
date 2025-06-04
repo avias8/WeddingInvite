@@ -6,6 +6,7 @@ import Header from "../components/Header";
 import styles from "./GuestUploads.module.css";
 import GuestSelector from "../components/GuestSelector";
 import { FaUserCircle, FaCamera } from "react-icons/fa";
+import Image from "next/image"; // Import next/image
 
 interface UploadResponse {
   success: boolean;
@@ -27,12 +28,23 @@ interface IndividualFileStatus {
   gcsObjectName?: string;
 }
 
-const NotificationBar = ({ message, type, onClose }: { message: string; type: "success" | "error"; onClose: () => void }) => {
-  if (!message) return null;
+// NotificationBar Component
+const NotificationBar = ({ message, type, onClose }: { message: string | null; type: "success" | "error"; onClose: () => void }) => {
+  // useEffect is now at the top level
   useEffect(() => {
-    const timer = setTimeout(() => { onClose(); }, 5000);
-    return () => clearTimeout(timer);
-  }, [message, onClose]);
+    let timer: NodeJS.Timeout;
+    if (message) { // Logic depending on message is inside the hook
+      timer = setTimeout(() => {
+        onClose();
+      }, 5000); // Auto-close after 5 seconds
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [message, onClose]); // Dependencies remain the same
+
+  if (!message) return null; // Conditional return remains
+
   return (
     <div className={`${styles.notificationBar} ${type === "success" ? styles.successMessage : styles.errorMessage}`}>
       <span>{message}</span>
@@ -41,6 +53,7 @@ const NotificationBar = ({ message, type, onClose }: { message: string; type: "s
   );
 };
 
+// VideoIcon Component (remains the same)
 const VideoIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" width="24px" height="24px" className={styles.videoIcon}>
     <path d="M8 5v14l11-7z" />
@@ -60,6 +73,7 @@ export default function GuestUploadPage() {
   const [showGuestIdentifyModal, setShowGuestIdentifyModal] = useState<boolean>(false);
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
+  // useEffect for guest identification (remains the same)
   useEffect(() => {
     const storedGuestId = sessionStorage.getItem("uploadGuestId");
     const storedGuestName = sessionStorage.getItem("uploadGuestName");
@@ -71,6 +85,7 @@ export default function GuestUploadPage() {
     }
   }, []);
 
+  // useEffect for revoking object URLs (remains the same)
   useEffect(() => {
     return () => {
       filesStatus.forEach(fs => {
@@ -81,6 +96,7 @@ export default function GuestUploadPage() {
     };
   }, [filesStatus]);
 
+  // handleFileChange (remains the same)
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     filesStatus.forEach(fs => { if (fs.previewUrl) URL.revokeObjectURL(fs.previewUrl); });
     setSelectedFiles(event.target.files);
@@ -105,6 +121,7 @@ export default function GuestUploadPage() {
     }
   };
 
+  // updateFileStatus (remains the same)
   const updateFileStatus = (index: number, status: IndividualFileStatus["status"], gcsObjectName?: string, errorMessage?: string, progress?: number) => {
     setFilesStatus(prev =>
       prev.map((fs, i) => {
@@ -120,6 +137,7 @@ export default function GuestUploadPage() {
     );
   };
 
+  // handleGuestIdentified (remains the same)
   const handleGuestIdentified = (guest: { id: number; name: string; inviteeId: number }) => {
     setCurrentGuestId(guest.id);
     setCurrentGuestName(guest.name);
@@ -129,6 +147,7 @@ export default function GuestUploadPage() {
     setNotification({ message: `Welcome, ${guest.name}! You're all set to share your memories.`, type: "success" });
   };
 
+  // handleChangeGuest (remains the same)
   const handleChangeGuest = () => {
     sessionStorage.removeItem("uploadGuestId");
     sessionStorage.removeItem("uploadGuestName");
@@ -138,6 +157,7 @@ export default function GuestUploadPage() {
     setNotification(null);
   };
 
+  // handleSubmit (remains the same, ensure currentGuestId is used for finalize-upload)
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!currentGuestId) {
@@ -185,14 +205,15 @@ export default function GuestUploadPage() {
             xhr.onload = () => {
               if (xhr.status >= 200 && xhr.status < 300) {
                 updateFileStatus(i, "success", signedUrlData.gcsObjectName, undefined, 100);
-                fetch('/api/media/finalize-upload', {
+                // Ensure currentGuestId is passed to finalize-upload
+                fetch('/api/media/finalize-upload', { // Assuming this endpoint exists
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         gcsObjectName: signedUrlData.gcsObjectName,
                         originalFileName: file.name,
                         contentType: file.type,
-                        uploaderId: currentGuestId
+                        uploaderId: currentGuestId // Pass the identified guest's ID
                     })
                 }).catch(finalizeError => console.error("Error finalizing upload metadata:", finalizeError));
                 resolve();
@@ -213,7 +234,7 @@ export default function GuestUploadPage() {
         }
       })();
     });
-    
+
     const results = await Promise.all(uploadPromises);
     successfulUploadsCount = results.filter(r => r.success).length;
     const allSuccessful = results.every(r => r.success);
@@ -229,7 +250,7 @@ export default function GuestUploadPage() {
       setOverallMessage(`😔 Oops, ${currentGuestName}! All uploads encountered issues. Please try again or contact us.`);
       setOverallMessageType("error");
     }
-    
+
     if (allSuccessful) {
       setSelectedFiles(null);
       setFilesStatus([]);
@@ -237,6 +258,7 @@ export default function GuestUploadPage() {
     }
   };
 
+  // formatFileSize (remains the same)
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -245,6 +267,7 @@ export default function GuestUploadPage() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  // getStatusIcon (remains the same)
   const getStatusIcon = (status: IndividualFileStatus["status"]): string => {
     switch (status) {
       case "pending": return "⏳";
@@ -255,7 +278,7 @@ export default function GuestUploadPage() {
     }
   };
 
-  // User Badge for upper left as a card
+  // SelectedUserBadge Component (remains the same)
   const SelectedUserBadge = () =>
     currentGuestName ? (
       <div className={styles.selectedUserBadgeCard}>
@@ -270,13 +293,12 @@ export default function GuestUploadPage() {
   return (
     <>
       <Header />
-      {notification && (
-        <NotificationBar
-          message={notification.message}
-          type={notification.type}
-          onClose={() => setNotification(null)}
-        />
-      )}
+      {/* Pass notification.message or null to NotificationBar */}
+      <NotificationBar
+        message={notification ? notification.message : null}
+        type={notification ? notification.type : "success"} // Default type if message is null but component is rendered
+        onClose={() => setNotification(null)}
+      />
       <div className={styles.pageContainer}>
         <SelectedUserBadge />
         <div className={styles.uploadCard}>
@@ -322,7 +344,18 @@ export default function GuestUploadPage() {
                     <li key={index} className={styles.fileStatusItem}>
                       <div className={styles.fileInfoRow}>
                         <div className={styles.fileThumbnailContainer}>
-                          {fs.fileType === 'image' && fs.previewUrl && ( <img src={fs.previewUrl} alt={`Preview of ${fs.file.name}`} className={styles.filePreviewThumbnail} /> )}
+                          {/* Use next/image for image previews */}
+                          {fs.fileType === 'image' && fs.previewUrl && (
+                            <Image
+                              src={fs.previewUrl}
+                              alt={`Preview of ${fs.file.name}`}
+                              width={50} // Provide appropriate width
+                              height={50} // Provide appropriate height
+                              style={{ objectFit: "cover" }} // Use style prop for objectFit
+                              className={styles.filePreviewThumbnail}
+                              unoptimized={true} // Object URLs might not be optimizable by Next.js
+                            />
+                          )}
                           {fs.fileType === 'video' && ( <div className={styles.videoThumbnailPlaceholder}><VideoIcon /></div> )}
                           {fs.fileType === 'other' && ( <div className={styles.otherFileThumbnailPlaceholder}>📄</div> )}
                         </div>
@@ -359,7 +392,7 @@ export default function GuestUploadPage() {
           </form>
 
           {overallMessage && ( <div className={`${styles.message} ${ overallMessageType === "success" ? styles.successMessage : overallMessageType === "error" ? styles.errorMessage : styles.loadingMessage }`} role="alert"> {overallMessage} </div> )}
-          
+
           <p className={styles.thankYouNote}> Every photo tells our story... Thank you for being part of it! 💫 </p>
           <p className={styles.photoFeedLink}> <a href="/photo-feed" className={styles.link}> 🖼️ Explore Our Memory Gallery </a> </p>
         </div>

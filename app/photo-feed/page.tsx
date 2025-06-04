@@ -1,15 +1,15 @@
 // app/photo-feed/page.tsx
 "use client";
 
-import React, { useState, useEffect, useRef, FormEvent, ChangeEvent } from "react";
+import React, { useState, useEffect, useRef, FormEvent, ChangeEvent, useCallback } from "react";
 import Header from "../components/Header"; // Adjust path as needed
 import styles from "./PhotoFeed.module.css";
 import Image from "next/image";
-import { FaTrash, FaLock, FaUnlock, FaSpinner, FaExclamationTriangle, FaCheckCircle, FaHeart, FaComment } from "react-icons/fa"; // Added FaHeart, FaComment
+import { FaTrash, FaLock, FaUnlock, FaSpinner, FaExclamationTriangle, FaCheckCircle, FaHeart, FaComment } from "react-icons/fa";
 
 // --- Updated MediaItem Interface ---
 interface MediaItem {
-  id: number; // Assuming each media item will have a unique ID from the database
+  id: number;
   name: string;
   url: string;
   contentType: string | undefined;
@@ -17,8 +17,8 @@ interface MediaItem {
   updated: string | undefined;
   likesCount?: number;
   commentsCount?: number;
-  currentUserHasLiked?: boolean; // To manage the like button state for the current user
-  uploaderName?: string; // Optional: if you want to display who uploaded it
+  currentUserHasLiked?: boolean;
+  uploaderName?: string;
 }
 
 interface ApiResponse {
@@ -28,18 +28,22 @@ interface ApiResponse {
   error?: string;
 }
 
-// (NotificationBar, ConfirmationModal, LightboxModal components remain the same)
-
 // Notification Bar Component
-const NotificationBar = ({ message, type, onClose }: { message: string; type: "success" | "error"; onClose: () => void }) => {
-  if (!message) return null;
-
+const NotificationBar = ({ message, type, onClose }: { message: string | null; type: "success" | "error"; onClose: () => void }) => {
+  // useEffect is now at the top level
   useEffect(() => {
-    const timer = setTimeout(() => {
-      onClose();
-    }, 5000); // Auto-close after 5 seconds
-    return () => clearTimeout(timer);
-  }, [message, onClose]);
+    let timer: NodeJS.Timeout;
+    if (message) { // Logic depending on message is inside the hook
+      timer = setTimeout(() => {
+        onClose();
+      }, 5000); // Auto-close after 5 seconds
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [message, onClose]); // Dependencies remain the same
+
+  if (!message) return null; // Conditional return remains
 
   return (
     <div className={`${styles.notificationBar} ${type === "success" ? styles.success : styles.error}`}>
@@ -88,7 +92,7 @@ const ConfirmationModal = ({
   );
 };
 
-
+// LightboxModal Component
 const LightboxModal = ({ src, alt, type, onClose }: { src: string; alt: string; type: string | undefined; onClose: () => void }) => {
   const modalContentRef = useRef<HTMLDivElement>(null);
 
@@ -123,8 +127,9 @@ const LightboxModal = ({ src, alt, type, onClose }: { src: string; alt: string; 
             className={styles.lightboxMedia}
             width={800}
             height={600}
-            unoptimized={true} // Preserving user's choice
-            priority // Good for LCP element in a lightbox
+            style={{ objectFit: "contain" }} // Ensure image is contained
+            unoptimized={true}
+            priority
           />
         ) : type?.startsWith("video/") ? (
           <video src={src} controls autoPlay className={styles.lightboxMedia} aria-label={alt}>
@@ -138,7 +143,7 @@ const LightboxModal = ({ src, alt, type, onClose }: { src: string; alt: string; 
   );
 };
 
-// --- (Comment Modal - Placeholder) ---
+// Comment Modal Component
 const CommentModal = ({
   isOpen,
   mediaItem,
@@ -154,7 +159,7 @@ const CommentModal = ({
 
   useEffect(() => {
     if (isOpen) {
-      setCommentText(""); // Reset comment text when modal opens
+      setCommentText("");
     }
   }, [isOpen]);
 
@@ -164,16 +169,15 @@ const CommentModal = ({
     e.preventDefault();
     if (commentText.trim()) {
       onCommentSubmit(mediaItem.id, commentText.trim());
-      onClose(); // Close modal after submission
+      onClose();
     }
   };
 
   return (
-    <div className={styles.authModalOverlay}> {/* Reusing authModalOverlay style for simplicity */}
-      <div className={styles.authModalContent}> {/* Reusing authModalContent style */}
+    <div className={styles.authModalOverlay}>
+      <div className={styles.authModalContent}>
         <button className={styles.modalCloseButton} onClick={onClose} aria-label="Close comments">&times;</button>
         <h3>Comments for {mediaItem.name}</h3>
-        {/* Placeholder for displaying existing comments */}
         <div className={styles.commentsListPlaceholder}>
           <p><em>Existing comments would appear here.</em></p>
         </div>
@@ -210,25 +214,25 @@ export default function PhotoFeedPage() {
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
   const [itemToDelete, setItemToDelete] = useState<MediaItem | null>(null);
 
-  // --- State for social features ---
   const [showCommentModal, setShowCommentModal] = useState<boolean>(false);
   const [commentingOnItem, setCommentingOnItem] = useState<MediaItem | null>(null);
-  // For guest identification - this is a placeholder.
-  // In a real app, this would come from an auth context or similar.
+  
+  // Corrected useState destructuring for currentGuestId
+  // The setter (setCurrentGuestId) is declared. If it's truly unused,
+  // ESLint will warn, and an eslint-disable comment can be added for it.
   const [currentGuestId, setCurrentGuestId] = useState<number | null>(1); // Example: Guest ID 1
 
-
-  const fetchMedia = async () => {
+  // Wrapped fetchMedia in useCallback
+  const fetchMedia = useCallback(async () => {
     setIsLoading(true);
     setPageError(null);
     try {
-      const response = await fetch("/api/get-guest-media"); // This API needs to be updated
+      const response = await fetch("/api/get-guest-media");
       const data: ApiResponse = await response.json();
 
       if (!response.ok || !data.success) {
         throw new Error(data.error || data.message || "Failed to load media.");
       }
-      // Ensure media items have default social counts if not provided by API yet
       const processedMedia = (data.media || []).map(item => ({
         ...item,
         likesCount: item.likesCount || 0,
@@ -237,7 +241,7 @@ export default function PhotoFeedPage() {
       }));
       setMediaItems(processedMedia);
 
-      if (processedMedia.length === 0 && !pageError) {
+      if (processedMedia.length === 0 && !pageError) { // Check !pageError to avoid overwriting an existing fetch error
         setPageError("No photos or videos have been shared yet. Check back soon!");
       }
     } catch (err) {
@@ -248,15 +252,18 @@ export default function PhotoFeedPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []); // Removed pageError from dependencies as it might cause loop if fetchMedia itself sets pageError
 
   useEffect(() => {
-    fetchMedia();
+    fetchMedia(); // fetchMedia is now stable due to useCallback
     const authStatus = sessionStorage.getItem("photoFeedAdminAuthenticated");
     if (authStatus === "true") {
       setIsAuthenticated(true);
     }
-  }, []);
+    // Example of how you might use setCurrentGuestId if needed, otherwise ESLint will warn.
+    // For now, we'll let ESLint flag it if it remains unused.
+    // setCurrentGuestId(prevId => prevId); 
+  }, [fetchMedia]); // Added fetchMedia to dependency array
 
   const openLightbox = (item: MediaItem) => {
     setLightboxItem(item);
@@ -310,7 +317,7 @@ export default function PhotoFeedPage() {
   const confirmDeleteMedia = async () => {
     if (!itemToDelete || !isAuthenticated) return;
     setShowDeleteConfirmModal(false);
-    setIsLoading(true);
+    setIsLoading(true); // Indicate loading state during deletion
     try {
       const adminPassword = process.env.NEXT_PUBLIC_MANAGEMENT_PASSWORD || "eW9zZGZlZGJhcg==";
       const response = await fetch("/api/delete-guest-media", {
@@ -324,7 +331,7 @@ export default function PhotoFeedPage() {
       }
       setMediaItems(prevItems => prevItems.filter(item => item.name !== itemToDelete.name));
       setNotification({ message: result.message || "Media item deleted successfully.", type: "success" });
-      if (mediaItems.length - 1 === 0) {
+      if (mediaItems.filter(item => item.name !== itemToDelete.name).length === 0) {
         setPageError("No photos or videos have been shared yet. Check back soon!");
       }
     } catch (err) {
@@ -333,17 +340,17 @@ export default function PhotoFeedPage() {
       setNotification({ message: `Error: ${errorMessage}`, type: "error" });
     } finally {
       setItemToDelete(null);
-      setIsLoading(false);
+      setIsLoading(false); // Reset loading state
     }
   };
 
-  // --- Placeholder Handlers for Like/Comment ---
   const handleLike = async (mediaId: number) => {
     if (!currentGuestId) {
-        setNotification({ message: "Please log in to like photos.", type: "error"}); // Or some way to identify user
+        setNotification({ message: "Please log in to like photos.", type: "error"});
         return;
     }
-    console.log(`Like action for media ID: ${mediaId} by guest ID: ${currentGuestId}`);
+    
+    const originalMediaItems = [...mediaItems]; // Store original state for potential revert
     // Optimistic UI update
     setMediaItems(prevItems =>
       prevItems.map(item => {
@@ -362,9 +369,7 @@ export default function PhotoFeedPage() {
     );
 
     try {
-      // API call to POST /api/media/[mediaId]/like with { guestId: currentGuestId }
-      // The backend should handle creating/deleting a MediaLike record
-      const response = await fetch(`/api/media/${mediaId}/like`, { // TODO: Create this API endpoint
+      const response = await fetch(`/api/media/${mediaId}/like`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ guestId: currentGuestId }),
@@ -373,14 +378,14 @@ export default function PhotoFeedPage() {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to update like status.");
       }
-      // Optional: Refetch media or update based on API response if not purely optimistic
-      // For now, the optimistic update handles the immediate UI change.
-      // fetchMedia(); // Or smarter update
+      // Optional: If API returns the updated item, use it. Otherwise, fetchMedia or rely on optimistic.
+      // const updatedItemFromServer = await response.json();
+      // setMediaItems(prev => prev.map(item => item.id === mediaId ? {...item, ...updatedItemFromServer.media} : item));
+
     } catch (error) {
       console.error("Error liking media:", error);
       setNotification({ message: (error as Error).message || "Failed to update like.", type: "error" });
-      // Revert optimistic update on error
-      fetchMedia(); // Simplest way to revert
+      setMediaItems(originalMediaItems); // Revert optimistic update on error
     }
   };
 
@@ -398,11 +403,9 @@ export default function PhotoFeedPage() {
         setNotification({ message: "Cannot submit comment without user identification.", type: "error"});
         return;
     }
-    console.log(`Comment on media ID: ${mediaId} by guest ID: ${currentGuestId}: "${commentText}"`);
-    // API call to POST /api/media/[mediaId]/comment with { guestId: currentGuestId, text: commentText }
-    // For now, just closes the modal and updates comment count optimistically
+    
     try {
-        const response = await fetch(`/api/media/${mediaId}/comment`, { // TODO: Create this API endpoint
+        const response = await fetch(`/api/media/${mediaId}/comment`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ guestId: currentGuestId, text: commentText }),
@@ -411,6 +414,7 @@ export default function PhotoFeedPage() {
             const errorData = await response.json();
             throw new Error(errorData.error || "Failed to post comment.");
         }
+        // Optimistically update comment count or refetch comments for this item
         setMediaItems(prevItems =>
             prevItems.map(item =>
                 item.id === mediaId ? { ...item, commentsCount: (item.commentsCount || 0) + 1 } : item
@@ -428,13 +432,12 @@ export default function PhotoFeedPage() {
   return (
     <>
       <Header />
-      {notification && (
-        <NotificationBar
-          message={notification.message}
-          type={notification.type}
-          onClose={() => setNotification(null)}
-        />
-      )}
+      {/* Pass notification.message or null to NotificationBar */}
+      <NotificationBar
+        message={notification ? notification.message : null}
+        type={notification ? notification.type : "success"}
+        onClose={() => setNotification(null)}
+      />
       <div className={styles.pageContainer}>
         <div className={styles.titleContainer}>
             <h1 className={styles.pageTitle}>Moments From The Wedding</h1>
@@ -488,8 +491,8 @@ export default function PhotoFeedPage() {
 
         {!isLoading && mediaItems.length > 0 && (
           <div className={styles.feedGrid}>
-            {mediaItems.map((item) => (
-              <div key={item.id || item.name} className={styles.feedItem}> {/* Use item.id if available */}
+            {mediaItems.map((item, index) => ( // Added index for priority prop
+              <div key={item.id || item.name} className={styles.feedItem}>
                 <div className={styles.mediaWrapper} onClick={() => openLightbox(item)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && openLightbox(item)}>
                   {item.contentType?.startsWith("image/") ? (
                     <Image
@@ -500,17 +503,18 @@ export default function PhotoFeedPage() {
                       className={styles.mediaContent}
                       style={{ objectFit: "cover" }}
                       unoptimized={true}
-                      priority={mediaItems.indexOf(item) < 3}
+                      priority={index < 3} // Prioritize loading for the first few images
                     />
                   ) : item.contentType?.startsWith("video/") ? (
                     <div className={styles.videoPlaceholder}>
                       <video
-                        src={item.url + '#t=0.1'}
+                        src={item.url + '#t=0.1'} // For thumbnail
                         className={styles.mediaContent}
                         preload="metadata"
                         aria-label={`Shared by guest: ${item.name}`}
                         muted
                         playsInline
+                        poster="" // Consider adding a poster image if available
                       >
                         Your browser does not support the video tag.
                       </video>
@@ -529,7 +533,6 @@ export default function PhotoFeedPage() {
                   )}
                 </div>
                 <div className={styles.itemInfo}>
-                  {/* Social Interaction Buttons */}
                   <div className={styles.socialActions}>
                     <button
                       onClick={() => handleLike(item.id)}
