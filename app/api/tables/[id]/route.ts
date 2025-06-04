@@ -1,6 +1,7 @@
 // app/api/tables/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client"; // Import Prisma for error types
 
 /**
  * GET /api/tables/[id]
@@ -82,11 +83,13 @@ export async function PUT(
     });
 
     return NextResponse.json(updatedTable);
-  } catch (error: any) { // Catching 'any' to inspect Prisma-specific errors
+  } catch (error: unknown) { // Changed error type from 'any' to 'unknown'
     console.error("Error updating table:", error);
-    // Check for Prisma's "Record to update not found" error
-    if (error.code === 'P2025') {
-      return NextResponse.json({ message: "Error updating table: Table not found.", error: error.message }, { status: 404 });
+    // Type check for Prisma-specific errors
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2025') { // "Record to update not found"
+        return NextResponse.json({ message: "Error updating table: Table not found.", error: error.message }, { status: 404 });
+      }
     }
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
     return NextResponse.json({ message: "Error updating table", error: errorMessage }, { status: 500 });
@@ -119,15 +122,16 @@ export async function DELETE(
     });
     // Return a 204 No Content for successful deletion, or a JSON message.
     return NextResponse.json({ message: "Table deleted successfully" }, { status: 200 });
-  } catch (error: any) { // Catching 'any' to inspect Prisma-specific errors
+  } catch (error: unknown) { // Changed error type from 'any' to 'unknown'
     console.error("Error deleting table:", error);
-    // Check for Prisma's "Record to delete not found" error
-    if (error.code === 'P2025') {
-      return NextResponse.json({ message: "Error deleting table: Table not found.", error: error.message }, { status: 404 });
-    }
-    // Check for foreign key constraint violation (e.g., if guests are still assigned and onDelete is RESTRICT)
-    if (error.code === 'P2003') {
-        return NextResponse.json({ message: "Error deleting table: Cannot delete table with assigned guests. Please unassign guests first.", error: error.message }, { status: 409 }); // 409 Conflict
+    // Type check for Prisma-specific errors
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2025') { // "Record to delete not found"
+        return NextResponse.json({ message: "Error deleting table: Table not found.", error: error.message }, { status: 404 });
+      }
+      if (error.code === 'P2003') { // Foreign key constraint violation
+          return NextResponse.json({ message: "Error deleting table: Cannot delete table with assigned guests. Please unassign guests first.", error: error.message }, { status: 409 }); // 409 Conflict
+      }
     }
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
     return NextResponse.json({ message: "Error deleting table", error: errorMessage }, { status: 500 });
