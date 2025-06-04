@@ -217,9 +217,7 @@ export default function PhotoFeedPage() {
   const [showCommentModal, setShowCommentModal] = useState<boolean>(false);
   const [commentingOnItem, setCommentingOnItem] = useState<MediaItem | null>(null);
   
-  // Corrected useState destructuring for currentGuestId
-  // The setter (setCurrentGuestId) is declared. If it's truly unused,
-  // ESLint will warn, and an eslint-disable comment can be added for it.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentGuestId, setCurrentGuestId] = useState<number | null>(1); // Example: Guest ID 1
 
   // Wrapped fetchMedia in useCallback
@@ -252,7 +250,7 @@ export default function PhotoFeedPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []); // Removed pageError from dependencies as it might cause loop if fetchMedia itself sets pageError
+  }, [pageError]); // Added pageError to dependency array
 
   useEffect(() => {
     fetchMedia(); // fetchMedia is now stable due to useCallback
@@ -260,8 +258,8 @@ export default function PhotoFeedPage() {
     if (authStatus === "true") {
       setIsAuthenticated(true);
     }
-    // Example of how you might use setCurrentGuestId if needed, otherwise ESLint will warn.
-    // For now, we'll let ESLint flag it if it remains unused.
+    // Example of how you might use setCurrentGuestId if needed.
+    // If setCurrentGuestId remains unused, the ESLint disable comment above handles it.
     // setCurrentGuestId(prevId => prevId); 
   }, [fetchMedia]); // Added fetchMedia to dependency array
 
