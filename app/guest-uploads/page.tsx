@@ -262,8 +262,8 @@ export default function GuestUploadPage() {
       setOverallMessage(`😔 Oops, ${currentGuestName}! All uploads encountered issues. Please check individual file errors below and try again.`);
       setOverallMessageType("error");
     } else {
-        setOverallMessage(`No files were processed.`);
-        setOverallMessageType(null);
+      setOverallMessage(`No files were processed.`);
+      setOverallMessageType(null);
     }
   };
 
@@ -308,15 +308,15 @@ export default function GuestUploadPage() {
 
       {showGuestIdentifyModal && (
         <GuestSelector
-            isOpen={showGuestIdentifyModal}
-            onClose={() => {
-                setShowGuestIdentifyModal(false);
-                if (!currentGuestId) {
-                    setNotification({ message: "Please identify yourself to upload photos.", type: "error" });
-                }
-            }}
-            onGuestIdentified={handleGuestIdentified}
-            context="upload"
+          isOpen={showGuestIdentifyModal}
+          onClose={() => {
+            // Simply close the modal. The logic for displaying the "Please Identify"
+            // message is already handled by the banner in the main component JSX.
+            // This removes the race condition.
+            setShowGuestIdentifyModal(false);
+          }}
+          onGuestIdentified={handleGuestIdentified}
+          context="upload"
         />
       )}
 
@@ -386,8 +386,8 @@ export default function GuestUploadPage() {
                               unoptimized={true}
                             />
                           )}
-                          {fs.fileType === 'video' && ( <div className={styles.videoThumbnailPlaceholder}><VideoIcon /></div> )}
-                          {fs.fileType === 'other' && ( <div className={styles.otherFileThumbnailPlaceholder}>📄</div> )}
+                          {fs.fileType === 'video' && (<div className={styles.videoThumbnailPlaceholder}><VideoIcon /></div>)}
+                          {fs.fileType === 'other' && (<div className={styles.otherFileThumbnailPlaceholder}>📄</div>)}
                         </div>
                         <div className={styles.fileDetails}>
                           <span className={styles.fileName}> {getStatusIcon(fs.status)} {fs.file.name} </span>
@@ -408,9 +408,9 @@ export default function GuestUploadPage() {
                           rows={2}
                           disabled={isSubmitting || fs.status === 'success' || fs.status === 'error'}
                         />
-                         <span className={styles.charCount}>
-                           {(fs.caption?.length || 0)}/150
-                         </span>
+                        <span className={styles.charCount}>
+                          {(fs.caption?.length || 0)}/150
+                        </span>
                       </div>
                       {(fs.status === "uploading" || fs.status === "success") && fs.progress > 0 && (
                         <div className={styles.progressBarContainer}>
@@ -420,7 +420,7 @@ export default function GuestUploadPage() {
                           </div>
                         </div>
                       )}
-                      {fs.status === "error" && fs.errorMessage && ( <div className={styles.fileErrorMessage}> <strong>Upload Issue:</strong> {fs.errorMessage} </div> )}
+                      {fs.status === "error" && fs.errorMessage && (<div className={styles.fileErrorMessage}> <strong>Upload Issue:</strong> {fs.errorMessage} </div>)}
                     </li>
                   ))}
                 </ul>
@@ -436,7 +436,7 @@ export default function GuestUploadPage() {
             </button>
           </form>
 
-          {overallMessage && ( <div className={`${styles.message} ${ overallMessageType === "success" ? styles.successMessage : overallMessageType === "error" ? styles.errorMessage : styles.loadingMessage }`} role="alert"> {overallMessage} </div> )}
+          {overallMessage && (<div className={`${styles.message} ${overallMessageType === "success" ? styles.successMessage : overallMessageType === "error" ? styles.errorMessage : styles.loadingMessage}`} role="alert"> {overallMessage} </div>)}
 
           <p className={styles.thankYouNote}> Every photo tells our story... Thank you for being part of it! 💫 </p>
           <p className={styles.photoFeedLink}> <a href="/photo-feed" className={styles.link}> 🖼️ Explore Our Memory Gallery </a> </p>
