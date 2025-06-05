@@ -5,7 +5,7 @@ import React, { useState, ChangeEvent, FormEvent, useRef, useEffect } from "reac
 import Header from "../components/Header";
 import styles from "./GuestUploads.module.css";
 import GuestSelector from "../components/GuestSelector"; // Assuming this is the updated GuestSelector
-import { FaUserCircle, FaCamera, FaSpinner, FaExclamationTriangle, FaCheckCircle } from "react-icons/fa"; // Added icons
+import { FaUserCircle, FaCamera, FaExclamationTriangle, FaCheckCircle } from "react-icons/fa"; // Removed FaSpinner
 import Image from "next/image";
 
 interface UploadResponse {
