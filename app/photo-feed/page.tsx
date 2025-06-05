@@ -51,7 +51,7 @@ const NotificationBar = ({ message, type, onClose }: { message: string | null; t
     <div className={`${styles.notificationBar} ${type === "success" ? styles.success : styles.error}`}>
       {type === "success" ? <FaCheckCircle className={styles.notificationIcon} /> : <FaExclamationTriangle className={styles.notificationIcon} />}
       <span>{message}</span>
-      <button onClick={onClose} className={styles.notificationClose}>&times;</button>
+      <button onClick={onClose} className={styles.notificationClose}>×</button>
     </div>
   );
 };
@@ -121,7 +121,7 @@ const LightboxModal = ({ src, alt, type, onClose }: { src: string; alt: string; 
   return (
     <div className={styles.lightboxOverlay} onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="lightboxTitle">
       <div className={styles.lightboxContent} ref={modalContentRef} onClick={(e) => e.stopPropagation()}>
-        <button className={styles.lightboxClose} onClick={onClose} aria-label="Close media view">&times;</button>
+        <button className={styles.lightboxClose} onClick={onClose} aria-label="Close media view">×</button>
         {type?.startsWith("image/") ? (
           <Image
             src={src}
@@ -371,7 +371,7 @@ export default function PhotoFeedPage() {
 
   const totalBookPages = useMemo(() => {
     if (mediaItems.length === 0) return 1;
-    return isMobileLayout ? mediaItems.length + 1 : Math.ceil(Math.max(0, mediaItems.length) / itemsPerSpread) + 1;
+    return isMobileLayout ? mediaItems.length + 1 : Math.ceil(Math.max(0, mediaItems.length - 1) / itemsPerSpread) + 1;
   }, [mediaItems.length, isMobileLayout, itemsPerSpread]);
 
   const fetchMedia = useCallback(async () => {
@@ -470,7 +470,9 @@ export default function PhotoFeedPage() {
       setNotification({ message: result.message || "Media item deleted successfully.", type: "success" });
       
       // Recalculate totalBookPages based on new items length
-      const newTotalBookPages = updatedMediaItems.length > 0 ? (Math.ceil(Math.max(0, updatedMediaItems.length) / itemsPerSpread) + 1) : 1;
+      const newTotalBookPages = isMobileLayout 
+        ? updatedMediaItems.length + 1 
+        : Math.ceil(Math.max(0, updatedMediaItems.length - 1) / itemsPerSpread) + 1;
       
       if (currentPage >= newTotalBookPages) {
         // If current page is now out of bounds, move to the new last page
@@ -481,12 +483,7 @@ export default function PhotoFeedPage() {
         flippedPages.forEach(p => {
           if (p < newCurrentPage) newFlippedPages.add(p); // Only keep flipped pages before the new current page
         });
-        // If on the new last page and it was previously flipped, it should remain "open" to that page.
-        // If newCurrentPage itself was in old flippedPages, it should be added.
-        if (flippedPages.has(newCurrentPage)) {
-            newFlippedPages.add(newCurrentPage);
-        }
-
+        
         setFlippedPages(newFlippedPages);
 
       } else if (updatedMediaItems.length === 0) {
@@ -522,102 +519,85 @@ export default function PhotoFeedPage() {
   };
 
   const handleNextPage = () => {
-    if (isLoading) return;
-    if (isMobileLayout) {
-      if (currentPage < totalBookPages - 1) {
-        handlePageFlip(currentPage);
-        setCurrentPage(currentPage + 1);
-      } else if (currentPage === 0 && !flippedPages.has(0)) {
-        handlePageFlip(0);
-      }
-    } else {
-      if (currentPage < totalBookPages - 1) {
-        handlePageFlip(currentPage);
-        setCurrentPage(currentPage + 1);
-      } else if (currentPage === 0 && totalBookPages === 1 && mediaItems.length > 0 && !flippedPages.has(0)) {
-        handlePageFlip(0);
-      }
+    if (isLoading || pageToAnimate !== null) return;
+  
+    if (currentPage < totalBookPages - 1) {
+      handlePageFlip(currentPage);
+      setCurrentPage(currentPage + 1);
+    } else if (currentPage === 0 && !flippedPages.has(0) && totalBookPages > 1) { 
+      // Special case for opening the cover when it's the only page but there's content
+      handlePageFlip(0);
+      setCurrentPage(1); // Move to show the "first page" view
     }
   };
 
   const handlePrevPage = () => {
-    if (isLoading) return;
-    if (isMobileLayout) {
-      if (currentPage > 0) {
-        const pageToUnflip = currentPage - 1;
-        handlePageFlip(pageToUnflip);
-        setCurrentPage(pageToUnflip);
-      }
-    } else {
-      if (currentPage > 0) {
-        const pageToUnflipAndShow = currentPage - 1;
-        handlePageFlip(pageToUnflipAndShow);
-        setCurrentPage(pageToUnflipAndShow);
-      }
+    if (isLoading || pageToAnimate !== null) return;
+  
+    if (currentPage > 0) {
+      const pageToUnflipAndShow = currentPage - 1;
+      handlePageFlip(pageToUnflipAndShow);
+      setCurrentPage(pageToUnflipAndShow);
     }
   };
   
   const getPageItemsForBookPage = useCallback((pageIdx: number): MediaItem[] => {
-    if (pageIdx === 0) {
+    if (pageIdx === 0) { // Cover Page
+      // On desktop, the back of the cover shows the first item. On mobile, it's blank.
       return isMobileLayout ? [] : mediaItems.length > 0 ? [mediaItems[0]] : [];
     }
     if (isMobileLayout) {
       const itemIndex = pageIdx - 1;
       return itemIndex < mediaItems.length ? [mediaItems[itemIndex]] : [];
     } else {
+      // Desktop: page 0 is cover, its back has item 0. Page 1 component starts with item 1.
       const startIndex = (pageIdx - 1) * itemsPerSpread + 1;
-      return startIndex < 0 || startIndex >= mediaItems.length ? [] : mediaItems.slice(startIndex, startIndex + itemsPerSpread);
+      return mediaItems.slice(startIndex, startIndex + itemsPerSpread);
     }
   }, [mediaItems, isMobileLayout, itemsPerSpread]);
 
   const getCurrentViewingPageLabel = () => {
     if (mediaItems.length === 0) return "Cover";
+  
     if (isMobileLayout) {
-      return currentPage === 0 ? "Cover" : `Page ${currentPage}`;
+      if (currentPage === 0) return "Cover";
+      return `Page ${currentPage}`;
     } else {
-      if (currentPage === 0 && flippedPages.has(0)) return "Page 1";
-      if (currentPage > 0) {
-        const firstItemOnSpreadIndex = (currentPage - 1) * itemsPerSpread + 1;
-        const firstUserPageNum = firstItemOnSpreadIndex + 1;
-        const secondItemOnSpreadIndex = firstItemOnSpreadIndex + 1;
-        return secondItemOnSpreadIndex < mediaItems.length ? `Pages ${firstUserPageNum}-${firstUserPageNum + 1}` : `Page ${firstUserPageNum}`;
+      if (currentPage === 0) {
+        return flippedPages.has(0) ? "Page 1" : "Cover";
       }
-      return "Cover";
+      const firstUserPageNum = (currentPage - 1) * 2 + 2;
+      const itemsOnSpread = getPageItemsForBookPage(currentPage).length;
+  
+      if (itemsOnSpread === 2) {
+        return `Pages ${firstUserPageNum}-${firstUserPageNum + 1}`;
+      } else if (itemsOnSpread === 1) {
+        return `Page ${firstUserPageNum}`;
+      }
+      return "End";
     }
   };
 
   const getTotalPagesDisplayed = () => {
-    return isMobileLayout ? Math.max(1, mediaItems.length) : Math.max(1, mediaItems.length) + 1;
+    if (mediaItems.length === 0) return "1";
+    return isMobileLayout ? `${mediaItems.length}` : `${mediaItems.length + 1}`;
   };
 
   const isNextDisabled = () => {
-    return isMobileLayout ? isLoading || (currentPage >= totalBookPages - 1 && flippedPages.has(currentPage)) : isLoading || (currentPage >= totalBookPages - 1 && (totalBookPages > 1 || (totalBookPages === 1 && flippedPages.has(0))));
+    return isLoading || pageToAnimate !== null || currentPage >= totalBookPages - 1;
   };
-
+  
   const isPrevDisabled = () => {
-    return isMobileLayout ? isLoading || currentPage === 0 : isLoading || (currentPage === 0 && !flippedPages.has(0));
-  };
-
-  const MAX_Z_INDEX_BASE = totalBookPages + 10;
-
-  // Determine current viewing page for indicator
-  let currentViewingPageLabel = "Cover";
-  if (mediaItems.length > 0) {
-    if (currentPage === 0 && flippedPages.has(0)) { // Cover is flipped, showing item 0 (page 1)
-      currentViewingPageLabel = "Page 1";
-    } else if (currentPage > 0) {
-      // currentPage = 1 corresponds to items[1] (page 2) and items[2] (page 3)
-      const firstItemOnSpreadIndex = (currentPage - 1) * itemsPerSpread + 1;
-      const firstUserPageNum = firstItemOnSpreadIndex + 1;
-      const secondItemOnSpreadIndex = firstItemOnSpreadIndex + 1;
-      
-      if (secondItemOnSpreadIndex < mediaItems.length) {
-        currentViewingPageLabel = `Pages ${firstUserPageNum}-${firstUserPageNum + 1}`;
-      } else {
-        currentViewingPageLabel = `Page ${firstUserPageNum}`;
-      }
+    if (isLoading || pageToAnimate !== null) return true;
+    if (isMobileLayout) {
+      return currentPage === 0;
+    } else {
+      // Can't go back if on the cover and it's not flipped
+      return currentPage === 0 && !flippedPages.has(0);
     }
-  }
+  };
+  
+  const MAX_Z_INDEX_BASE = totalBookPages + 10;
 
   return (
     <>
@@ -647,7 +627,7 @@ export default function PhotoFeedPage() {
         {showAuthModal && !isAuthenticated && (
           <div className={styles.authModalOverlay}>
             <div className={styles.authModalContent}>
-              <button className={styles.modalCloseButton} onClick={() => { setShowAuthModal(false); setAuthError(null); setPassword("");}} aria-label="Close admin login">&times;</button>
+              <button className={styles.modalCloseButton} onClick={() => { setShowAuthModal(false); setAuthError(null); setPassword("");}} aria-label="Close admin login">×</button>
               <h2>Admin Login</h2>
               <form onSubmit={handleAuthSubmit}>
                 <input
@@ -683,26 +663,22 @@ export default function PhotoFeedPage() {
           <>
             <div className={styles.flipBookContainer} aria-label="Photo Album">
               <div className={styles.book}>
-                <div className={styles.bookSpine} />
+                {!isMobileLayout && <div className={styles.bookSpine} />}
                 <div className={styles.bookPages}>
                   {Array.from({ length: totalBookPages }, (_, i) => {
                     const pageComponentIndex = i;
                     const isFlipped = flippedPages.has(pageComponentIndex);
                     
                     let zIndexValue;
-                    // Simplified z-index logic: current page highest, then descending for unflipped, ascending for flipped from back
                     if (pageToAnimate === pageComponentIndex) {
-                        zIndexValue = MAX_Z_INDEX_BASE + 1; // Highest when animating
+                        zIndexValue = MAX_Z_INDEX_BASE + 1;
                     } else if (pageComponentIndex === currentPage) {
-                        zIndexValue = MAX_Z_INDEX_BASE;     // Current active page (not yet flipped or just unflipped to)
+                        zIndexValue = MAX_Z_INDEX_BASE;
                     } else if (isFlipped) {
-                        // Flipped pages go from low (further back) to higher as they get closer to front
-                        zIndexValue = pageComponentIndex + 1; 
+                        zIndexValue = pageComponentIndex + 1;
                     } else {
-                        // Unflipped pages go from high (closer to front) to lower
                         zIndexValue = MAX_Z_INDEX_BASE - pageComponentIndex;
                     }
-
 
                     return (
                       <BookPage
@@ -711,14 +687,19 @@ export default function PhotoFeedPage() {
                         pageNumber={pageComponentIndex}
                         isFlipped={isFlipped}
                         onFlip={() => {
-                            // If clicking the current page that's not flipped, try to go next
                             if (pageComponentIndex === currentPage && !isFlipped) {
                                 handleNextPage();
-                            // If clicking a flipped page to the "left" of current view, go previous
-                            } else if (isFlipped && pageComponentIndex < currentPage) {
-                                handlePrevPage();
+                            } else if (pageComponentIndex < currentPage) {
+                                // Clicking a page to the "left" of the stack should turn back to it
+                                setCurrentPage(pageComponentIndex);
+                                setFlippedPages(prev => {
+                                    const newSet = new Set<number>();
+                                    prev.forEach(p => {
+                                        if (p < pageComponentIndex) newSet.add(p);
+                                    });
+                                    return newSet;
+                                });
                             }
-                            // Potentially other interactions, e.g. clicking a far page to jump
                         }}
                         isAuthenticated={isAuthenticated}
                         onDeleteRequest={requestDeleteMedia}
@@ -733,7 +714,6 @@ export default function PhotoFeedPage() {
               </div>
             </div>
             
-            {/* Controls only if there are items to navigate */}
             {mediaItems.length > 0 && (
                  <div className={styles.bookControls}>
                  <button 
