@@ -1,7 +1,7 @@
 /* app/photo-feed/PhotoFeed.module.css - Flip Book Theme */
 
 /* --- Flip Book Theme Variables --- */
-:root {
+:global(:root) {
   --book-cream: #faf6f0;
   --book-paper: #f9f4ed; /* Slightly off-white for pages */
   --book-shadow: #e8dfd2; /* Soft shadow for depth */
