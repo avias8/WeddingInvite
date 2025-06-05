@@ -396,12 +396,7 @@ export default function GuestUploadPage() {
 
           <form onSubmit={handleSubmit} className={styles.uploadForm}>
             <div className={styles.fileInputContainer}>
-              <label
-                htmlFor="fileUpload"
-                className={`${styles.fileInputLabel} ${
-                  (!currentGuestId && currentGuestId !== ANONYMOUS_GUEST_DETAILS.id) ? styles.disabledLabel : ''
-                }`}
-              >
+              <label htmlFor="fileUpload" className={`${styles.fileInputLabel} ${(!currentGuestId && currentGuestId !== 0) ? styles.disabledLabel : ''}`}>
                 {selectedFiles && selectedFiles.length > 0
                   ? `${selectedFiles.length} beautiful ${selectedFiles.length === 1 ? 'file' : 'files'} selected`
                   : "Choose Your Favorite Memories"}
@@ -414,7 +409,7 @@ export default function GuestUploadPage() {
                 accept="image/*,video/*"
                 onChange={handleFileChange}
                 className={styles.fileInput}
-                disabled={!currentGuestId || currentGuestId === ANONYMOUS_GUEST_DETAILS.id || isSubmitting} // Disable if not identified
+                disabled={isSubmitting || (currentGuestId === null && currentGuestId !== ANONYMOUS_GUEST_DETAILS.id)} // Disable if not identified (allow if anon ID is set)
               />
             </div>
 
@@ -509,11 +504,7 @@ export default function GuestUploadPage() {
           )}
 
           <p className={styles.thankYouNote}> Every photo tells our story... Thank you for being part of it! 💫 </p>
-          <p className={styles.photoFeedLink}>
-            <a href="/photo-feed" className={`${styles.link} ${styles.memoryGalleryButton}`}>
-              🖼️ Explore Our Memory Gallery
-            </a>
-          </p>
+          <p className={styles.photoFeedLink}> <a href="/photo-feed" className={styles.link}> 🖼️ Explore Our Memory Gallery </a> </p>
         </div>
       </div>
     </>
