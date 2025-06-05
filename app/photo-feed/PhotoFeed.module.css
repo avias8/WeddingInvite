@@ -148,9 +148,7 @@
   /* z-index is set by inline style from JS, but this class can add other effects if needed */
    box-shadow: 0 0 30px rgba(0,0,0,0.3); /* Emphasize turning page */
 }
-.coverPage.bookPage { /* Specific styles for the cover if needed, e.g., thicker feel */
-   /* border-left: 1px solid var(--book-spine); */ /* If spine isn't separate element */
-}
+
 
 
 /* Page Sides */

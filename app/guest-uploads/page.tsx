@@ -30,20 +30,19 @@ interface IndividualFileStatus {
 
 // NotificationBar Component
 const NotificationBar = ({ message, type, onClose }: { message: string | null; type: "success" | "error"; onClose: () => void }) => {
-  // useEffect is now at the top level
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (message) { // Logic depending on message is inside the hook
+    if (message) {
       timer = setTimeout(() => {
         onClose();
-      }, 5000); // Auto-close after 5 seconds
+      }, 5000);
     }
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [message, onClose]); // Dependencies remain the same
+  }, [message, onClose]);
 
-  if (!message) return null; // Conditional return remains
+  if (!message) return null;
 
   return (
     <div className={`${styles.notificationBar} ${type === "success" ? styles.successMessage : styles.errorMessage}`}>
@@ -53,7 +52,7 @@ const NotificationBar = ({ message, type, onClose }: { message: string | null; t
   );
 };
 
-// VideoIcon Component (remains the same)
+// VideoIcon Component
 const VideoIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" width="24px" height="24px" className={styles.videoIcon}>
     <path d="M8 5v14l11-7z" />
@@ -73,7 +72,6 @@ export default function GuestUploadPage() {
   const [showGuestIdentifyModal, setShowGuestIdentifyModal] = useState<boolean>(false);
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
-  // useEffect for guest identification (remains the same)
   useEffect(() => {
     const storedGuestId = sessionStorage.getItem("uploadGuestId");
     const storedGuestName = sessionStorage.getItem("uploadGuestName");
@@ -85,7 +83,6 @@ export default function GuestUploadPage() {
     }
   }, []);
 
-  // useEffect for revoking object URLs (remains the same)
   useEffect(() => {
     return () => {
       filesStatus.forEach(fs => {
@@ -96,7 +93,6 @@ export default function GuestUploadPage() {
     };
   }, [filesStatus]);
 
-  // handleFileChange (remains the same)
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     filesStatus.forEach(fs => { if (fs.previewUrl) URL.revokeObjectURL(fs.previewUrl); });
     setSelectedFiles(event.target.files);
@@ -113,7 +109,7 @@ export default function GuestUploadPage() {
         } else if (file.type.startsWith("video/")) {
           fileType = 'video';
         }
-        return { file, status: "pending" as const, progress: 0, previewUrl, fileType };
+        return { file, status: "pending" as const, progress: 0, previewUrl, fileType, errorMessage: undefined, gcsObjectName: undefined };
       });
       setFilesStatus(newFilesStatusArray);
     } else {
@@ -121,23 +117,21 @@ export default function GuestUploadPage() {
     }
   };
 
-  // updateFileStatus (remains the same)
   const updateFileStatus = (index: number, status: IndividualFileStatus["status"], gcsObjectName?: string, errorMessage?: string, progress?: number) => {
     setFilesStatus(prev =>
       prev.map((fs, i) => {
         if (i === index) {
-          const newStatusUpdate = { ...fs, status, gcsObjectName, errorMessage };
+          const newStatusUpdate: Partial<IndividualFileStatus> = { status, gcsObjectName, errorMessage };
           if (progress !== undefined) newStatusUpdate.progress = progress;
-          if (status === "success" && newStatusUpdate.progress !== 100) newStatusUpdate.progress = 100;
+          if (status === "success" && (newStatusUpdate.progress === undefined || newStatusUpdate.progress < 100)) newStatusUpdate.progress = 100;
           if (status === "error" && progress === undefined) newStatusUpdate.progress = 0;
-          return newStatusUpdate;
+          return { ...fs, ...newStatusUpdate };
         }
         return fs;
       })
     );
   };
 
-  // handleGuestIdentified (remains the same)
   const handleGuestIdentified = (guest: { id: number; name: string; inviteeId: number }) => {
     setCurrentGuestId(guest.id);
     setCurrentGuestName(guest.name);
@@ -147,7 +141,6 @@ export default function GuestUploadPage() {
     setNotification({ message: `Welcome, ${guest.name}! You're all set to share your memories.`, type: "success" });
   };
 
-  // handleChangeGuest (remains the same)
   const handleChangeGuest = () => {
     sessionStorage.removeItem("uploadGuestId");
     sessionStorage.removeItem("uploadGuestName");
@@ -157,7 +150,6 @@ export default function GuestUploadPage() {
     setNotification(null);
   };
 
-  // handleSubmit (remains the same, ensure currentGuestId is used for finalize-upload)
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!currentGuestId) {
@@ -174,91 +166,102 @@ export default function GuestUploadPage() {
 
     setIsSubmitting(true);
     setOverallMessage(`✨ Processing your beautiful memories, ${currentGuestName}...`);
-    setOverallMessageType(null);
-    let successfulUploadsCount = 0;
+    setOverallMessageType(null); // Clear previous type, will be set based on outcome
 
-    const uploadPromises = filesStatus.map((fs, i) => {
+    // Use a new array for results to determine overall status accurately
+    const operationResults: { success: boolean; fileName: string; error?: string }[] = [];
+
+    for (let i = 0; i < filesStatus.length; i++) {
+      const fs = filesStatus[i];
       const file = fs.file;
       updateFileStatus(i, "uploading", undefined, undefined, 0);
-      return (async () => {
-        try {
-          const signedUrlResponse = await fetch("/api/generate-upload-url", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ filename: file.name, contentType: file.type }),
-          });
-          const signedUrlData: UploadResponse = await signedUrlResponse.json();
-          if (!signedUrlResponse.ok || !signedUrlData.success || !signedUrlData.signedUrl || !signedUrlData.gcsObjectName) {
-            throw new Error(signedUrlData.error || signedUrlData.details || "Failed to get an upload URL.");
-          }
 
-          await new Promise<void>((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open("PUT", signedUrlData.signedUrl as string, true);
-            xhr.setRequestHeader("Content-Type", file.type);
-            xhr.upload.onprogress = (progressEvent) => {
-              if (progressEvent.lengthComputable) {
-                const percentComplete = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-                updateFileStatus(i, "uploading", undefined, undefined, percentComplete);
-              }
-            };
-            xhr.onload = () => {
-              if (xhr.status >= 200 && xhr.status < 300) {
-                updateFileStatus(i, "success", signedUrlData.gcsObjectName, undefined, 100);
-                // Ensure currentGuestId is passed to finalize-upload
-                fetch('/api/media/finalize-upload', { // Assuming this endpoint exists
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        gcsObjectName: signedUrlData.gcsObjectName,
-                        originalFileName: file.name,
-                        contentType: file.type,
-                        uploaderId: currentGuestId // Pass the identified guest's ID
-                    })
-                }).catch(finalizeError => console.error("Error finalizing upload metadata:", finalizeError));
-                resolve();
-              } else {
-                reject(new Error(`Upload failed for ${file.name}. Status: ${xhr.status} ${xhr.statusText || 'Unknown error'}`));
-              }
-            };
-            xhr.onerror = () => reject(new Error(`Network error during upload for ${file.name}. Please check your connection.`));
-            xhr.onabort = () => reject(new Error(`Upload aborted for ${file.name}.`));
-            xhr.send(file);
-          });
-          return { success: true, fileName: file.name };
-        } catch (error) {
-          const errMsg = error instanceof Error ? error.message : "An unknown error occurred during upload.";
-          if (process.env.NODE_ENV !== 'production') console.error(`Error uploading ${file.name}:`, error);
-          updateFileStatus(i, "error", undefined, errMsg, 0);
-          return { success: false, fileName: file.name, error: errMsg };
+      try {
+        // 1. Get Signed URL
+        const signedUrlResponse = await fetch("/api/generate-upload-url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filename: file.name, contentType: file.type }),
+        });
+        const signedUrlData: UploadResponse = await signedUrlResponse.json();
+        if (!signedUrlResponse.ok || !signedUrlData.success || !signedUrlData.signedUrl || !signedUrlData.gcsObjectName) {
+          throw new Error(signedUrlData.error || signedUrlData.details || "Failed to get an upload URL.");
         }
-      })();
-    });
 
-    const results = await Promise.all(uploadPromises);
-    successfulUploadsCount = results.filter(r => r.success).length;
-    const allSuccessful = results.every(r => r.success);
+        // 2. Upload to GCS
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("PUT", signedUrlData.signedUrl as string, true);
+          xhr.setRequestHeader("Content-Type", file.type);
+          xhr.upload.onprogress = (progressEvent) => {
+            if (progressEvent.lengthComputable) {
+              const percentComplete = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+              updateFileStatus(i, "uploading", signedUrlData.gcsObjectName, undefined, percentComplete);
+            }
+          };
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve();
+            } else {
+              reject(new Error(`GCS Upload failed for ${file.name}. Status: ${xhr.status} ${xhr.statusText || 'Unknown error'}`));
+            }
+          };
+          xhr.onerror = () => reject(new Error(`Network error during GCS upload for ${file.name}.`));
+          xhr.onabort = () => reject(new Error(`GCS Upload aborted for ${file.name}.`));
+          xhr.send(file);
+        });
+
+        // 3. Finalize Upload (save metadata to DB)
+        const finalizeResponse = await fetch('/api/media/finalize-upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            gcsObjectName: signedUrlData.gcsObjectName,
+            originalFileName: file.name,
+            contentType: file.type,
+            uploaderId: currentGuestId
+          })
+        });
+        const finalizeData: UploadResponse = await finalizeResponse.json();
+
+        if (!finalizeResponse.ok || !finalizeData.success) {
+          throw new Error(finalizeData.error || finalizeData.message || `Failed to save ${file.name} details to our records.`);
+        }
+
+        updateFileStatus(i, "success", signedUrlData.gcsObjectName, undefined, 100);
+        operationResults.push({ success: true, fileName: file.name });
+
+      } catch (error) {
+        const errMsg = error instanceof Error ? error.message : "An unknown error occurred during processing.";
+        if (process.env.NODE_ENV !== 'production') console.error(`Error processing ${file.name}:`, error);
+        updateFileStatus(i, "error", fs.gcsObjectName, errMsg, 0); // Keep gcsObjectName if it was obtained
+        operationResults.push({ success: false, fileName: file.name, error: errMsg });
+      }
+    } // End of for loop
 
     setIsSubmitting(false);
-    if (allSuccessful) {
+    const successfulUploadsCount = operationResults.filter(r => r.success).length;
+    const allSuccessful = operationResults.every(r => r.success);
+
+    if (allSuccessful && filesStatus.length > 0) {
       setOverallMessage(`🎉 Amazing, ${currentGuestName}! ${successfulUploadsCount} precious ${successfulUploadsCount === 1 ? 'memory has' : 'memories have'} been uploaded successfully! Thank you! ✨`);
       setOverallMessageType("success");
+      setSelectedFiles(null); // Clear selected files from input
+      setFilesStatus([]);    // Clear the status list
+      if (fileInputRef.current) fileInputRef.current.value = ""; // Reset file input
     } else if (successfulUploadsCount > 0) {
-      setOverallMessage(`📸 Great progress, ${currentGuestName}! ${successfulUploadsCount} ${successfulUploadsCount === 1 ? 'file has' : 'files have'} been uploaded. Some others had issues - please check below.`);
+      setOverallMessage(`📸 Great progress, ${currentGuestName}! ${successfulUploadsCount} ${successfulUploadsCount === 1 ? 'file has' : 'files have'} been uploaded. Some others had issues - please check their status below.`);
+      setOverallMessageType("error"); // Still an error overall if some failed
+    } else if (filesStatus.length > 0) { // All failed if any were attempted
+      setOverallMessage(`😔 Oops, ${currentGuestName}! All uploads encountered issues. Please check individual file errors below and try again.`);
       setOverallMessageType("error");
-    } else {
-      setOverallMessage(`😔 Oops, ${currentGuestName}! All uploads encountered issues. Please try again or contact us.`);
-      setOverallMessageType("error");
-    }
-
-    if (allSuccessful) {
-      setSelectedFiles(null);
-      setFilesStatus([]);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+    } else { // No files were processed (shouldn't happen if validation is correct)
+        setOverallMessage(`No files were processed.`);
+        setOverallMessageType(null);
     }
   };
 
-  // formatFileSize (remains the same)
+
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -267,18 +270,16 @@ export default function GuestUploadPage() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  // getStatusIcon (remains the same)
   const getStatusIcon = (status: IndividualFileStatus["status"]): string => {
     switch (status) {
       case "pending": return "⏳";
-      case "uploading": return "📤";
+      case "uploading": return "�";
       case "success": return "✅";
       case "error": return "❌";
       default: return "📄";
     }
   };
 
-  // SelectedUserBadge Component (remains the same)
   const SelectedUserBadge = () =>
     currentGuestName ? (
       <div className={styles.selectedUserBadgeCard}>
@@ -293,16 +294,15 @@ export default function GuestUploadPage() {
   return (
     <>
       <Header />
-      {/* Pass notification.message or null to NotificationBar */}
       <NotificationBar
         message={notification ? notification.message : null}
-        type={notification ? notification.type : "success"} // Default type if message is null but component is rendered
+        type={notification ? notification.type : "success"}
         onClose={() => setNotification(null)}
       />
       <div className={styles.pageContainer}>
         <SelectedUserBadge />
         <div className={styles.uploadCard}>
-          {!currentGuestName && (
+          {!currentGuestName && !showGuestIdentifyModal && ( // Only show if modal is not active
             <div className={`${styles.identifiedGuestBanner} ${styles.guestNotIdentifiedBanner}`}>
               <FaCamera className={styles.guestAvatar} />
               <span className={styles.uploadingAsText}>Please identify yourself to share photos!</span>
@@ -344,16 +344,15 @@ export default function GuestUploadPage() {
                     <li key={index} className={styles.fileStatusItem}>
                       <div className={styles.fileInfoRow}>
                         <div className={styles.fileThumbnailContainer}>
-                          {/* Use next/image for image previews */}
                           {fs.fileType === 'image' && fs.previewUrl && (
                             <Image
                               src={fs.previewUrl}
                               alt={`Preview of ${fs.file.name}`}
-                              width={50} // Provide appropriate width
-                              height={50} // Provide appropriate height
-                              style={{ objectFit: "cover" }} // Use style prop for objectFit
+                              width={50}
+                              height={50}
+                              style={{ objectFit: "cover" }}
                               className={styles.filePreviewThumbnail}
-                              unoptimized={true} // Object URLs might not be optimizable by Next.js
+                              unoptimized={true}
                             />
                           )}
                           {fs.fileType === 'video' && ( <div className={styles.videoThumbnailPlaceholder}><VideoIcon /></div> )}
@@ -367,7 +366,7 @@ export default function GuestUploadPage() {
                           {fs.status === "uploading" ? `${fs.progress}%` : fs.status}
                         </span>
                       </div>
-                      {(fs.status === "uploading" || fs.status === "success") && (
+                      {(fs.status === "uploading" || fs.status === "success") && fs.progress > 0 && (
                         <div className={styles.progressBarContainer}>
                           <div className={`${styles.progressBar} ${fs.status === "success" ? styles.progressSuccess : ""}`} style={{ width: `${fs.progress}%` }} role="progressbar" aria-valuenow={fs.progress} aria-valuemin={0} aria-valuemax={100} aria-label={`Upload progress for ${fs.file.name}`}>
                             {fs.status === "uploading" && fs.progress > 15 && `${fs.progress}%`}
