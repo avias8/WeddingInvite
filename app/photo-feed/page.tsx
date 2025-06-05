@@ -27,7 +27,11 @@ interface ApiResponse {
   error?: string;
 }
 
-// --- Notification Bar Component (remains the same) ---
+// --- Define Anonymous Guest ID ---
+const ANONYMOUS_GUEST_ID = 251;
+
+
+// --- Notification Bar Component ---
 const NotificationBar = ({ message, type, onClose }: { message: string | null; type: "success" | "error"; onClose: () => void }) => {
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -52,7 +56,7 @@ const NotificationBar = ({ message, type, onClose }: { message: string | null; t
   );
 };
 
-// --- Confirmation Modal Component (remains the same) ---
+// --- Confirmation Modal Component ---
 const ConfirmationModal = ({
   isOpen,
   title,
@@ -90,7 +94,7 @@ const ConfirmationModal = ({
   );
 };
 
-// --- LightboxModal Component (remains the same) ---
+// --- LightboxModal Component ---
 const LightboxModal = ({ src, alt, type, onClose }: { src: string; alt: string; type: string | undefined; onClose: () => void }) => {
   const modalContentRef = useRef<HTMLDivElement>(null);
 
@@ -141,7 +145,7 @@ const LightboxModal = ({ src, alt, type, onClose }: { src: string; alt: string; 
   );
 };
 
-// --- Book Page Component (remains the same) ---
+// --- Book Page Component ---
 const BookPage = ({
   items,
   pageNumber,
@@ -174,72 +178,81 @@ const BookPage = ({
     }
   };
 
-  const renderMediaItem = (item: MediaItem) => (
-    <div key={item.id} className={styles.pageContentItem}>
-      <div className={styles.pageMediaWrapper} onClick={() => onMediaClick(item)}>
-        {isAuthenticated && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDeleteRequest(item);
-            }}
-            className={styles.deleteButton}
-            title="Delete this item"
-            aria-label={`Delete media item ${item.name}`}
-          >
-            <FaTrash />
-          </button>
-        )}
-        {item.contentType?.startsWith("image/") ? (
-          <Image
-            src={item.url}
-            alt={`Shared by ${item.uploaderName || 'a guest'}: ${item.name}`}
-            width={350}
-            height={262}
-            className={styles.mediaContent}
-            style={{ objectFit: "cover" }}
-            unoptimized={true}
-          />
-        ) : item.contentType?.startsWith("video/") ? (
-          <div className={styles.videoPlaceholder}>
-            <video
-              src={item.url + '#t=0.1'} // #t=0.1 for thumbnail on some browsers
-              className={styles.mediaContent}
-              preload="metadata"
-              aria-label={`Shared by ${item.uploaderName || 'a guest'}: ${item.name}`}
-              muted
-              playsInline
+  const renderMediaItem = (item: MediaItem) => {
+    // Determine the display name for the uploader
+    // If the uploaderId matches the anonymous ID, display "a guest"
+    // Otherwise, use the uploaderName or "a guest" as a fallback
+    const uploaderDisplayName = item.uploaderId === ANONYMOUS_GUEST_ID 
+                               ? "a guest" 
+                               : item.uploaderName || "a guest";
+    return (
+      <div key={item.id} className={styles.pageContentItem}>
+        <div className={styles.pageMediaWrapper} onClick={() => onMediaClick(item)}>
+          {isAuthenticated && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteRequest(item);
+              }}
+              className={styles.deleteButton}
+              title="Delete this item"
+              aria-label={`Delete media item ${item.name}`}
+              style={{ zIndex: 1000 }} // Ensure button is above other elements
             >
-              Your browser does not support the video tag.
-            </video>
-            <div className={styles.playIconOverlay}>
-              <svg viewBox="0 0 24 24" fill="currentColor" height="1em" width="1em">
-                <path d="M8 5v14l11-7z" />
-              </svg>
+              <FaTrash />
+            </button>
+          )}
+          {item.contentType?.startsWith("image/") ? (
+            <Image
+              src={item.url}
+              alt={`Shared by ${uploaderDisplayName}: ${item.name}`}
+              width={350}
+              height={262}
+              className={styles.mediaContent}
+              style={{ objectFit: "cover" }}
+              unoptimized={true}
+            />
+          ) : item.contentType?.startsWith("video/") ? (
+            <div className={styles.videoPlaceholder}>
+              <video
+                src={item.url + '#t=0.1'} // #t=0.1 for thumbnail on some browsers
+                className={styles.mediaContent}
+                preload="metadata"
+                aria-label={`Shared by ${uploaderDisplayName}: ${item.name}`}
+                muted
+                playsInline
+              >
+                Your browser does not support the video tag.
+              </video>
+              <div className={styles.playIconOverlay}>
+                <svg viewBox="0 0 24 24" fill="currentColor" height="1em" width="1em">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className={styles.unsupportedMedia}>
-            <FaExclamationTriangle className={styles.unsupportedIcon} />
-            <p>Unsupported file</p>
-          </div>
-        )}
+          ) : (
+            <div className={styles.unsupportedMedia}>
+              <FaExclamationTriangle className={styles.unsupportedIcon} />
+              <p>Unsupported file</p>
+            </div>
+          )}
+        </div>
+        <div className={styles.pageMediaInfo}>
+          <span className={styles.uploadInfo}>
+            Uploaded by {uploaderDisplayName} on {formatDate(item.timeCreated)}
+          </span>
+          {item.caption && (
+            <div className={styles.captionFrame}>
+              <p className={styles.captionText}>
+                “{item.caption}” <br />
+                <span className={styles.captionAttribution}>- {uploaderDisplayName}</span>
+              </p>
+            </div>
+          )}
+        </div>
       </div>
-      <div className={styles.pageMediaInfo}>
-        <span className={styles.uploadInfo}>
-          Uploaded by {item.uploaderName || "a Guest"} on {formatDate(item.timeCreated)}
-        </span>
-        {item.caption && (
-          <div className={styles.captionFrame}>
-            <p className={styles.captionText}>
-              “{item.caption}” <br />
-              <span className={styles.captionAttribution}>- {item.uploaderName || "Guest"}</span>
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+    );
+  };
 
   if (pageNumber === 0) { // Cover page
     return (
