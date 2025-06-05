@@ -1,10 +1,9 @@
 // app/api/get-guest-media/route.ts
 import { NextResponse } from "next/server";
-// Removed 'File' from this import as it was unused
 import { Storage, StorageOptions, GetFilesResponse } from "@google-cloud/storage";
 import { prisma } from "@/lib/prisma"; // Adjust path to your prisma client
 
-// --- Google Cloud Storage Client Initialization (copied from existing, should be refactored to a shared lib) ---
+// --- Google Cloud Storage Client Initialization (should be refactored to a shared lib) ---
 let storage: Storage | null = null;
 const gcsBucketName = process.env.GCS_BUCKET_NAME;
 const serviceAccountJsonStringEnv = process.env.GOOGLE_SERVICE_ACCOUNT;
@@ -68,23 +67,22 @@ if (storage === null && !gcsApplicationCredentialsEnv && !serviceAccountJsonStri
 }
 // --- End of GCS Client Initialization ---
 
-// Define a type for expected GCS API error structure
 interface GcsApiError extends Error {
   code?: number | string;
   errors?: Array<{ message: string; reason: string }>;
 }
 
-// Updated MediaItem interface for the API response
 interface MediaItemResponse {
-  id: string; // Using GCS file name as a unique ID for the item on the frontend
-  name: string; // GCS object name
-  url: string; // Signed URL
+  id: string;
+  name: string;
+  url: string;
   contentType: string | undefined;
   timeCreated: string | undefined;
   updated: string | undefined;
-  uploaderId?: number | null; // ID of the Guest who uploaded
-  uploaderName?: string | null; // Name of the Guest who uploaded
-  guestMediaDbId?: number; // The ID from the GuestMedia table in DB
+  uploaderId?: number | null;
+  uploaderName?: string | null;
+  guestMediaDbId?: number;
+  caption?: string | null; // Added caption field
 }
 
 export async function GET() {
@@ -98,29 +96,34 @@ export async function GET() {
   }
 
   try {
-    // 1. Fetch GuestMedia records from DB, including uploader (Guest) details
     const dbMediaRecords = await prisma.guestMedia.findMany({
       include: {
-        uploader: { // This includes the Guest record related via uploaderId
+        uploader: {
           select: {
             id: true,
             name: true,
           },
         },
       },
+      // Optionally select the caption directly if not relying on default select all
+      // select: {
+      //   id: true,
+      //   gcsPath: true,
+      //   caption: true, // Ensure caption is selected
+      //   uploader: { select: { id: true, name: true } }
+      // }
     });
 
-    // Create a map for quick lookup: gcsObjectName -> uploader details
-    const uploaderInfoMap = new Map<string, { uploaderId?: number | null; uploaderName?: string | null, guestMediaDbId: number }>();
+    const uploaderInfoMap = new Map<string, { uploaderId?: number | null; uploaderName?: string | null; guestMediaDbId: number; caption?: string | null }>();
     dbMediaRecords.forEach(record => {
-      uploaderInfoMap.set(record.gcsPath, { // Assuming gcsPath stores the GCS object name
+      uploaderInfoMap.set(record.gcsPath, {
         uploaderId: record.uploader?.id,
         uploaderName: record.uploader?.name,
         guestMediaDbId: record.id,
+        caption: record.caption, // Store the caption
       });
     });
 
-    // 2. Fetch files from GCS
     const [gcsFiles]: GetFilesResponse = await storage.bucket(gcsBucketName).getFiles();
 
     if (!gcsFiles || gcsFiles.length === 0) {
@@ -128,10 +131,10 @@ export async function GET() {
     }
 
     const mediaItems: MediaItemResponse[] = [];
-    const oneHourInMs = 60 * 60 * 1000; // Signed URL expiry
+    const oneHourInMs = 60 * 60 * 1000;
 
     for (const gcsFile of gcsFiles) {
-      if (gcsFile.name.endsWith('/')) { // Skip "folders"
+      if (gcsFile.name.endsWith('/')) {
         continue;
       }
 
@@ -143,26 +146,25 @@ export async function GET() {
 
       try {
         const [url] = await gcsFile.getSignedUrl(signedUrlOptions);
-        const uploaderDetails = uploaderInfoMap.get(gcsFile.name);
+        const dbDetails = uploaderInfoMap.get(gcsFile.name);
 
         mediaItems.push({
-          id: gcsFile.name, // Use GCS file name as the primary ID for the item being sent to client
+          id: gcsFile.name,
           name: gcsFile.name,
           url: url,
           contentType: gcsFile.metadata.contentType,
           timeCreated: gcsFile.metadata.timeCreated as string | undefined,
           updated: gcsFile.metadata.updated as string | undefined,
-          uploaderId: uploaderDetails?.uploaderId,
-          uploaderName: uploaderDetails?.uploaderName,
-          guestMediaDbId: uploaderDetails?.guestMediaDbId,
+          uploaderId: dbDetails?.uploaderId,
+          uploaderName: dbDetails?.uploaderName,
+          guestMediaDbId: dbDetails?.guestMediaDbId,
+          caption: dbDetails?.caption, // Add caption to the response
         });
       } catch (signedUrlError) {
         console.error(`Get Media API: Failed to get signed URL for ${gcsFile.name}:`, (signedUrlError as Error).message);
-        // Optionally, decide if you want to include items with failed signed URLs
       }
     }
 
-    // Sort by timeCreated in descending order (newest first)
     mediaItems.sort((a, b) => {
       const timeA = a.timeCreated ? new Date(a.timeCreated).getTime() : 0;
       const timeB = b.timeCreated ? new Date(b.timeCreated).getTime() : 0;
@@ -172,18 +174,18 @@ export async function GET() {
     return NextResponse.json({ success: true, media: mediaItems });
 
   } catch (error) {
-    const gcsApiError = error as GcsApiError; // Type assertion
+    const gcsApiError = error as GcsApiError;
     console.error("Get Media API: Error fetching media:", gcsApiError.message, gcsApiError.stack);
     let errorMessage = gcsApiError.message || "An unknown error occurred while fetching media.";
-    const statusCode = 500; // FIXED: Changed from let to const
+    const statusCode = 500;
 
-    if (gcsApiError.code) { // Check if GCS specific error code exists
+    if (gcsApiError.code) {
         if (gcsApiError.code === 403 || String(gcsApiError.code) === '403') {
             errorMessage = `Permission denied when accessing GCS bucket. Check service account permissions. Original error: ${errorMessage}`;
         } else if (gcsApiError.code === 404 || String(gcsApiError.code) === '404') {
             errorMessage = `GCS bucket '${gcsBucketName}' not found. Original error: ${errorMessage}`;
         }
-    } else if (error instanceof Error && error.message.includes("PrismaClient")) { // Basic check for Prisma errors
+    } else if (error instanceof Error && error.message.includes("PrismaClient")) {
         errorMessage = `Database error: ${error.message}`;
     }
 

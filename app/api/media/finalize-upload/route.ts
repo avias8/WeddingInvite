@@ -1,6 +1,7 @@
 // app/api/media/finalize-upload/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma"; // Adjust path to your prisma client
+import { Prisma } from '@prisma/client'; // Import Prisma for error types
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,6 +11,7 @@ export async function POST(req: NextRequest) {
       originalFileName, // The original name of the file
       contentType, // MIME type of the file
       uploaderId, // The ID of the Guest who uploaded the file
+      caption, // New optional field for the caption
     } = body;
 
     // --- Input Validation ---
@@ -31,7 +33,12 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    // originalFileName can be optional, so no strict check here unless you make it mandatory
+    if (caption && (typeof caption !== 'string' || caption.length > 150)) {
+      return NextResponse.json(
+        { success: false, error: "Caption must be a string and no more than 150 characters." },
+        { status: 400 }
+      );
+    }
 
     // --- Check if Uploader (Guest) Exists ---
     const uploaderGuest = await prisma.guest.findUnique({
@@ -46,14 +53,13 @@ export async function POST(req: NextRequest) {
     }
 
     // --- Create GuestMedia Record ---
-    // Assuming gcsPath in your schema stores the GCS object name directly.
-    // If it's meant to store the full gs:// path, adjust accordingly.
     const newGuestMedia = await prisma.guestMedia.create({
       data: {
-        gcsPath: gcsObjectName, // This is the unique object name in GCS
-        originalFileName: originalFileName || null, // Handle if optional
+        gcsPath: gcsObjectName,
+        originalFileName: originalFileName || null,
         contentType: contentType,
         uploaderId: uploaderId,
+        caption: caption || null, // Save the caption, or null if not provided
         // uploadedAt is handled by @default(now()) in your schema
       },
     });
@@ -63,7 +69,7 @@ export async function POST(req: NextRequest) {
         success: true,
         message: "Media record created successfully.",
         guestMediaId: newGuestMedia.id,
-        guestMedia: newGuestMedia, // Optionally return the created record
+        guestMedia: newGuestMedia,
       },
       { status: 201 }
     );
@@ -71,15 +77,28 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Error in finalize-upload endpoint:", error);
     let errorMessage = "An unknown error occurred.";
-    if (error instanceof Error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      // Handle specific Prisma errors, e.g., unique constraint violation
+      if (error.code === 'P2002') {
+        // Check if the target includes 'gcsPath' for a more specific message
+        const target = error.meta?.target as string[] | undefined;
+        if (target && target.includes('gcsPath')) {
+          return NextResponse.json(
+            { success: false, error: "A media record for this GCS object already exists (gcsPath duplicate)." },
+            { status: 409 } // Conflict
+          );
+        }
+        // Generic unique constraint error
+        return NextResponse.json(
+            { success: false, error: `Database unique constraint failed: ${error.message}` },
+            { status: 409 } // Conflict
+          );
+      }
+      errorMessage = `Database error: ${error.message} (Code: ${error.code})`;
+    } else if (error instanceof Error) {
       errorMessage = error.message;
     }
-    // Check for specific Prisma errors if needed, e.g., unique constraint violation
-    // if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    //   if (error.code === 'P2002') { // Unique constraint failed
-    //     return NextResponse.json({ success: false, error: "A media record for this GCS object already exists." }, { status: 409 });
-    //   }
-    // }
+    
     return NextResponse.json(
       { success: false, error: `Failed to finalize upload: ${errorMessage}` },
       { status: 500 }
