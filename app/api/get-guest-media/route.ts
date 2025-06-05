@@ -1,6 +1,7 @@
 // app/api/get-guest-media/route.ts
 import { NextResponse } from "next/server";
-import { Storage, StorageOptions, GetFilesResponse, File } from "@google-cloud/storage";
+// Removed 'File' from this import as it was unused
+import { Storage, StorageOptions, GetFilesResponse } from "@google-cloud/storage";
 import { prisma } from "@/lib/prisma"; // Adjust path to your prisma client
 
 // --- Google Cloud Storage Client Initialization (copied from existing, should be refactored to a shared lib) ---
@@ -174,7 +175,7 @@ export async function GET() {
     const gcsApiError = error as GcsApiError; // Type assertion
     console.error("Get Media API: Error fetching media:", gcsApiError.message, gcsApiError.stack);
     let errorMessage = gcsApiError.message || "An unknown error occurred while fetching media.";
-    let statusCode = 500;
+    const statusCode = 500; // FIXED: Changed from let to const
 
     if (gcsApiError.code) { // Check if GCS specific error code exists
         if (gcsApiError.code === 403 || String(gcsApiError.code) === '403') {
@@ -185,7 +186,6 @@ export async function GET() {
     } else if (error instanceof Error && error.message.includes("PrismaClient")) { // Basic check for Prisma errors
         errorMessage = `Database error: ${error.message}`;
     }
-
 
     return NextResponse.json(
       { success: false, error: `Failed to fetch media. ${errorMessage}` },
