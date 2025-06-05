@@ -1,4 +1,4 @@
-/* app/photo-feed/PhotoFeed.module.css - Flip Book Theme */
+/* app/photo-feed/PhotoFeed.module.css */
 
 /* --- Main Page Container --- */
 .pageContainer {
@@ -248,7 +248,7 @@
 /* Media Content in Book Pages */
 .pageMediaWrapper {
   width: 100%;
-  max-width: 330px; /* Slightly smaller max */
+  max-width: 400px; /* Slightly smaller max */
   aspect-ratio: 4 / 3;
   background: #fff; /* White frame for photos */
   padding: 8px; /* Thinner frame */
@@ -541,27 +541,35 @@
 /* Delete Button for Admin on Media Items */
 .deleteButton {
   position: absolute;
-  top: 0.6rem; /* Adjusted position */
-  right: 0.6rem;
-  background: rgba(200, 84, 80, 0.85); /* var(--book-red) with alpha */
-  color: white;
-  border: none;
-  width: 30px; /* Smaller button */
-  height: 30px;
-  border-radius: 50%;
+  top: 8px;
+  right: 8px;
+  background: rgba(40, 30, 20, 0.6); /* A dark, semi-transparent background */
+  color: white; /* This color will be inherited by the icon */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 28px;
+  height: 28px;
+  border-radius: 6px; /* Rounded square instead of a circle */
   cursor: pointer;
-  font-size: 0.9rem; /* Smaller icon */
+  /* font-size removed, we will size the svg directly */
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease-in-out;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
-  z-index: 5; /* Ensure it's above media content, but below page-level z-index */
+  transition: all 0.25s ease-in-out;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  z-index: 5;
+  backdrop-filter: blur(2px); /* A nice frosted glass effect */
+}
+
+/* New rule to explicitly size the SVG icon */
+.deleteButton svg {
+  width: 14px;
+  height: 14px;
 }
 
 .deleteButton:hover {
-  background: var(--book-red); /* Solid red on hover */
-  transform: scale(1.15) rotate(5deg);
+  background: var(--book-red); /* Use the theme's red color for hover */
+  transform: scale(1.1); /* A simple, clean scale effect */
+  box-shadow: 0 2px 8px rgba(200, 84, 80, 0.5); /* A subtle glow in the theme's red */
 }
 
 /* Lightbox */
