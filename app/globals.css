@@ -11,6 +11,22 @@
   --font-body: 'Georgia', serif;
   --font-decorative: 'Hernandez Bros', serif;
 
+  /* 🆕 Flipbook-specific theme vars (namespaced with --book-) */
+  --book-cream: #faf6f0;
+  --book-paper: #f9f4ed;
+  --book-shadow: #e8dfd2;
+  --book-spine: #8b6f47;
+  --book-gold: #c89f68;
+  --book-deep-gold: #b08c54;
+  --book-brown: #6b5d54;
+  --book-dark: #3a3028;
+  --book-red: #c85450;
+  --book-green: #7a9a65;
+  
+  --font-chapter: 'Playfair Display', 'Georgia', serif;
+  --font-script: 'Dancing Script', 'Brush Script MT', cursive;
+  --font-story: 'Crimson Text', 'Georgia', serif;
+
   --color-background: #f3efe4; /* A soft cream with a hint of green, like sunlight filtering through leaves */
   --color-text-primary: #21701a; /* A deep olive-gray for text, grounding the palette in nature */
   --color-text-secondary: #041803; /* A medium gray for secondary text, providing contrast */

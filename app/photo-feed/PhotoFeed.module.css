@@ -1,31 +1,12 @@
 /* app/photo-feed/PhotoFeed.module.css - Flip Book Theme */
 
-/* --- Flip Book Theme Variables --- */
-:root { /* MODIFIED HERE */
-  --book-cream: #faf6f0;
-  --book-paper: #f9f4ed; /* Slightly off-white for pages */
-  --book-shadow: #e8dfd2; /* Soft shadow for depth */
-  --book-spine: #8b6f47; /* Richer brown for spine */
-  --book-gold: #c89f68; /* Muted gold for accents, less orange */
-  --book-deep-gold: #b08c54; /* Darker gold for highlights/hovers */
-  --book-brown: #6b5d54; /* General text, subtle details */
-  --book-dark: #3a3028; /* Very dark brown for contrast, like ink */
-  --book-red: #c85450; /* For delete/error states */
-  --book-green: #7a9a65; /* For success states */
-  
-  /* Typography */
-  --font-chapter: 'Playfair Display', 'Georgia', serif; /* Elegant serif for titles */
-  --font-script: 'Dancing Script', 'Brush Script MT', cursive; /* Flowing script for subtitles/dedications */
-  --font-story: 'Crimson Text', 'Georgia', serif; /* Readable serif for main content/dates */
-  
-  /* Book Dimensions */
+/* --- Main Page Container --- */
+.pageContainer {
+   /* Book Dimensions */
   --book-width: min(90vw, 960px); /* Adjusted max width */
   --book-height: min(75vh, 680px); /* Adjusted max height */
   --page-width: calc(var(--book-width) / 2);
-}
 
-/* --- Main Page Container --- */
-.pageContainer {
   min-height: 100vh;
   background: 
     radial-gradient(ellipse at center, rgba(200, 159, 104, 0.05) 0%, transparent 60%), /* Softer radial */
@@ -916,7 +897,8 @@
 
 /* Mobile Styles */
 @media (max-width: 768px) {
-  :root { /* MODIFIED HERE - Also apply :global here if variables are overridden */
+  .pageContainer {
+      /* Book Dimensions */
     --book-width: 92vw; /* Slightly wider on tablet */
     --book-height: 65vh; /* Adjust height for better ratio */
   }
