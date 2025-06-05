@@ -159,22 +159,34 @@
   cursor: pointer;
 }
 
-/* Pages rendered in DOM order need descending z-index */
-.bookPages > .bookPage:nth-last-child(1) { z-index: 10; }
-.bookPages > .bookPage:nth-last-child(2) { z-index: 9; }
-.bookPages > .bookPage:nth-last-child(3) { z-index: 8; }
-.bookPages > .bookPage:nth-last-child(4) { z-index: 7; }
-.bookPages > .bookPage:nth-last-child(5) { z-index: 6; }
-.bookPages > .bookPage:nth-last-child(6) { z-index: 5; }
-.bookPages > .bookPage:nth-last-child(7) { z-index: 4; }
-.bookPages > .bookPage:nth-last-child(8) { z-index: 3; }
-.bookPages > .bookPage:nth-last-child(9) { z-index: 2; }
-.bookPages > .bookPage:nth-last-child(n+10) { z-index: 1; }
+/* Base z-index for pages */
+.bookPages > .bookPage:nth-last-child(1) { z-index: 100; }
+.bookPages > .bookPage:nth-last-child(2) { z-index: 90; }
+.bookPages > .bookPage:nth-last-child(3) { z-index: 80; }
+.bookPages > .bookPage:nth-last-child(4) { z-index: 70; }
+.bookPages > .bookPage:nth-last-child(5) { z-index: 60; }
+.bookPages > .bookPage:nth-last-child(6) { z-index: 50; }
+.bookPages > .bookPage:nth-last-child(7) { z-index: 40; }
+.bookPages > .bookPage:nth-last-child(8) { z-index: 30; }
+.bookPages > .bookPage:nth-last-child(9) { z-index: 20; }
+.bookPages > .bookPage:nth-last-child(n+10) { z-index: 10; }
 
+/* Flipped pages need to maintain their relative order but be lower */
 .bookPage.flipped {
   transform: rotateY(-180deg);
-  z-index: 20 !important; /* Flipped pages go on top */
 }
+
+/* Adjust z-index for flipped pages dynamically */
+.bookPages > .bookPage.flipped:nth-last-child(1) { z-index: 9; }
+.bookPages > .bookPage.flipped:nth-last-child(2) { z-index: 8; }
+.bookPages > .bookPage.flipped:nth-last-child(3) { z-index: 7; }
+.bookPages > .bookPage.flipped:nth-last-child(4) { z-index: 6; }
+.bookPages > .bookPage.flipped:nth-last-child(5) { z-index: 5; }
+.bookPages > .bookPage.flipped:nth-last-child(6) { z-index: 4; }
+.bookPages > .bookPage.flipped:nth-last-child(7) { z-index: 3; }
+.bookPages > .bookPage.flipped:nth-last-child(8) { z-index: 2; }
+.bookPages > .bookPage.flipped:nth-last-child(9) { z-index: 1; }
+.bookPages > .bookPage.flipped:nth-last-child(n+10) { z-index: 1; }
 
 /* Page Sides */
 .pageFront,
@@ -370,18 +382,33 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Book Cover (First Page) - Special styling */
-.bookCover {
-  background: linear-gradient(135deg, var(--book-spine) 0%, var(--book-brown) 100%);
-  border: 2px solid var(--book-gold);
+/* Book Cover Back Page */
+.bookCoverBack {
+  background: var(--book-paper);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.bookCoverBackContent {
   text-align: center;
-  position: relative;
-  overflow: hidden;
-  z-index: 15 !important; /* Ensure cover is always on top initially */
+  padding: 2rem;
+}
+
+.dedicationText {
+  font-family: var(--font-script);
+  font-size: 1.6rem;
+  color: var(--book-brown);
+  margin: 0.5rem 0;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.decorativeDivider {
+  font-size: 2rem;
+  color: var(--book-gold);
+  margin-top: 2rem;
+  opacity: 0.7;
 }
 
 .bookCover::before {

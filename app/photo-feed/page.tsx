@@ -234,11 +234,13 @@ const BookPage = ({
           <p className={styles.bookCoverSubtitle}>A collection of moments from our special day</p>
           <div className={styles.bookCoverDate}>Click to open</div>
         </div>
-        <div className={styles.pageBack}>
+        <div className={`${styles.pageBack} ${styles.bookCoverBack}`}>
           <div className={styles.pageContent}>
-            <p style={{ textAlign: 'center', color: 'var(--book-brown)', fontStyle: 'italic', fontSize: '1.2rem' }}>
-              Turn the page to begin...
-            </p>
+            <div className={styles.bookCoverBackContent}>
+              <p className={styles.dedicationText}>Dedicated to our friends and family</p>
+              <p className={styles.dedicationText}>who made this day special</p>
+              <div className={styles.decorativeDivider}>❦</div>
+            </div>
           </div>
         </div>
       </div>
@@ -288,7 +290,12 @@ export default function PhotoFeedPage() {
       if (!response.ok || !data.success) {
         throw new Error(data.error || data.message || "Failed to load media.");
       }
-      setMediaItems(data.media || []);
+      setMediaItems((data.media || []).sort((a, b) => {
+        // Sort by timeCreated in ascending order (oldest first)
+        const dateA = a.timeCreated ? new Date(a.timeCreated).getTime() : 0;
+        const dateB = b.timeCreated ? new Date(b.timeCreated).getTime() : 0;
+        return dateA - dateB;
+      }));
 
       if ((data.media || []).length === 0 && !pageError) {
         setPageError("No photos or videos have been shared yet. Check back soon!");
