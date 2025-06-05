@@ -1,7 +1,6 @@
-// app/components/GuestSelector.tsx
 "use client";
 
-import React, { useState, FormEvent, ChangeEvent, useEffect } from 'react';
+import React, { useState, FormEvent, ChangeEvent, useEffect, useMemo, useRef } from 'react';
 import styles from './GuestSelector.module.css'; // Using the existing CSS module
 import type { Invitee, Guest } from '@/app/types'; // Adjust path if necessary
 
@@ -13,7 +12,7 @@ interface GuestSelectorProps {
 }
 
 interface InviteeWithGuests extends Invitee {
-  guestsList?: Guest[]; // Expect this from the API: GET /api/invitees
+  guestsList?: Guest[];
 }
 
 export default function GuestSelector({
@@ -27,18 +26,26 @@ export default function GuestSelector({
   const [message, setMessage] = useState<string | null>(null);
   
   const [allInvitees, setAllInvitees] = useState<InviteeWithGuests[]>([]);
-  const [selectedInviteeId, setSelectedInviteeId] = useState<string>('');
+  // selectedInviteeId is still useful to know which one is formally picked
+  const [selectedInviteeId, setSelectedInviteeId] = useState<string>(''); 
   const [selectedInvitee, setSelectedInvitee] = useState<InviteeWithGuests | null>(null);
   const [guestsOfSelectedInvitee, setGuestsOfSelectedInvitee] = useState<Guest[]>([]);
   const [finalSelectedGuestId, setFinalSelectedGuestId] = useState<string>('');
 
-  // State for custom name input
   const [isUsingCustomName, setIsUsingCustomName] = useState<boolean>(false);
   const [customNameValue, setCustomNameValue] = useState<string>('');
+
+  // For the combobox-like family input
+  const [familySearchTerm, setFamilySearchTerm] = useState<string>('');
+  const [isFamilyListVisible, setIsFamilyListVisible] = useState<boolean>(false);
+  const familyInputRef = useRef<HTMLInputElement>(null);
+  const familyListRef = useRef<HTMLDivElement>(null);
+
 
   // Fetch all invitees when the modal opens
   useEffect(() => {
     if (isOpen) {
+      // Reset all states
       setIsLoading(true);
       setMessage(null);
       setStep('inviteeSelect');
@@ -46,8 +53,10 @@ export default function GuestSelector({
       setSelectedInvitee(null);
       setGuestsOfSelectedInvitee([]);
       setFinalSelectedGuestId('');
-      setIsUsingCustomName(false); // Reset custom name state
-      setCustomNameValue('');    // Reset custom name state
+      setIsUsingCustomName(false);
+      setCustomNameValue('');
+      setFamilySearchTerm('');
+      setIsFamilyListVisible(false);
 
       fetch('/api/invitees') 
         .then(res => {
@@ -63,7 +72,10 @@ export default function GuestSelector({
             setStep('infoState');
             setAllInvitees([]);
           } else {
-            setAllInvitees(attendingInvitees);
+            const sortedInvitees = [...attendingInvitees].sort((a, b) => 
+              a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+            );
+            setAllInvitees(sortedInvitees);
           }
         })
         .catch(err => {
@@ -74,93 +86,178 @@ export default function GuestSelector({
     }
   }, [isOpen]);
 
-  // Handle Invitee (Family) Selection
-  const handleInviteeSelectionChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const inviteeId = e.target.value;
-    setSelectedInviteeId(inviteeId);
-    setMessage(null); // Clear message when changing invitee
-    setIsUsingCustomName(false); // Reset custom name when family changes
-    setCustomNameValue('');
+  // Filter invitees based on search term for the combobox
+  const filteredInvitees = useMemo(() => {
+    if (!familySearchTerm && !isFamilyListVisible) { // Don't show all if input is empty and not focused
+        return [];
+    }
+    if (!familySearchTerm) { // Show all if input is empty but focused/visible
+        return allInvitees;
+    }
+    return allInvitees.filter(invitee =>
+      invitee.name.toLowerCase().includes(familySearchTerm.toLowerCase())
+    );
+  }, [allInvitees, familySearchTerm, isFamilyListVisible]);
 
-    if (inviteeId) {
-      const foundInvitee = allInvitees.find(inv => inv.id.toString() === inviteeId);
-      if (foundInvitee) {
-        setSelectedInvitee(foundInvitee);
-        const guests = foundInvitee.guestsList || [];
-        setGuestsOfSelectedInvitee(guests);
-
-        if (guests.length === 0) {
-          if (foundInvitee.guests === 1) {
-            setMessage(`No specific guest names found for ${foundInvitee.name}'s party. We'll assume you are ${foundInvitee.name}.`);
-            setStep('infoState');
-            onGuestIdentified({ id: foundInvitee.id, name: foundInvitee.name, inviteeId: foundInvitee.id });
-            onClose();
-            return;
-          } else {
-            setMessage(`No guest names are currently listed for ${foundInvitee.name}'s party. Please contact the hosts to update details.`);
-            setStep('infoState');
-            setFinalSelectedGuestId('');
-            return;
-          }
-        } else if (guests.length === 1) {
-          setFinalSelectedGuestId(guests[0].id.toString());
-          setCustomNameValue(guests[0].name); // Pre-fill custom name input
-          setStep('guestSelect');
-        } else {
-          setFinalSelectedGuestId(guests.length > 0 ? guests[0].id.toString() : '');
-          setCustomNameValue(guests.find(g => g.id.toString() === (guests[0].id.toString()))?.name || '');
-          setStep('guestSelect');
-        }
-      } else {
-        setSelectedInvitee(null);
-        setGuestsOfSelectedInvitee([]);
-        setStep('inviteeSelect');
+  // Handle clicking outside the custom family combobox to close the list
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        familyInputRef.current && !familyInputRef.current.contains(event.target as Node) &&
+        familyListRef.current && !familyListRef.current.contains(event.target as Node)
+      ) {
+        setIsFamilyListVisible(false);
       }
+    }
+    if (isFamilyListVisible) {
+      document.addEventListener('mousedown', handleClickOutside);
     } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isFamilyListVisible]);
+
+
+  // Function to handle selecting an invitee (family/party)
+  const selectInvitee = (inviteeToSelect: InviteeWithGuests | null) => {
+    if (inviteeToSelect) {
+      setSelectedInviteeId(inviteeToSelect.id.toString());
+      setSelectedInvitee(inviteeToSelect);
+      setFamilySearchTerm(inviteeToSelect.name); // Update input to show selected family
+      setIsFamilyListVisible(false); // Hide the list
+      setMessage(null);
+      setIsUsingCustomName(false);
+      setCustomNameValue('');
+      setFinalSelectedGuestId('');
+
+      const guests = inviteeToSelect.guestsList || [];
+      setGuestsOfSelectedInvitee(guests);
+
+      if (guests.length === 0) {
+        if (inviteeToSelect.maxInvites === 1) {
+          onGuestIdentified({ id: inviteeToSelect.id, name: inviteeToSelect.name, inviteeId: inviteeToSelect.id });
+          onClose();
+          return;
+        } else {
+          setMessage(`No guest names are currently listed for ${inviteeToSelect.name}'s party. You can enter your name below, or contact the hosts.`);
+          setStep('guestSelect');
+          setIsUsingCustomName(true);
+          setFinalSelectedGuestId(inviteeToSelect.id.toString()); // Placeholder
+          return;
+        }
+      } else if (guests.length === 1) {
+        setFinalSelectedGuestId(guests[0].id.toString());
+        setCustomNameValue(guests[0].name);
+        setStep('guestSelect');
+      } else {
+        setStep('guestSelect');
+      }
+    } else { // Deselecting
+      setSelectedInviteeId('');
       setSelectedInvitee(null);
+      // familySearchTerm might be kept as is, or cleared. Let's clear it for full reset.
+      // setFamilySearchTerm(''); // User might want to keep typing
       setGuestsOfSelectedInvitee([]);
       setFinalSelectedGuestId('');
       setStep('inviteeSelect');
     }
   };
+  
+  const handleFamilySearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const term = e.target.value;
+    setFamilySearchTerm(term);
+    setIsFamilyListVisible(true); // Show list when typing
+    // If user clears input, deselect current family
+    if (term === '') {
+      setSelectedInviteeId('');
+      setSelectedInvitee(null);
+      setGuestsOfSelectedInvitee([]);
+      setFinalSelectedGuestId('');
+      setStep('inviteeSelect'); // Go back to family selection step UI
+    } else {
+        // If typing again after a selection, clear previous selection to force re-selection from list
+        if (selectedInvitee && term !== selectedInvitee.name) {
+            setSelectedInviteeId('');
+            setSelectedInvitee(null);
+            setGuestsOfSelectedInvitee([]);
+            setFinalSelectedGuestId('');
+            setStep('inviteeSelect');
+        }
+    }
+  };
 
-  // Update customNameValue when finalSelectedGuestId changes and not using custom name
+
   useEffect(() => {
-    if (finalSelectedGuestId && !isUsingCustomName) {
+    if (finalSelectedGuestId && !isUsingCustomName && guestsOfSelectedInvitee.length > 0) {
       const guest = guestsOfSelectedInvitee.find(g => g.id.toString() === finalSelectedGuestId);
       if (guest) {
         setCustomNameValue(guest.name);
       }
+    } else if (!finalSelectedGuestId && !isUsingCustomName) {
+        setCustomNameValue('');
     }
   }, [finalSelectedGuestId, guestsOfSelectedInvitee, isUsingCustomName]);
 
 
-  // Handle Final Guest Selection and Submission
   const handleGuestConfirmation = (e: FormEvent) => {
     e.preventDefault();
-    setMessage(null); // Clear message on confirmation attempt
-    if (!selectedInvitee || !finalSelectedGuestId) {
-      setMessage("Please select your family and then your name.");
-      setStep('errorState');
-      return;
+    setMessage(null); 
+
+    if (!selectedInvitee) { // This check should be based on selectedInvitee, not just selectedInviteeId
+        setMessage("Please select your family/party first.");
+        setStep('inviteeSelect'); // Or highlight the family input
+        if(familyInputRef.current) familyInputRef.current.focus();
+        return;
+    }
+
+    if (guestsOfSelectedInvitee.length === 0 && isUsingCustomName && customNameValue.trim()) {
+        onGuestIdentified({ 
+            id: selectedInvitee.id, 
+            name: customNameValue.trim(), 
+            inviteeId: selectedInvitee.id 
+        });
+        onClose();
+        return;
+    }
+    
+    if (!isUsingCustomName && !finalSelectedGuestId) {
+        setMessage("Please select your name from the list.");
+        setStep('guestSelect');
+        return;
+    }
+
+    if (isUsingCustomName && !customNameValue.trim()) {
+        setMessage("Please enter your preferred name.");
+        setStep('guestSelect'); 
+        return;
     }
 
     const originalGuest = guestsOfSelectedInvitee.find(g => g.id.toString() === finalSelectedGuestId);
-    if (!originalGuest) {
-      setMessage("Selected guest not found. Please try again.");
-      setStep('errorState');
-      return;
+    let nameToUse = '';
+    let guestIdToUse = 0;
+
+    if (isUsingCustomName) {
+        nameToUse = customNameValue.trim();
+        guestIdToUse = originalGuest ? originalGuest.id : selectedInvitee.id; 
+    } else {
+        if (!originalGuest) {
+            setMessage("Selected guest not found. Please try again or select your family again.");
+            setStep('errorState'); 
+            return;
+        }
+        nameToUse = originalGuest.name;
+        guestIdToUse = originalGuest.id;
     }
 
-    const nameToUse = (isUsingCustomName && customNameValue.trim()) ? customNameValue.trim() : originalGuest.name;
-
-    if (!nameToUse) {
+    if (!nameToUse) { 
       setMessage("Name cannot be empty.");
       setStep('guestSelect');
       return;
     }
 
-    onGuestIdentified({ id: originalGuest.id, name: nameToUse, inviteeId: selectedInvitee.id });
+    onGuestIdentified({ id: guestIdToUse, name: nameToUse, inviteeId: selectedInvitee.id });
     onClose();
   };
   
@@ -189,107 +286,162 @@ export default function GuestSelector({
             
             {message && <p className={`${styles.messageBox} ${step === 'errorState' ? styles.errorText : styles.infoText}`}>{message}</p>}
 
-            {step === 'inviteeSelect' || step === 'guestSelect' ? (
+            {(step === 'inviteeSelect' || step === 'guestSelect') && allInvitees.length > 0 ? (
               <>
-                <div className={styles.formGroup}>
-                  <label htmlFor="inviteeSelector" className={styles.label}>Select Your Family / Party Name:</label>
-                  <select
-                    id="inviteeSelector"
-                    value={selectedInviteeId}
-                    onChange={handleInviteeSelectionChange}
-                    className={styles.select}
-                    required={step === 'inviteeSelect'}
-                    disabled={allInvitees.length === 0}
-                  >
-                    <option value="">-- Select Family/Party --</option>
-                    {allInvitees.map((inv) => (
-                      <option key={inv.id} value={inv.id.toString()}>
-                        {inv.name} (Party of {inv.maxInvites})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {step === 'guestSelect' && selectedInvitee && guestsOfSelectedInvitee.length > 0 && (
-                  <>
-                    <div className={styles.formGroup}>
-                      <label htmlFor="guestSelector" className={styles.label}>Select Your Name:</label>
-                      <select
-                        id="guestSelector"
-                        value={finalSelectedGuestId}
-                        onChange={(e) => {
-                            setFinalSelectedGuestId(e.target.value);
-                            // If not using custom name, prefill with selected guest's name
-                            if (!isUsingCustomName) {
-                                const guest = guestsOfSelectedInvitee.find(g => g.id.toString() === e.target.value);
-                                setCustomNameValue(guest ? guest.name : '');
-                            }
-                        }}
-                        className={styles.select}
-                        required
-                      >
-                        <option value="">-- Select Your Name --</option>
-                        {guestsOfSelectedInvitee.map((guest) => (
-                          <option key={guest.id} value={guest.id.toString()}>
-                            {guest.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {finalSelectedGuestId && (
-                      <div className={styles.formGroup}>
-                        <div className={styles.customNameToggle}>
-                          <input
-                            type="checkbox"
-                            id="useCustomName"
-                            checked={isUsingCustomName}
-                            onChange={(e) => {
-                              setIsUsingCustomName(e.target.checked);
-                              if (!e.target.checked && selectedGuestForDisplay) {
-                                // If unchecking, revert customNameValue to the selected guest's actual name
-                                setCustomNameValue(selectedGuestForDisplay.name);
-                              } else if (e.target.checked && selectedGuestForDisplay && !customNameValue) {
-                                // If checking and customNameValue is empty, prefill from selected guest
-                                setCustomNameValue(selectedGuestForDisplay.name);
-                              }
-                            }}
-                            className={styles.checkbox}
-                          />
-                          <label htmlFor="useCustomName" className={styles.checkboxLabel}>
-                            Use a different name for this session?
-                          </label>
+                {/* Combined Family Search Input and Dropdown */}
+                <div className={styles.formGroup} style={{ position: 'relative' }}>
+                  <label htmlFor="familySearchInput" className={styles.label}>
+                    {selectedInvitee ? "Selected Family / Party:" : "Search & Select Your Family / Party Name:"}
+                  </label>
+                  <input
+                    type="text"
+                    id="familySearchInput"
+                    ref={familyInputRef}
+                    value={familySearchTerm}
+                    onChange={handleFamilySearchChange}
+                    onFocus={() => setIsFamilyListVisible(true)}
+                    placeholder="Type your family/party name..."
+                    className={styles.input}
+                    autoComplete="off"
+                    disabled={step === 'guestSelect' && !!selectedInvitee} // Disable if family selected and on guest step
+                  />
+                  {isFamilyListVisible && filteredInvitees.length > 0 && !selectedInvitee && ( // Only show list if no family is firmly selected yet
+                    <div ref={familyListRef} className={styles.familyListDropdown}>
+                      {filteredInvitees.map((inv) => (
+                        <div
+                          key={inv.id}
+                          className={styles.familyListItem}
+                          onClick={() => selectInvitee(inv)}
+                          onMouseDown={(e) => e.preventDefault()} // Prevents input blur before click
+                        >
+                          {inv.name} (Party of {inv.maxInvites})
                         </div>
+                      ))}
+                    </div>
+                  )}
+                   {isFamilyListVisible && familySearchTerm && filteredInvitees.length === 0 && !selectedInvitee && (
+                     <div ref={familyListRef} className={styles.familyListDropdown}>
+                        <div className={styles.familyListItemDisabled}>No families match your search.</div>
+                     </div>
+                   )}
+                </div>
+                {selectedInvitee && step === 'inviteeSelect' && ( /* User selected a family, prompt to move to guest */
+                     <button type="button" onClick={() => setStep('guestSelect')} className={styles.secondaryButton}>
+                        Next: Select Guest Name
+                    </button>
+                )}
+
+
+                {/* Guest Selection Section - only if a family has been selected */}
+                {selectedInvitee && step === 'guestSelect' && (
+                  <>
+                    {guestsOfSelectedInvitee.length > 0 && (
+                      <div className={styles.formGroup}>
+                        <label htmlFor="guestSelector" className={styles.label}>Select Your Name:</label>
+                        <select
+                          id="guestSelector"
+                          value={finalSelectedGuestId}
+                          onChange={(e) => {
+                              setFinalSelectedGuestId(e.target.value);
+                              if (!isUsingCustomName) {
+                                  const guest = guestsOfSelectedInvitee.find(g => g.id.toString() === e.target.value);
+                                  setCustomNameValue(guest ? guest.name : '');
+                              }
+                          }}
+                          className={styles.select}
+                          required={!isUsingCustomName}
+                        >
+                          <option value="">-- Select Your Name --</option>
+                          {guestsOfSelectedInvitee.map((guest) => (
+                            <option key={guest.id} value={guest.id.toString()}>
+                              {guest.name}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     )}
+                    
+                    {(guestsOfSelectedInvitee.length > 0 || (guestsOfSelectedInvitee.length === 0 && selectedInvitee)) && (
+                         <div className={styles.formGroup}>
+                            <div className={styles.customNameToggle}>
+                            <input
+                                type="checkbox"
+                                id="useCustomName"
+                                checked={isUsingCustomName}
+                                onChange={(e) => {
+                                    const checked = e.target.checked;
+                                    setIsUsingCustomName(checked);
+                                    if (!checked && selectedGuestForDisplay) {
+                                        setCustomNameValue(selectedGuestForDisplay.name);
+                                    } else if (checked && selectedGuestForDisplay && !customNameValue) {
+                                        setCustomNameValue(selectedGuestForDisplay.name);
+                                    } else if (checked && !selectedGuestForDisplay && guestsOfSelectedInvitee.length === 0 && selectedInvitee) {
+                                        setCustomNameValue(''); 
+                                    } else if (!checked && !selectedGuestForDisplay){
+                                        setCustomNameValue('');
+                                    }
+                                }}
+                                className={styles.checkbox}
+                            />
+                            <label htmlFor="useCustomName" className={styles.checkboxLabel}>
+                                {guestsOfSelectedInvitee.length > 0 ? "Use a different name / My name isn't listed correctly" : "Enter your name"}
+                            </label>
+                            </div>
+                        </div>
+                    )}
 
-                    {isUsingCustomName && finalSelectedGuestId && (
+                    {isUsingCustomName && ( 
                       <div className={styles.formGroup}>
-                        <label htmlFor="customNameInput" className={styles.label}>Preferred Name:</label>
+                        <label htmlFor="customNameInput" className={styles.label}>Your Name:</label>
                         <input
                           type="text"
                           id="customNameInput"
                           value={customNameValue}
                           onChange={(e) => setCustomNameValue(e.target.value)}
                           className={styles.input}
-                          placeholder="Enter your preferred name"
+                          placeholder="Enter your full name"
+                          required={isUsingCustomName}
                         />
                       </div>
                     )}
                   </>
                 )}
                 
-                {step === 'guestSelect' && guestsOfSelectedInvitee.length > 0 && (
-                   <button type="submit" className={styles.submitButton} disabled={!finalSelectedGuestId || (isUsingCustomName && !customNameValue.trim())}>
-                     Confirm Identity
-                   </button>
+                {selectedInvitee && step === 'guestSelect' && (finalSelectedGuestId || (isUsingCustomName && customNameValue.trim())) && (
+                    <button 
+                        type="submit" 
+                        className={styles.submitButton} 
+                        disabled={
+                            (!finalSelectedGuestId && !isUsingCustomName) || 
+                            (isUsingCustomName && !customNameValue.trim()) 
+                        }
+                    >
+                    Confirm Identity
+                    </button>
+                )}
+                 {selectedInvitee && (
+                    <button 
+                        type="button" 
+                        onClick={() => {
+                            setFamilySearchTerm('');
+                            selectInvitee(null); // This will reset family selection states
+                        }}
+                        className={styles.secondaryButton}
+                        style={{marginTop: '0.5rem'}}
+                    >
+                        Change Family/Party
+                    </button>
                 )}
               </>
             ) : null}
 
+            {!isLoading && allInvitees.length === 0 && step !== 'errorState' && step !== 'infoState' && (
+                 <p className={styles.modalInstructions}>No invitee data found. Please contact the event hosts.</p>
+            )}
+
             {(step === 'errorState' || step === 'infoState') && !message && (
                  <p className={styles.modalInstructions}>
-                    {step === 'errorState' ? "An error occurred. Please try again or contact the hosts." : "Please follow the instructions above."}
+                    {step === 'errorState' ? "An error occurred. Please try again or contact the hosts." : "Please follow the instructions above or contact the hosts if you have trouble."}
                  </p>
             )}
              {(step === 'errorState' || step === 'infoState') && (

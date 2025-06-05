@@ -1,27 +1,107 @@
 /* app/components/GuestSelector.module.css */
+/* Existing styles are preserved. */
+/* Add styles for the custom dropdown list for families */
+
+.familyListDropdown {
+  position: absolute;
+  top: 100%; /* Position below the input */
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-top: none; /* Avoid double border with input */
+  border-radius: 0 0 var(--border-radius-md, 8px) var(--border-radius-md, 8px);
+  z-index: 10; /* Ensure it's above other elements in the modal */
+  max-height: 200px; /* Limit height and make scrollable */
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.familyListItem {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+}
+
+.familyListItem:hover {
+  background-color: var(--color-background-hover, #f0f0f0);
+}
+
+.familyListItemDisabled {
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  color: var(--color-text-secondary, #6c757d);
+  font-style: italic;
+}
+
+.customNameToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; 
+  margin-top: 0.5rem; 
+  margin-bottom: 0.5rem; 
+}
+
+.checkbox {
+  margin: 0; 
+  width: 1.1rem; 
+  height: 1.1rem; 
+  accent-color: var(--color-accent, #e85a4f); 
+}
+
+.checkboxLabel {
+  font-size: 0.9rem; 
+  color: var(--color-text-secondary, #6c757d);
+  cursor: pointer;
+  font-weight: normal; 
+  margin-bottom: 0;
+}
+
+.secondaryButton {
+  background-color: var(--color-background-muted, #e9ecef);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border, #d1d5db);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius-md, 8px);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  width: 100%;
+  margin-top: 0.5rem; /* Space above button */
+}
+
+.secondaryButton:hover {
+  background-color: var(--color-border-hover, #ced4da);
+  border-color: #adb5bd;
+}
+
+
+/* Keep all other existing styles from GuestSelector.module.css */
 .modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7); /* Darker overlay for better focus */
+  background-color: rgba(0, 0, 0, 0.7); 
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1100;
   padding: 1rem;
-  backdrop-filter: blur(3px); /* Subtle blur */
+  backdrop-filter: blur(3px); 
 }
 
 .modalContent {
-  background-color: var(--color-background, #fdfdfd); /* Use a light, clean background */
+  background-color: var(--color-background, #fdfdfd); 
   color: var(--color-text-primary, #343a40);
-  padding: 2rem 2.5rem; /* More padding */
-  border-radius: var(--border-radius-lg, 16px); /* Softer radius */
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15); /* Enhanced shadow */
+  padding: 2rem 2.5rem; 
+  border-radius: var(--border-radius-lg, 16px); 
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15); 
   width: 100%;
-  max-width: 480px; /* Slightly wider */
+  max-width: 480px; 
   position: relative;
   font-family: var(--font-body, sans-serif);
   animation: modalFadeIn 0.3s ease-out;
@@ -38,7 +118,7 @@
   right: 12px;
   background: transparent;
   border: none;
-  font-size: 2.2rem; /* Larger close icon */
+  font-size: 2.2rem; 
   font-weight: 300;
   color: var(--color-text-secondary, #6c757d);
   cursor: pointer;
@@ -53,7 +133,7 @@
 
 .modalTitle {
   font-family: var(--font-wedding, 'Georgia', serif);
-  font-size: clamp(1.5rem, 5vw, 1.8rem); /* Responsive title */
+  font-size: clamp(1.5rem, 5vw, 1.8rem); 
   color: var(--color-accent, #e85a4f);
   text-align: center;
   margin-top: 0;
@@ -80,17 +160,17 @@
 
 .label {
   display: block;
-  font-weight: 500; /* Slightly less bold */
+  font-weight: 500; 
   margin-bottom: 0.6rem;
-  font-size: 0.85rem; /* Smaller label */
+  font-size: 0.85rem; 
   color: var(--color-text-primary);
 }
 
 .input,
 .select {
   width: 100%;
-  padding: 0.8rem 1rem; /* Comfortable padding */
-  border: 1px solid var(--color-border, #d1d5db); /* Softer border */
+  padding: 0.8rem 1rem; 
+  border: 1px solid var(--color-border, #d1d5db); 
   border-radius: var(--border-radius-md, 8px);
   font-size: 1rem;
   box-sizing: border-box;
@@ -114,14 +194,14 @@
   background: linear-gradient(135deg, var(--color-secondary-accent, #5cb85c) 0%, color-mix(in srgb, var(--color-secondary-accent, #5cb85c) 80%, black) 100%);
   color: white;
   border: none;
-  padding: 0.85rem 1.5rem; /* Good padding */
+  padding: 0.85rem 1.5rem; 
   border-radius: var(--border-radius-md, 8px);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.1s ease;
   width: 100%;
-  margin-top: 0.5rem; /* Space above button */
+  margin-top: 0.5rem; 
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
@@ -132,7 +212,7 @@
 }
 
 .submitButton:disabled {
-  background: #b0bec5; /* Muted color for disabled */
+  background: #b0bec5; 
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
@@ -177,15 +257,15 @@
 }
 
 .errorText {
-  color: #b91c1c; /* Darker red for text */
-  background-color: #fee2e2; /* Light red background */
-  border-color: #fca5a5; /* Red border */
+  color: #b91c1c; 
+  background-color: #fee2e2; 
+  border-color: #fca5a5; 
 }
 
 .infoText {
-  color: #1e40af; /* Darker blue for text */
-  background-color: #dbeafe; /* Light blue background */
-  border-color: #93c5fd; /* Blue border */
+  color: #1e40af; 
+  background-color: #dbeafe; 
+  border-color: #93c5fd; 
 }
 
 /* --- Enhanced Identified Guest Banner --- */
@@ -193,25 +273,25 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem 1.5rem; /* Increased padding */
-  background-color: color-mix(in srgb, var(--color-secondary-accent) 10%, transparent); /* Lighter, more subtle */
+  padding: 1rem 1.5rem; 
+  background-color: color-mix(in srgb, var(--color-secondary-accent) 10%, transparent); 
   color: var(--color-secondary-accent);
-  border-radius: var(--border-radius-lg, 12px); /* Softer radius */
-  margin-bottom: 2rem; /* More space below */
+  border-radius: var(--border-radius-lg, 12px); 
+  margin-bottom: 2rem; 
   border: 1px solid color-mix(in srgb, var(--color-secondary-accent) 25%, transparent);
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  text-align: left; /* Align text to the left */
+  text-align: left; 
 }
 
 .guestNotIdentifiedBanner {
   background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
   color: var(--color-accent);
   border-color: color-mix(in srgb, var(--color-accent) 25%, transparent);
-  justify-content: space-between; /* Space out items */
+  justify-content: space-between; 
 }
 
 .guestAvatar {
-  font-size: 2.5rem; /* Larger icon */
+  font-size: 2.5rem; 
   color: var(--color-secondary-accent);
   flex-shrink: 0;
 }
@@ -222,19 +302,19 @@
 .guestText {
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Allow text to take available space */
+  flex-grow: 1; 
 }
 
 .uploadingAsText {
   font-size: 0.85rem;
   opacity: 0.8;
-  display: block; /* Ensure it takes its own line */
+  display: block; 
   line-height: 1.2;
 }
 
 .identifiedGuestName {
   font-size: 1.1rem;
-  font-weight: 600; /* Bolder name */
+  font-weight: 600; 
   display: block;
   line-height: 1.3;
 }
@@ -249,7 +329,7 @@
   padding: 0.4rem 0.8rem;
   border-radius: var(--border-radius-md);
   transition: background-color 0.2s ease, color 0.2s ease;
-  white-space: nowrap; /* Prevent button text from wrapping */
+  white-space: nowrap; 
 }
 .changeGuestButton:hover {
   background-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
@@ -271,7 +351,7 @@
   background-color: color-mix(in srgb, var(--color-accent) 85%, black);
 }
 
-/* --- Notification Bar (ensure these styles are present or adapt) --- */
+
 .notificationBar {
   position: fixed;
   top: 20px;
@@ -279,7 +359,7 @@
   transform: translateX(-50%);
   padding: 1rem 1.5rem;
   border-radius: var(--border-radius-md, 8px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* var(--box-shadow-md) */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
   z-index: 2500;
   display: flex;
   align-items: center;
@@ -311,7 +391,7 @@
   opacity: 1;
 }
 
-/* Ensure file input is visually distinct if disabled */
+
 .fileInput:disabled,
 .fileInputLabel[disabled] { 
   cursor: not-allowed;
@@ -319,15 +399,15 @@
 }
 .fileInputContainer:has(.fileInput:disabled) {
   background-color: #f0f0f0; 
-  opacity: 0.6; /* Make the whole container look more disabled */
+  opacity: 0.6; 
 }
 
 .uploadButton:disabled {
-  background: linear-gradient(135deg, #e0e0e0, #bdbdbd); /* More distinct disabled gradient */
-  color: #757575; /* Darker grey for text */
+  background: linear-gradient(135deg, #e0e0e0, #bdbdbd); 
+  color: #757575; 
   cursor: not-allowed;
   transform: none;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* Inner shadow for pressed look */
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); 
 }
 
 .message.successMessage {
@@ -341,7 +421,7 @@
   border-left-color: #ef5350;
 }
 
-/* --- User Badge in Upper Left --- */
+
 .selectedUserBadge {
   position: absolute;
   top: 1.5rem;
@@ -398,7 +478,7 @@
   text-decoration: none;
 }
 
-/* Responsive: move badge inwards on small screens */
+
 @media (max-width: 600px) {
   .selectedUserBadge {
     top: 0.7rem;
@@ -421,6 +501,6 @@
   .changeGuestButton, .identifyButton {
     width: 100%;
     margin-top: 0.5rem;
-    padding: 0.8rem; /* Make buttons easier to tap */
+    padding: 0.8rem; 
   }
 }
