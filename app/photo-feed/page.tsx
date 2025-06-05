@@ -371,7 +371,7 @@ export default function PhotoFeedPage() {
 
   const totalBookPages = useMemo(() => {
     if (mediaItems.length === 0) return 1;
-    return isMobileLayout ? mediaItems.length + 1 : Math.ceil(Math.max(0, mediaItems.length - 1) / itemsPerSpread) + 1;
+    return isMobileLayout ? mediaItems.length + 1 : Math.ceil(Math.max(0, mediaItems.length) / itemsPerSpread) + 1;
   }, [mediaItems.length, isMobileLayout, itemsPerSpread]);
 
   const fetchMedia = useCallback(async () => {
