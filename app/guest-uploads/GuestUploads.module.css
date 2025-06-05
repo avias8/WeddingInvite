@@ -643,3 +643,9 @@
 
   .notificationBar { top: 45px; }
 }
+
+.infoMessage { 
+  background-color: #e1f5fe; /* Light blue */
+  color: #01579b;    /* Dark blue text */
+  border-left-color: #0288d1; /* Blue accent for border if you use it */
+}

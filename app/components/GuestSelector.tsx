@@ -9,6 +9,7 @@ interface GuestSelectorProps {
   onClose: () => void;
   onGuestIdentified: (guest: { id: number; name: string; inviteeId: number }) => void;
   context?: 'upload' | 'photoFeed'; // Optional: to slightly change messaging
+  onSelectAnonymous?: () => void; // New prop for anonymous selection
 }
 
 interface InviteeWithGuests extends Invitee {
@@ -20,6 +21,7 @@ export default function GuestSelector({
   onClose,
   onGuestIdentified,
   context = 'photoFeed',
+  onSelectAnonymous, // New prop
 }: GuestSelectorProps) {
   const [step, setStep] = useState<'inviteeSelect' | 'guestSelect' | 'errorState' | 'infoState'>('inviteeSelect');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -63,13 +65,15 @@ export default function GuestSelector({
           return res.json();
         })
         .then((data: InviteeWithGuests[]) => {
-          const attendingInvitees = data.filter(inv => inv.isAttending === true || inv.isAttending === null);
-          if (attendingInvitees.length === 0) {
-            setMessage("No attending or pending invitees found to select from.");
-            setStep('infoState');
+          // Filter for invitees who are attending or have not responded yet
+          const attendingOrPendingInvitees = data.filter(inv => inv.isAttending === true || inv.isAttending === null);
+          
+          if (attendingOrPendingInvitees.length === 0) {
+            setMessage("No attending or pending invitees found to select from. You can proceed anonymously if you wish.");
+            // Keep step as 'inviteeSelect' to show the anonymous button, or change to 'infoState' if anonymous isn't desired here
             setAllInvitees([]);
           } else {
-            const sortedInvitees = [...attendingInvitees].sort((a, b) => 
+            const sortedInvitees = [...attendingOrPendingInvitees].sort((a, b) => 
               a.name.toLowerCase().localeCompare(b.name.toLowerCase())
             );
             setAllInvitees(sortedInvitees);
@@ -132,22 +136,27 @@ export default function GuestSelector({
       setGuestsOfSelectedInvitee(guests);
 
       if (guests.length === 0) {
+        // If party size is 1, automatically identify as the invitee
         if (inviteeToSelect.maxInvites === 1) {
           onGuestIdentified({ id: inviteeToSelect.id, name: inviteeToSelect.name, inviteeId: inviteeToSelect.id });
           onClose();
           return;
         } else {
+          // If party size > 1 but no guests listed, prompt for custom name
           setMessage(`No guest names are currently listed for ${inviteeToSelect.name}'s party. You can enter your name below, or contact the hosts.`);
           setStep('guestSelect');
           setIsUsingCustomName(true);
-          setFinalSelectedGuestId(inviteeToSelect.id.toString()); // Placeholder
+          // Use invitee ID as a placeholder if no specific guest ID; parent component might need to handle this
+          setFinalSelectedGuestId(inviteeToSelect.id.toString()); 
           return;
         }
       } else if (guests.length === 1) {
+        // If only one guest in the list, pre-select them
         setFinalSelectedGuestId(guests[0].id.toString());
-        setCustomNameValue(guests[0].name);
+        setCustomNameValue(guests[0].name); // Pre-fill custom name in case they want to edit
         setStep('guestSelect');
       } else {
+        // Multiple guests, proceed to guest selection step
         setStep('guestSelect');
       }
     } else { // Deselecting
@@ -187,8 +196,10 @@ export default function GuestSelector({
         setCustomNameValue(guest.name);
       }
     } else if (!finalSelectedGuestId && !isUsingCustomName) {
+        // Clear custom name if no guest is selected and not using custom name explicitly
         setCustomNameValue('');
     }
+    // If isUsingCustomName is true, customNameValue is managed by its own input, so no change here.
   }, [finalSelectedGuestId, guestsOfSelectedInvitee, isUsingCustomName]);
 
 
@@ -196,16 +207,17 @@ export default function GuestSelector({
     e.preventDefault();
     setMessage(null); 
 
-    if (!selectedInvitee) { // This check should be based on selectedInvitee, not just selectedInviteeId
+    if (!selectedInvitee) { 
         setMessage("Please select your family/party first.");
-        setStep('inviteeSelect'); // Or highlight the family input
+        setStep('inviteeSelect'); 
         if(familyInputRef.current) familyInputRef.current.focus();
         return;
     }
 
+    // Case 1: No guests listed for the invitee, user entered a custom name
     if (guestsOfSelectedInvitee.length === 0 && isUsingCustomName && customNameValue.trim()) {
         onGuestIdentified({ 
-            id: selectedInvitee.id, 
+            id: selectedInvitee.id, // Use invitee ID as a placeholder or main ID
             name: customNameValue.trim(), 
             inviteeId: selectedInvitee.id 
         });
@@ -213,26 +225,34 @@ export default function GuestSelector({
         return;
     }
     
+    // Case 2: Guests are listed, but user has not selected one (and not using custom name)
     if (!isUsingCustomName && !finalSelectedGuestId) {
         setMessage("Please select your name from the list.");
         setStep('guestSelect');
         return;
     }
 
+    // Case 3: User opted for custom name, but didn't enter one
     if (isUsingCustomName && !customNameValue.trim()) {
         setMessage("Please enter your preferred name.");
         setStep('guestSelect'); 
         return;
     }
 
+    // Determine name and ID to use
     const originalGuest = guestsOfSelectedInvitee.find(g => g.id.toString() === finalSelectedGuestId);
     let nameToUse = '';
-    let guestIdToUse = 0;
+    let guestIdToUse = 0; // This ID will be used in onGuestIdentified
 
     if (isUsingCustomName) {
         nameToUse = customNameValue.trim();
+        // If there was an original guest selected before opting for custom name, use their ID.
+        // Otherwise (e.g., no guests in list, or custom name without prior selection), use invitee's ID as a fallback.
+        // The parent component (`GuestUploadPage`) will use this ID for storing who uploaded.
+        // The database GuestMedia.uploaderId should be able to handle an Invitee.id if that's the design.
         guestIdToUse = originalGuest ? originalGuest.id : selectedInvitee.id; 
     } else {
+        // Using selected guest from the list
         if (!originalGuest) {
             setMessage("Selected guest not found. Please try again or select your family again.");
             setStep('errorState'); 
@@ -251,6 +271,13 @@ export default function GuestSelector({
     onGuestIdentified({ id: guestIdToUse, name: nameToUse, inviteeId: selectedInvitee.id });
     onClose();
   };
+
+  const handleAnonymousProceed = () => {
+    if (onSelectAnonymous) {
+      onSelectAnonymous();
+    }
+    onClose();
+  };
   
   const getActionText = () => {
     return context === 'upload' ? "upload photos" : "like and comment";
@@ -260,6 +287,7 @@ export default function GuestSelector({
     return null;
   }
 
+  // Find the guest object if a guest ID is selected, to prefill custom name when toggling checkbox
   const selectedGuestForDisplay = guestsOfSelectedInvitee.find(g => g.id.toString() === finalSelectedGuestId);
 
   return (
@@ -294,16 +322,16 @@ export default function GuestSelector({
                     placeholder="Type your family/party name..."
                     className={styles.input}
                     autoComplete="off"
-                    disabled={step === 'guestSelect' && !!selectedInvitee} // Disable if family selected and on guest step
+                    disabled={step === 'guestSelect' && !!selectedInvitee} 
                   />
-                  {isFamilyListVisible && filteredInvitees.length > 0 && !selectedInvitee && ( // Only show list if no family is firmly selected yet
+                  {isFamilyListVisible && filteredInvitees.length > 0 && !selectedInvitee && ( 
                     <div ref={familyListRef} className={styles.familyListDropdown}>
                       {filteredInvitees.map((inv) => (
                         <div
                           key={inv.id}
                           className={styles.familyListItem}
                           onClick={() => selectInvitee(inv)}
-                          onMouseDown={(e) => e.preventDefault()} // Prevents input blur before click
+                          onMouseDown={(e) => e.preventDefault()} 
                         >
                           {inv.name} (Party of {inv.maxInvites})
                         </div>
@@ -316,14 +344,14 @@ export default function GuestSelector({
                      </div>
                    )}
                 </div>
-                {selectedInvitee && step === 'inviteeSelect' && ( /* User selected a family, prompt to move to guest */
+                {selectedInvitee && step === 'inviteeSelect' && ( 
                      <button type="button" onClick={() => setStep('guestSelect')} className={styles.secondaryButton}>
                         Next: Select Guest Name
                     </button>
                 )}
 
 
-                {/* Guest Selection Section - only if a family has been selected */}
+                {/* Guest Selection Section */}
                 {selectedInvitee && step === 'guestSelect' && (
                   <>
                     {guestsOfSelectedInvitee.length > 0 && (
@@ -340,7 +368,7 @@ export default function GuestSelector({
                               }
                           }}
                           className={styles.select}
-                          required={!isUsingCustomName}
+                          required={!isUsingCustomName} // Only required if not using custom name
                         >
                           <option value="">-- Select Your Name --</option>
                           {guestsOfSelectedInvitee.map((guest) => (
@@ -352,6 +380,7 @@ export default function GuestSelector({
                       </div>
                     )}
                     
+                    {/* Checkbox and Custom Name Input */}
                     {(guestsOfSelectedInvitee.length > 0 || (guestsOfSelectedInvitee.length === 0 && selectedInvitee)) && (
                          <div className={styles.formGroup}>
                             <div className={styles.customNameToggle}>
@@ -362,15 +391,16 @@ export default function GuestSelector({
                                 onChange={(e) => {
                                     const checked = e.target.checked;
                                     setIsUsingCustomName(checked);
-                                    if (!checked && selectedGuestForDisplay) {
+                                    if (!checked && selectedGuestForDisplay) { // If unchecking and a guest was selected
                                         setCustomNameValue(selectedGuestForDisplay.name);
-                                    } else if (checked && selectedGuestForDisplay && !customNameValue) {
+                                    } else if (checked && selectedGuestForDisplay && !customNameValue) { // If checking and a guest was selected, and custom field is empty
                                         setCustomNameValue(selectedGuestForDisplay.name);
-                                    } else if (checked && !selectedGuestForDisplay && guestsOfSelectedInvitee.length === 0 && selectedInvitee) {
+                                    } else if (checked && !selectedGuestForDisplay && guestsOfSelectedInvitee.length === 0 && selectedInvitee) { // If no guests in list and checking
                                         setCustomNameValue(''); 
-                                    } else if (!checked && !selectedGuestForDisplay){
+                                    } else if (!checked && !selectedGuestForDisplay){ // If unchecking and no guest was selected
                                         setCustomNameValue('');
                                     }
+                                    // If checking and custom field already has text, keep it.
                                 }}
                                 className={styles.checkbox}
                             />
@@ -398,6 +428,7 @@ export default function GuestSelector({
                   </>
                 )}
                 
+                {/* Submit Button for Identified Guest */}
                 {selectedInvitee && step === 'guestSelect' && (finalSelectedGuestId || (isUsingCustomName && customNameValue.trim())) && (
                     <button 
                         type="submit" 
@@ -410,12 +441,14 @@ export default function GuestSelector({
                     Confirm Identity
                     </button>
                 )}
+
+                {/* Change Family/Party Button */}
                  {selectedInvitee && (
                     <button 
                         type="button" 
                         onClick={() => {
                             setFamilySearchTerm('');
-                            selectInvitee(null); // This will reset family selection states
+                            selectInvitee(null); 
                         }}
                         className={styles.secondaryButton}
                         style={{marginTop: '0.5rem'}}
@@ -426,10 +459,12 @@ export default function GuestSelector({
               </>
             ) : null}
 
+            {/* Fallback for no invitees loaded */}
             {!isLoading && allInvitees.length === 0 && step !== 'errorState' && step !== 'infoState' && (
-                 <p className={styles.modalInstructions}>No invitee data found. Please contact the event hosts.</p>
+                 <p className={styles.modalInstructions}>No invitee data found. Please contact the event hosts or proceed anonymously.</p>
             )}
-
+            
+            {/* Error/Info State Message and Close Button */}
             {(step === 'errorState' || step === 'infoState') && !message && (
                  <p className={styles.modalInstructions}>
                     {step === 'errorState' ? "An error occurred. Please try again or contact the hosts." : "Please follow the instructions above or contact the hosts if you have trouble."}
@@ -438,6 +473,18 @@ export default function GuestSelector({
              {(step === 'errorState' || step === 'infoState') && (
                 <button type="button" onClick={onClose} className={styles.submitButton} style={{marginTop: '1rem', backgroundColor: 'var(--color-text-secondary)'}}>
                   Close
+                </button>
+            )}
+
+            {/* Proceed Anonymously Button - always available if the prop is passed */}
+            {onSelectAnonymous && (
+                <button
+                    type="button"
+                    onClick={handleAnonymousProceed}
+                    className={styles.secondaryButton} 
+                    style={{ marginTop: '1rem', borderColor: 'var(--color-accent)' }} 
+                >
+                    No Thanks, Proceed Anonymously
                 </button>
             )}
           </form>

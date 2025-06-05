@@ -4,8 +4,8 @@
 import React, { useState, ChangeEvent, FormEvent, useRef, useEffect } from "react";
 import Header from "../components/Header";
 import styles from "./GuestUploads.module.css";
-import GuestSelector from "../components/GuestSelector";
-import { FaUserCircle, FaCamera } from "react-icons/fa";
+import GuestSelector from "../components/GuestSelector"; // Assuming this is the updated GuestSelector
+import { FaUserCircle, FaCamera, FaSpinner, FaExclamationTriangle, FaCheckCircle } from "react-icons/fa"; // Added icons
 import Image from "next/image";
 
 interface UploadResponse {
@@ -26,17 +26,17 @@ interface IndividualFileStatus {
   fileType: 'image' | 'video' | 'other';
   errorMessage?: string;
   gcsObjectName?: string;
-  caption?: string; // Added caption field
+  caption?: string; 
 }
 
-// NotificationBar Component
-const NotificationBar = ({ message, type, onClose }: { message: string | null; type: "success" | "error"; onClose: () => void }) => {
+// NotificationBar Component (as previously defined, or your implementation)
+const NotificationBar = ({ message, type, onClose }: { message: string | null; type: "success" | "error" | "info"; onClose: () => void }) => {
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (message) {
       timer = setTimeout(() => {
         onClose();
-      }, 5000);
+      }, 5000); // Notification stays for 5 seconds
     }
     return () => {
       if (timer) clearTimeout(timer);
@@ -45,15 +45,31 @@ const NotificationBar = ({ message, type, onClose }: { message: string | null; t
 
   if (!message) return null;
 
+  let icon = null;
+  let baseClasses = styles.notificationBar;
+  if (type === "success") {
+    icon = <FaCheckCircle className={styles.notificationIcon} />;
+    baseClasses += ` ${styles.successMessage}`;
+  } else if (type === "error") {
+    icon = <FaExclamationTriangle className={styles.notificationIcon} />;
+    baseClasses += ` ${styles.errorMessage}`;
+  } else if (type === "info") {
+    // Assuming you might add an info icon, or just rely on color
+    baseClasses += ` ${styles.infoMessage}`; // Add an .infoMessage style in your CSS
+  }
+
+
   return (
-    <div className={`${styles.notificationBar} ${type === "success" ? styles.successMessage : styles.errorMessage}`}>
+    <div className={baseClasses}>
+      {icon}
       <span>{message}</span>
       <button onClick={onClose} className={styles.notificationCloseButton}>&times;</button>
     </div>
   );
 };
 
-// VideoIcon Component
+
+// VideoIcon Component (as previously defined)
 const VideoIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" width="24px" height="24px" className={styles.videoIcon}>
     <path d="M8 5v14l11-7z" />
@@ -64,14 +80,25 @@ export default function GuestUploadPage() {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [filesStatus, setFilesStatus] = useState<IndividualFileStatus[]>([]);
   const [overallMessage, setOverallMessage] = useState<string | null>(null);
-  const [overallMessageType, setOverallMessageType] = useState<"success" | "error" | null>(null);
+  const [overallMessageType, setOverallMessageType] = useState<"success" | "error" | "info" | null>(null); // Added "info"
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [currentGuestId, setCurrentGuestId] = useState<number | null>(null);
   const [currentGuestName, setCurrentGuestName] = useState<string | null>(null);
+  // We don't necessarily need to store currentInviteeId in GuestUploadPage's state 
+  // unless other parts of GuestUploadPage need it directly. 
+  // The important part is that GuestMedia.uploaderId gets the correct Guest.id.
   const [showGuestIdentifyModal, setShowGuestIdentifyModal] = useState<boolean>(false);
-  const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [notification, setNotification] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null); // Added "info"
+
+
+  // --- Define Anonymous Guest Details ---
+  const ANONYMOUS_GUEST_DETAILS = {
+    id: 251,
+    name: "Anonymous",
+    inviteeId: 140, // This is the invitee_id for the "Anonymous" guest row
+  };
 
   useEffect(() => {
     const storedGuestId = sessionStorage.getItem("uploadGuestId");
@@ -80,11 +107,13 @@ export default function GuestUploadPage() {
       setCurrentGuestId(parseInt(storedGuestId, 10));
       setCurrentGuestName(storedGuestName);
     } else {
+      // Initially, always show the modal if no guest is identified in session
       setShowGuestIdentifyModal(true);
     }
   }, []);
 
   useEffect(() => {
+    // Cleanup Object URLs when component unmounts or filesStatus changes
     return () => {
       filesStatus.forEach(fs => {
         if (fs.previewUrl) {
@@ -95,7 +124,9 @@ export default function GuestUploadPage() {
   }, [filesStatus]);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    // Revoke old URLs before setting new files
     filesStatus.forEach(fs => { if (fs.previewUrl) URL.revokeObjectURL(fs.previewUrl); });
+    
     setSelectedFiles(event.target.files);
     setOverallMessage(null);
     setOverallMessageType(null);
@@ -110,7 +141,6 @@ export default function GuestUploadPage() {
         } else if (file.type.startsWith("video/")) {
           fileType = 'video';
         }
-        // Initialize caption as empty string
         return { file, status: "pending" as const, progress: 0, previewUrl, fileType, errorMessage: undefined, gcsObjectName: undefined, caption: "" };
       });
       setFilesStatus(newFilesStatusArray);
@@ -119,7 +149,6 @@ export default function GuestUploadPage() {
     }
   };
 
-  // Function to update caption for a specific file
   const handleCaptionChange = (index: number, caption: string) => {
     setFilesStatus(prev =>
       prev.map((fs, i) => (i === index ? { ...fs, caption } : fs))
@@ -133,7 +162,7 @@ export default function GuestUploadPage() {
           const newStatusUpdate: Partial<IndividualFileStatus> = { status, gcsObjectName, errorMessage };
           if (progress !== undefined) newStatusUpdate.progress = progress;
           if (status === "success" && (newStatusUpdate.progress === undefined || newStatusUpdate.progress < 100)) newStatusUpdate.progress = 100;
-          if (status === "error" && progress === undefined) newStatusUpdate.progress = 0;
+          if (status === "error" && progress === undefined) newStatusUpdate.progress = 0; // Reset progress on error
           return { ...fs, ...newStatusUpdate };
         }
         return fs;
@@ -141,27 +170,48 @@ export default function GuestUploadPage() {
     );
   };
 
+  // This function is called by GuestSelector when a specific guest is identified
   const handleGuestIdentified = (guest: { id: number; name: string; inviteeId: number }) => {
     setCurrentGuestId(guest.id);
     setCurrentGuestName(guest.name);
     sessionStorage.setItem("uploadGuestId", guest.id.toString());
     sessionStorage.setItem("uploadGuestName", guest.name);
+    // You could also store guest.inviteeId in session if needed elsewhere
+    // sessionStorage.setItem("uploadInviteeId", guest.inviteeId.toString());
     setShowGuestIdentifyModal(false);
-    setNotification({ message: `Welcome, ${guest.name}! You're all set to share your memories.`, type: "success" });
+    
+    // Only show "Welcome" for non-anonymous selections
+    if (guest.id !== ANONYMOUS_GUEST_DETAILS.id) {
+      setNotification({ message: `Welcome, ${guest.name}! You're all set to share your memories.`, type: "success" });
+    }
   };
+
+  // This function is called by GuestSelector when user chooses to proceed anonymously
+  const handleProceedAnonymously = () => {
+    // Use the predefined anonymous guest details
+    handleGuestIdentified({
+      id: ANONYMOUS_GUEST_DETAILS.id,
+      name: ANONYMOUS_GUEST_DETAILS.name,
+      inviteeId: ANONYMOUS_GUEST_DETAILS.inviteeId 
+    });
+    // GuestSelector's onClose will handle setShowGuestIdentifyModal(false)
+    setNotification({ message: "You are proceeding anonymously. Your uploads will not be associated with your name.", type: "info" });
+  };
+
 
   const handleChangeGuest = () => {
     sessionStorage.removeItem("uploadGuestId");
     sessionStorage.removeItem("uploadGuestName");
+    // sessionStorage.removeItem("uploadInviteeId"); // If you stored it
     setCurrentGuestId(null);
     setCurrentGuestName(null);
     setShowGuestIdentifyModal(true);
-    setNotification(null);
+    setNotification(null); // Clear any previous notifications
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!currentGuestId) {
+    if (!currentGuestId && currentGuestId !== 0) { // Allow 0 if it's a valid ID (e.g. for anonymous)
       setOverallMessage("Please identify yourself before uploading files.");
       setOverallMessageType("error");
       setShowGuestIdentifyModal(true);
@@ -174,8 +224,8 @@ export default function GuestUploadPage() {
     }
 
     setIsSubmitting(true);
-    setOverallMessage(`✨ Processing your beautiful memories, ${currentGuestName}...`);
-    setOverallMessageType(null);
+    setOverallMessage(`✨ Processing your beautiful memories, ${currentGuestName || 'Guest'}...`);
+    setOverallMessageType(null); // Or "info" type if you have styling for it
 
     const operationResults: { success: boolean; fileName: string; error?: string }[] = [];
 
@@ -185,6 +235,7 @@ export default function GuestUploadPage() {
       updateFileStatus(i, "uploading", undefined, undefined, 0);
 
       try {
+        // Step 1: Get Signed URL
         const signedUrlResponse = await fetch("/api/generate-upload-url", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -195,6 +246,7 @@ export default function GuestUploadPage() {
           throw new Error(signedUrlData.error || signedUrlData.details || "Failed to get an upload URL.");
         }
 
+        // Step 2: Upload to GCS
         await new Promise<void>((resolve, reject) => {
           const xhr = new XMLHttpRequest();
           xhr.open("PUT", signedUrlData.signedUrl as string, true);
@@ -217,6 +269,7 @@ export default function GuestUploadPage() {
           xhr.send(file);
         });
 
+        // Step 3: Finalize Upload with Backend
         const finalizeResponse = await fetch('/api/media/finalize-upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -224,8 +277,8 @@ export default function GuestUploadPage() {
             gcsObjectName: signedUrlData.gcsObjectName,
             originalFileName: file.name,
             contentType: file.type,
-            uploaderId: currentGuestId,
-            caption: fs.caption, // Send the caption for this file
+            uploaderId: currentGuestId, // This will be 251 for anonymous
+            caption: fs.caption, 
           })
         });
         const finalizeData: UploadResponse = await finalizeResponse.json();
@@ -243,32 +296,33 @@ export default function GuestUploadPage() {
         updateFileStatus(i, "error", fs.gcsObjectName, errMsg, 0);
         operationResults.push({ success: false, fileName: file.name, error: errMsg });
       }
-    }
+    } // End of for loop
 
     setIsSubmitting(false);
     const successfulUploadsCount = operationResults.filter(r => r.success).length;
     const allSuccessful = operationResults.every(r => r.success);
 
     if (allSuccessful && filesStatus.length > 0) {
-      setOverallMessage(`🎉 Amazing, ${currentGuestName}! ${successfulUploadsCount} precious ${successfulUploadsCount === 1 ? 'memory has' : 'memories have'} been uploaded successfully! Thank you! ✨`);
+      setOverallMessage(`🎉 Amazing, ${currentGuestName || 'Guest'}! ${successfulUploadsCount} precious ${successfulUploadsCount === 1 ? 'memory has' : 'memories have'} been uploaded successfully! Thank you! ✨`);
       setOverallMessageType("success");
-      setSelectedFiles(null);
-      setFilesStatus([]);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      setSelectedFiles(null); 
+      setFilesStatus([]); 
+      if (fileInputRef.current) fileInputRef.current.value = ""; 
     } else if (successfulUploadsCount > 0) {
-      setOverallMessage(`📸 Great progress, ${currentGuestName}! ${successfulUploadsCount} ${successfulUploadsCount === 1 ? 'file has' : 'files have'} been uploaded. Some others had issues - please check their status below.`);
-      setOverallMessageType("error");
+      setOverallMessage(`📸 Great progress, ${currentGuestName || 'Guest'}! ${successfulUploadsCount} ${successfulUploadsCount === 1 ? 'file has' : 'files have'} been uploaded. Some others had issues - please check their status below.`);
+      setOverallMessageType("error"); 
     } else if (filesStatus.length > 0) {
-      setOverallMessage(`😔 Oops, ${currentGuestName}! All uploads encountered issues. Please check individual file errors below and try again.`);
+      setOverallMessage(`😔 Oops, ${currentGuestName || 'Guest'}! All uploads encountered issues. Please check individual file errors below and try again.`);
       setOverallMessageType("error");
     } else {
-      setOverallMessage(`No files were processed.`);
+      setOverallMessage(`No files were processed.`); // Should not happen if submit button is enabled
       setOverallMessageType(null);
     }
   };
 
 
   const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -298,18 +352,22 @@ export default function GuestUploadPage() {
         <GuestSelector
           isOpen={showGuestIdentifyModal}
           onClose={() => {
-            // Simply close the modal. The logic for displaying the "Please Identify"
-            // message is already handled by the banner in the main component JSX.
-            // This removes the race condition.
             setShowGuestIdentifyModal(false);
+            // If modal is closed without any identification (neither specific guest nor anonymous)
+            // and user is not yet identified, prompt them.
+            if (currentGuestId === null && currentGuestName === null) {
+                 setNotification({ message: "Please identify yourself or proceed anonymously to upload photos.", type: "error"});
+            }
           }}
           onGuestIdentified={handleGuestIdentified}
+          onSelectAnonymous={handleProceedAnonymously} // Pass the new handler
           context="upload"
         />
       )}
 
       <div className={styles.pageContainer}>
-        {(!currentGuestName && !showGuestIdentifyModal) && (
+        {/* Conditional Banner for Guest Identification Status */}
+        {(!currentGuestName && !showGuestIdentifyModal && currentGuestId === null) && ( // Show only if not identified AND modal is not open
           <div className={`${styles.identifiedGuestBanner} ${styles.guestNotIdentifiedBanner}`}>
             <FaCamera className={styles.guestAvatar} />
             <span className={styles.uploadingAsText}>Please identify yourself to share photos!</span>
@@ -338,7 +396,7 @@ export default function GuestUploadPage() {
 
           <form onSubmit={handleSubmit} className={styles.uploadForm}>
             <div className={styles.fileInputContainer}>
-              <label htmlFor="fileUpload" className={styles.fileInputLabel}>
+              <label htmlFor="fileUpload" className={`${styles.fileInputLabel} ${(!currentGuestId && currentGuestId !== 0) ? styles.disabledLabel : ''}`}>
                 {selectedFiles && selectedFiles.length > 0
                   ? `${selectedFiles.length} beautiful ${selectedFiles.length === 1 ? 'file' : 'files'} selected`
                   : "Choose Your Favorite Memories"}
@@ -351,7 +409,7 @@ export default function GuestUploadPage() {
                 accept="image/*,video/*"
                 onChange={handleFileChange}
                 className={styles.fileInput}
-                disabled={isSubmitting || !currentGuestId}
+                disabled={isSubmitting || (currentGuestId === null && currentGuestId !== ANONYMOUS_GUEST_DETAILS.id)} // Disable if not identified (allow if anon ID is set)
               />
             </div>
 
@@ -371,7 +429,7 @@ export default function GuestUploadPage() {
                               height={50}
                               style={{ objectFit: "cover" }}
                               className={styles.filePreviewThumbnail}
-                              unoptimized={true}
+                              unoptimized={true} // Good for blob URLs
                             />
                           )}
                           {fs.fileType === 'video' && (<div className={styles.videoThumbnailPlaceholder}><VideoIcon /></div>)}
@@ -393,7 +451,7 @@ export default function GuestUploadPage() {
                           onChange={(e) => handleCaptionChange(index, e.target.value)}
                           maxLength={150}
                           className={styles.captionTextarea}
-                          rows={2}
+                          rows={2} // Default rows
                           disabled={isSubmitting || fs.status === 'success' || fs.status === 'error'}
                         />
                         <span className={styles.charCount}>
@@ -402,13 +460,23 @@ export default function GuestUploadPage() {
                       </div>
                       {(fs.status === "uploading" || fs.status === "success") && fs.progress > 0 && (
                         <div className={styles.progressBarContainer}>
-                          <div className={`${styles.progressBar} ${fs.status === "success" ? styles.progressSuccess : ""}`} style={{ width: `${fs.progress}%` }} role="progressbar" aria-valuenow={fs.progress} aria-valuemin={0} aria-valuemax={100} aria-label={`Upload progress for ${fs.file.name}`}>
+                          <div 
+                            className={`${styles.progressBar} ${fs.status === "success" ? styles.progressSuccess : ""}`} 
+                            style={{ width: `${fs.progress}%` }} 
+                            role="progressbar" 
+                            aria-valuenow={fs.progress} 
+                            aria-valuemin={0} 
+                            aria-valuemax={100} 
+                            aria-label={`Upload progress for ${fs.file.name}`}
+                          >
                             {fs.status === "uploading" && fs.progress > 15 && `${fs.progress}%`}
                             {fs.status === "success" && `Complete! ✨`}
                           </div>
                         </div>
                       )}
-                      {fs.status === "error" && fs.errorMessage && (<div className={styles.fileErrorMessage}> <strong>Upload Issue:</strong> {fs.errorMessage} </div>)}
+                      {fs.status === "error" && fs.errorMessage && (
+                        <div className={styles.fileErrorMessage}> <strong>Upload Issue:</strong> {fs.errorMessage} </div>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -418,13 +486,22 @@ export default function GuestUploadPage() {
             <button
               type="submit"
               className={styles.uploadButton}
-              disabled={isSubmitting || !selectedFiles || selectedFiles.length === 0 || !currentGuestId}
+              disabled={isSubmitting || !selectedFiles || selectedFiles.length === 0 || (currentGuestId === null && currentGuestId !== ANONYMOUS_GUEST_DETAILS.id)}
             >
               {isSubmitting ? "✨ Uploading Magic..." : "Share the Love"}
             </button>
           </form>
 
-          {overallMessage && (<div className={`${styles.message} ${overallMessageType === "success" ? styles.successMessage : overallMessageType === "error" ? styles.errorMessage : styles.loadingMessage}`} role="alert"> {overallMessage} </div>)}
+          {overallMessage && (
+            <div className={`${styles.message} ${
+                overallMessageType === "success" ? styles.successMessage : 
+                overallMessageType === "error" ? styles.errorMessage : 
+                overallMessageType === "info" ? styles.infoMessage : // Assuming you'll add .infoMessage style
+                styles.loadingMessage // Default or general loading
+            }`} role="alert"> 
+              {overallMessage} 
+            </div>
+          )}
 
           <p className={styles.thankYouNote}> Every photo tells our story... Thank you for being part of it! 💫 </p>
           <p className={styles.photoFeedLink}> <a href="/photo-feed" className={styles.link}> 🖼️ Explore Our Memory Gallery </a> </p>
