@@ -2,12 +2,12 @@
 "use client";
 
 import React, { useState, useEffect, useRef, FormEvent, ChangeEvent, useCallback } from "react";
-import Header from "../components/Header"; // Adjust path as needed
+import Header from "../components/Header";
 import styles from "./PhotoFeed.module.css";
 import Image from "next/image";
-import { FaTrash, FaLock, FaUnlock, FaSpinner, FaExclamationTriangle, FaCheckCircle } from "react-icons/fa";
+import { FaTrash, FaLock, FaUnlock, FaSpinner, FaExclamationTriangle, FaCheckCircle, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-// --- Updated MediaItem Interface ---
+// --- Interfaces ---
 interface MediaItem {
   id: number;
   name: string;
@@ -27,20 +27,19 @@ interface ApiResponse {
 
 // Notification Bar Component
 const NotificationBar = ({ message, type, onClose }: { message: string | null; type: "success" | "error"; onClose: () => void }) => {
-  // useEffect is now at the top level
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (message) { // Logic depending on message is inside the hook
+    if (message) {
       timer = setTimeout(() => {
         onClose();
-      }, 5000); // Auto-close after 5 seconds
+      }, 5000);
     }
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [message, onClose]); // Dependencies remain the same
+  }, [message, onClose]);
 
-  if (!message) return null; // Conditional return remains
+  if (!message) return null;
 
   return (
     <div className={`${styles.notificationBar} ${type === "success" ? styles.success : styles.error}`}>
@@ -124,7 +123,7 @@ const LightboxModal = ({ src, alt, type, onClose }: { src: string; alt: string; 
             className={styles.lightboxMedia}
             width={800}
             height={600}
-            style={{ objectFit: "contain" }} // Ensure image is contained
+            style={{ objectFit: "contain" }}
             unoptimized={true}
             priority
           />
@@ -135,6 +134,123 @@ const LightboxModal = ({ src, alt, type, onClose }: { src: string; alt: string; 
         ) : (
           <p id="lightboxTitle" className={styles.unsupportedText}>Unsupported media type: {alt}</p>
         )}
+      </div>
+    </div>
+  );
+};
+
+// Book Page Component
+const BookPage = ({ 
+  items, 
+  pageNumber, 
+  isFlipped, 
+  onFlip, 
+  isAuthenticated, 
+  onDeleteRequest,
+  onMediaClick 
+}: { 
+  items: MediaItem[];
+  pageNumber: number;
+  isFlipped: boolean;
+  onFlip: () => void;
+  isAuthenticated: boolean;
+  onDeleteRequest: (item: MediaItem) => void;
+  onMediaClick: (item: MediaItem) => void;
+}) => {
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return "Unknown date";
+    try {
+      return new Date(dateString).toLocaleDateString(undefined, {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+    } catch {
+      return "Invalid date";
+    }
+  };
+
+  const renderMediaItem = (item: MediaItem) => (
+    <div key={item.id} className={styles.pageContent}>
+      <div className={styles.pageMediaWrapper} onClick={() => onMediaClick(item)}>
+        {isAuthenticated && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteRequest(item);
+            }}
+            className={styles.deleteButton}
+            title="Delete this item"
+            aria-label={`Delete media item ${item.name}`}
+          >
+            <FaTrash />
+          </button>
+        )}
+        {item.contentType?.startsWith("image/") ? (
+          <Image
+            src={item.url}
+            alt={`Shared by guest: ${item.name}`}
+            width={350}
+            height={262}
+            className={styles.mediaContent}
+            style={{ objectFit: "cover" }}
+            unoptimized={true}
+          />
+        ) : item.contentType?.startsWith("video/") ? (
+          <div className={styles.videoPlaceholder}>
+            <video
+              src={item.url + '#t=0.1'}
+              className={styles.mediaContent}
+              preload="metadata"
+              aria-label={`Shared by guest: ${item.name}`}
+              muted
+              playsInline
+            >
+              Your browser does not support the video tag.
+            </video>
+            <div className={styles.playIconOverlay}>
+              <svg viewBox="0 0 24 24" fill="currentColor" height="1em" width="1em">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+          </div>
+        ) : (
+          <div className={styles.unsupportedMedia}>
+            <FaExclamationTriangle className={styles.unsupportedIcon} />
+            <p>Unsupported file</p>
+          </div>
+        )}
+      </div>
+      <div className={styles.pageMediaInfo}>
+        {formatDate(item.timeCreated)}
+      </div>
+    </div>
+  );
+
+  // Cover page
+  if (pageNumber === 0) {
+    return (
+      <div className={`${styles.bookPage} ${isFlipped ? styles.flipped : ''}`} onClick={onFlip}>
+        <div className={`${styles.pageFront} ${styles.bookCover}`}>
+          <h2 className={styles.bookCoverTitle}>Our Wedding Memories</h2>
+          <p className={styles.bookCoverSubtitle}>A collection of moments from our special day</p>
+          <div className={styles.bookCoverDate}>Click to open</div>
+        </div>
+        <div className={styles.pageBack}>
+          {items[0] && renderMediaItem(items[0])}
+          <div className={styles.pageNumber}>1</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${styles.bookPage} ${isFlipped ? styles.flipped : ''}`} onClick={onFlip}>
+      <div className={styles.pageFront}>
+        {items[0] && renderMediaItem(items[0])}
+        <div className={styles.pageNumber}>{pageNumber * 2}</div>
+      </div>
+      <div className={styles.pageBack}>
+        {items[1] && renderMediaItem(items[1])}
+        <div className={styles.pageNumber}>{pageNumber * 2 + 1}</div>
       </div>
     </div>
   );
@@ -155,10 +271,10 @@ export default function PhotoFeedPage() {
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
   const [itemToDelete, setItemToDelete] = useState<MediaItem | null>(null);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [currentGuestId, setCurrentGuestId] = useState<number | null>(1); // Example: Guest ID 1
+  // Flip book state
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [flippedPages, setFlippedPages] = useState<Set<number>>(new Set());
 
-  // Wrapped fetchMedia in useCallback
   const fetchMedia = useCallback(async () => {
     setIsLoading(true);
     setPageError(null);
@@ -171,7 +287,7 @@ export default function PhotoFeedPage() {
       }
       setMediaItems(data.media || []);
 
-      if ((data.media || []).length === 0 && !pageError) { // Check !pageError to avoid overwriting an existing fetch error
+      if ((data.media || []).length === 0 && !pageError) {
         setPageError("No photos or videos have been shared yet. Check back soon!");
       }
     } catch (err) {
@@ -182,18 +298,15 @@ export default function PhotoFeedPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [pageError]); // Added pageError to dependency array
+  }, [pageError]);
 
   useEffect(() => {
-    fetchMedia(); // fetchMedia is now stable due to useCallback
+    fetchMedia();
     const authStatus = sessionStorage.getItem("photoFeedAdminAuthenticated");
     if (authStatus === "true") {
       setIsAuthenticated(true);
     }
-    // Example of how you might use setCurrentGuestId if needed.
-    // If setCurrentGuestId remains unused, the ESLint disable comment above handles it.
-    // setCurrentGuestId(prevId => prevId); 
-  }, [fetchMedia]); // Added fetchMedia to dependency array
+  }, [fetchMedia]);
 
   const openLightbox = (item: MediaItem) => {
     setLightboxItem(item);
@@ -201,17 +314,6 @@ export default function PhotoFeedPage() {
 
   const closeLightbox = () => {
     setLightboxItem(null);
-  };
-
-  const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return "Unknown date";
-    try {
-      return new Date(dateString).toLocaleDateString(undefined, {
-        year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
-      });
-    } catch {
-      return "Invalid date";
-    }
   };
 
   const handleAuthSubmit = (e: FormEvent) => {
@@ -247,7 +349,7 @@ export default function PhotoFeedPage() {
   const confirmDeleteMedia = async () => {
     if (!itemToDelete || !isAuthenticated) return;
     setShowDeleteConfirmModal(false);
-    setIsLoading(true); // Indicate loading state during deletion
+    setIsLoading(true);
     try {
       const adminPassword = process.env.NEXT_PUBLIC_MANAGEMENT_PASSWORD || "eW9zZGZlZGJhcg==";
       const response = await fetch("/api/delete-guest-media", {
@@ -270,14 +372,49 @@ export default function PhotoFeedPage() {
       setNotification({ message: `Error: ${errorMessage}`, type: "error" });
     } finally {
       setItemToDelete(null);
-      setIsLoading(false); // Reset loading state
+      setIsLoading(false);
     }
+  };
+
+  // Flip book logic
+  const itemsPerPage = 2;
+  const totalPages = Math.ceil(mediaItems.length / itemsPerPage) + 1; // +1 for cover
+
+  const handlePageFlip = (pageIndex: number) => {
+    setFlippedPages(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(pageIndex)) {
+        newSet.delete(pageIndex);
+      } else {
+        newSet.add(pageIndex);
+      }
+      return newSet;
+    });
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages - 1) {
+      handlePageFlip(currentPage);
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+      handlePageFlip(currentPage - 1);
+    }
+  };
+
+  const getPageItems = (pageIndex: number): MediaItem[] => {
+    if (pageIndex === 0) return mediaItems.slice(0, 1); // Cover page shows first item on back
+    const startIndex = (pageIndex - 1) * itemsPerPage;
+    return mediaItems.slice(startIndex, startIndex + itemsPerPage);
   };
 
   return (
     <>
       <Header />
-      {/* Pass notification.message or null to NotificationBar */}
       <NotificationBar
         message={notification ? notification.message : null}
         type={notification ? notification.type : "success"}
@@ -285,20 +422,20 @@ export default function PhotoFeedPage() {
       />
       <div className={styles.pageContainer}>
         <div className={styles.titleContainer}>
-            <h1 className={styles.pageTitle}>Moments From The Wedding</h1>
-            {isAuthenticated ? (
+          <h1 className={styles.pageTitle}>Moments From The Wedding</h1>
+          <p className={styles.pageSubtitle}>
+            See the moments captured by you, our wonderful guests!
+          </p>
+          {isAuthenticated ? (
             <button onClick={handleLogout} className={`${styles.button} ${styles.authToggleButton}`} title="Logout Admin">
-                <FaUnlock aria-hidden="true" /> Admin Mode
+              <FaUnlock aria-hidden="true" /> Admin Mode
             </button>
-            ) : (
+          ) : (
             <button onClick={() => setShowAuthModal(true)} className={`${styles.button} ${styles.authToggleButton}`} title="Admin Login">
-                <FaLock aria-hidden="true" /> Admin
+              <FaLock aria-hidden="true" /> Admin
             </button>
-            )}
+          )}
         </div>
-        <p className={styles.pageSubtitle}>
-          See the moments captured by you, our wonderful guests!
-        </p>
 
         {showAuthModal && !isAuthenticated && (
           <div className={styles.authModalOverlay}>
@@ -327,76 +464,59 @@ export default function PhotoFeedPage() {
             <p>Loading memories...</p>
           </div>
         )}
+        
         {pageError && !isLoading && mediaItems.length === 0 && (
-            <div className={styles.emptyStateContainer}>
-                <FaExclamationTriangle className={styles.emptyStateIcon} />
-                <p className={styles.errorMessage}>{pageError}</p>
-            </div>
+          <div className={styles.emptyStateContainer}>
+            <FaExclamationTriangle className={styles.emptyStateIcon} />
+            <p className={styles.errorMessage}>{pageError}</p>
+          </div>
         )}
 
         {!isLoading && mediaItems.length > 0 && (
-          <div className={styles.feedGrid}>
-            {mediaItems.map((item, index) => (
-              <div key={item.id || item.name} className={styles.feedItem}>
-                <div className={styles.mediaWrapper} onClick={() => openLightbox(item)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && openLightbox(item)}>
-                  {item.contentType?.startsWith("image/") ? (
-                    <Image
-                      src={item.url}
-                      alt={`Shared by guest: ${item.name}`}
-                      width={400}
-                      height={300}
-                      className={styles.mediaContent}
-                      style={{ objectFit: "cover" }}
-                      unoptimized={true}
-                      priority={index < 3} // Prioritize loading for the first few images
+          <>
+            <div className={styles.flipBookContainer}>
+              <div className={styles.book}>
+                <div className={styles.bookSpine} />
+                <div className={styles.bookPages}>
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <BookPage
+                      key={i}
+                      items={getPageItems(i)}
+                      pageNumber={i}
+                      isFlipped={flippedPages.has(i)}
+                      onFlip={() => handlePageFlip(i)}
+                      isAuthenticated={isAuthenticated}
+                      onDeleteRequest={requestDeleteMedia}
+                      onMediaClick={openLightbox}
                     />
-                  ) : item.contentType?.startsWith("video/") ? (
-                    <div className={styles.videoPlaceholder}>
-                      <video
-                        src={item.url + '#t=0.1'} // For thumbnail
-                        className={styles.mediaContent}
-                        preload="metadata"
-                        aria-label={`Shared by guest: ${item.name}`}
-                        muted
-                        playsInline
-                        poster="" // Consider adding a poster image if available
-                      >
-                        Your browser does not support the video tag.
-                      </video>
-                      <div className={styles.playIconOverlay}>
-                        <svg viewBox="0 0 24 24" fill="currentColor" height="1em" width="1em">
-                            <path d="M8 5v14l11-7z" />
-                        </svg>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className={styles.unsupportedMedia}>
-                      <FaExclamationTriangle className={styles.unsupportedIcon} />
-                      <p>Unsupported file</p>
-                      <span className={styles.fileNameText}>{item.name}</span>
-                    </div>
-                  )}
-                </div>
-                <div className={styles.itemInfo}>
-                  <span className={styles.uploadDate}>
-                    {formatDate(item.timeCreated)}
-                  </span>
-                  {isAuthenticated && (
-                    <button
-                      onClick={() => requestDeleteMedia(item)}
-                      className={styles.deleteButton}
-                      title="Delete this item"
-                      aria-label={`Delete media item ${item.name}`}
-                    >
-                      <FaTrash />
-                    </button>
-                  )}
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+            
+            <div className={styles.bookControls}>
+              <button 
+                onClick={handlePrevPage} 
+                disabled={currentPage === 0}
+                className={styles.pageButton}
+              >
+                <FaChevronLeft /> Previous
+              </button>
+              <span className={styles.pageIndicator}>
+                Page {currentPage + 1} of {totalPages}
+              </span>
+              <button 
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages - 1}
+                className={styles.pageButton}
+              >
+                Next <FaChevronRight />
+              </button>
+            </div>
+          </>
         )}
       </div>
+      
       {lightboxItem && (
         <LightboxModal
           src={lightboxItem.url}
@@ -405,6 +525,7 @@ export default function PhotoFeedPage() {
           onClose={closeLightbox}
         />
       )}
+      
       <ConfirmationModal
         isOpen={showDeleteConfirmModal}
         title="Confirm Deletion"
