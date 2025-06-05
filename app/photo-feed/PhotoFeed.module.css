@@ -916,7 +916,7 @@
 
 /* Mobile Styles */
 @media (max-width: 768px) {
-  :root {
+  :root { /* Also apply :global here if variables are overridden */
     --book-width: 92vw; /* Slightly wider on tablet */
     --book-height: 65vh; /* Adjust height for better ratio */
   }
@@ -974,9 +974,10 @@
 }
 
 @media (max-width: 480px) {
-  :root {
-     --book-height: 60vh; 
-  }
+  /* No :global(:root) needed here if not overriding the variables themselves, */
+  /* only styles using them. If variables ARE overridden, then yes, :global needed. */
+  /* Assuming no variable overrides for this block for now. */
+
   .pageTitle {
     font-size: clamp(1.8rem, 7vw, 2.2rem);
   }
@@ -1030,4 +1031,3 @@
     font-size: 1.5rem;
   }
 }
-
