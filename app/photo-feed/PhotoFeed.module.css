@@ -1,7 +1,7 @@
 /* app/photo-feed/PhotoFeed.module.css - Flip Book Theme */
 
 /* --- Flip Book Theme Variables --- */
-.pageContainer :global(:root) { /* MODIFIED HERE */
+:global(:root) { /* MODIFIED HERE */
   --book-cream: #faf6f0;
   --book-paper: #f9f4ed; /* Slightly off-white for pages */
   --book-shadow: #e8dfd2; /* Soft shadow for depth */
@@ -916,7 +916,7 @@
 
 /* Mobile Styles */
 @media (max-width: 768px) {
-  .pageContainer :global(:root) { /* MODIFIED HERE - Also apply :global here if variables are overridden */
+  :global(:root) { /* MODIFIED HERE - Also apply :global here if variables are overridden */
     --book-width: 92vw; /* Slightly wider on tablet */
     --book-height: 65vh; /* Adjust height for better ratio */
   }
