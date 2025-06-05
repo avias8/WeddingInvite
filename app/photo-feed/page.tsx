@@ -472,7 +472,7 @@ export default function PhotoFeedPage() {
       // Recalculate totalBookPages based on new items length
       const newTotalBookPages = isMobileLayout 
         ? updatedMediaItems.length + 1 
-        : Math.ceil(Math.max(0, updatedMediaItems.length - 1) / itemsPerSpread) + 1;
+        : Math.ceil(Math.max(0, updatedMediaItems.length) / itemsPerSpread) + 1;
       
       if (currentPage >= newTotalBookPages) {
         // If current page is now out of bounds, move to the new last page
