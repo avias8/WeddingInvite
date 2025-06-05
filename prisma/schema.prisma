@@ -10,14 +10,14 @@ generator client {
 }
 
 model Invitee {
-  id                  Int       @id @default(autoincrement())
+  id                  Int        @id @default(autoincrement())
   name                String
-  email               String    @unique
+  email               String     @unique
   isAttending         Boolean?
-  guests              Int       @default(1) // Number of guests confirmed in the party
-  createdAt           DateTime  @default(now())
-  token               String    @unique @default(uuid())
-  maxInvites          Int       // Max number of people allowed in this party
+  guests              Int        @default(1) // Number of guests confirmed in the party
+  createdAt           DateTime   @default(now())
+  token               String     @unique @default(uuid())
+  maxInvites          Int        // Max number of people allowed in this party
   respondedAt         DateTime?
   dietaryRestrictions String?
   accessibilityInfo   String?
@@ -25,25 +25,23 @@ model Invitee {
   songRequests        String?
   emailSentAt         DateTime?
   emailOpenedAt       DateTime?
-  guestsList          Guest[]   // Relation to individual Guest records created for this Invitee's party
+  guestsList          Guest[]    // Relation to individual Guest records created for this Invitee's party
 }
 
 model Guest {
-  id                  Int       @id @default(autoincrement())
+  id                  Int        @id @default(autoincrement())
   name                String
-  inviteeId           Int       @map("invitee_id")
-  invitee             Invitee   @relation(fields: [inviteeId], references: [id], onDelete: Cascade) // If Invitee is deleted, their guests are also deleted
+  inviteeId           Int        @map("invitee_id")
+  invitee             Invitee    @relation(fields: [inviteeId], references: [id], onDelete: Cascade)
   dietaryRestrictions String?
   accessibilityInfo   String?
-  isAttending         Boolean?  // Individual guest attendance status, if different from Invitee's overall
+  isAttending         Boolean?   // Individual guest attendance status, if different from Invitee's overall
 
-  tableId             Int?      @map("table_id")
-  table               Table?    @relation(fields: [tableId], references: [id]) // Default onDelete for optional relation
+  tableId             Int?       @map("table_id")
+  table               Table?     @relation(fields: [tableId], references: [id])
 
-  // Re-added relations for social features
-  uploadedMedia       GuestMedia[] @relation("UploadedMediaByGuest") // Media uploaded by this guest
-  likes               MediaLike[]  @relation("LikesByGuest")         // Likes given by this guest
-  comments            MediaComment[] @relation("CommentsByGuest")      // Comments made by this guest
+  // Relation to media uploaded by this guest
+  uploadedMedia       GuestMedia[] @relation("UploadedMediaByGuest")
 }
 
 model Table {
@@ -53,61 +51,17 @@ model Table {
   guests    Guest[] // Guests assigned to this table
 }
 
-// --- RE-INTRODUCED MODELS FOR SOCIAL FEATURES ---
-
 model GuestMedia {
-  id                Int       @id @default(autoincrement())
-  gcsPath           String    @unique // Full GCS path, e.g., "weddingguestphotos/uuid-filename.jpg"
-  originalFileName  String?   // Original name of the file uploaded by the guest
-  contentType       String?   // e.g., "image/jpeg", "video/mp4"
-  uploadedAt        DateTime  @default(now())
+  id                Int        @id @default(autoincrement())
+  gcsPath           String     @unique // Full GCS path, e.g., "weddingguestphotos/uuid-filename.jpg"
+  originalFileName  String?    // Original name of the file uploaded by the guest
+  contentType       String?    // e.g., "image/jpeg", "video/mp4"
+  uploadedAt        DateTime   @default(now())
+  caption           String?    @db.VarChar(150) // Caption for the media, limited to 150 chars
 
   // Who uploaded it? Linking to a Guest record.
-  uploaderId        Int?      @map("uploader_guest_id")
-  uploader          Guest?    @relation("UploadedMediaByGuest", fields: [uploaderId], references: [id], onDelete: SetNull)
-
-  // Relations to likes and comments
-  likes             MediaLike[]
-  comments          MediaComment[]
+  uploaderId        Int?       @map("uploader_guest_id")
+  uploader          Guest?     @relation("UploadedMediaByGuest", fields: [uploaderId], references: [id], onDelete: SetNull)
 
   @@index([uploadedAt]) // Index for sorting media by upload time
-}
-
-model MediaLike {
-  id        Int       @id @default(autoincrement())
-
-  mediaId   Int       @map("media_id")
-  media     GuestMedia @relation(fields: [mediaId], references: [id], onDelete: Cascade) // If media is deleted, likes are deleted
-
-  guestId   Int       @map("guest_id")
-  guest     Guest     @relation("LikesByGuest", fields: [guestId], references: [id], onDelete: Cascade) // If guest is deleted, their likes are deleted
-
-  createdAt DateTime  @default(now())
-
-  @@unique([mediaId, guestId]) // A guest can only like a specific media item once
-  @@index([mediaId])
-  @@index([guestId])
-}
-
-model MediaComment {
-  id        Int       @id @default(autoincrement())
-  text      String    @db.Text // Use Text type for potentially longer comments
-
-  mediaId   Int       @map("media_id")
-  media     GuestMedia @relation(fields: [mediaId], references: [id], onDelete: Cascade) // If media is deleted, comments are deleted
-
-  guestId   Int       @map("guest_id")
-  guest     Guest     @relation("CommentsByGuest", fields: [guestId], references: [id], onDelete: Cascade) // If guest is deleted, their comments are deleted
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  // Optional: For threaded comments/replies
-  parentId  Int?            @map("parent_comment_id")
-  parent    MediaComment?   @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade, map: "comment_parent_fk")
-  replies   MediaComment[]  @relation("CommentReplies")
-
-  @@index([mediaId])
-  @@index([guestId])
-  @@index([createdAt])
 }
