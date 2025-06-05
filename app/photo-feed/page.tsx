@@ -140,15 +140,16 @@ const LightboxModal = ({ src, alt, type, onClose }: { src: string; alt: string; 
 };
 
 // Book Page Component
-const BookPage = ({ 
-  items, 
-  pageNumber, 
-  isFlipped, 
-  onFlip, 
-  isAuthenticated, 
+const BookPage = ({
+  items,
+  pageNumber,
+  isFlipped,
+  onFlip,
+  isAuthenticated,
   onDeleteRequest,
-  onMediaClick 
-}: { 
+  onMediaClick,
+  coverBelow = false, // NEW
+}: {
   items: MediaItem[];
   pageNumber: number;
   isFlipped: boolean;
@@ -156,6 +157,7 @@ const BookPage = ({
   isAuthenticated: boolean;
   onDeleteRequest: (item: MediaItem) => void;
   onMediaClick: (item: MediaItem) => void;
+  coverBelow?: boolean; // NEW
 }) => {
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return "Unknown date";
@@ -248,7 +250,10 @@ const BookPage = ({
   }
 
   return (
-    <div className={`${styles.bookPage} ${isFlipped ? styles.flipped : ''}`} onClick={onFlip}>
+    <div
+      className={`${styles.bookPage} ${isFlipped ? styles.flipped : ""} ${coverBelow && pageNumber === 0 ? styles.coverBelow : ""}`}
+      onClick={onFlip}
+    >
       <div className={styles.pageFront}>
         {items[0] && renderMediaItem(items[0])}
         {pageNumber > 0 && <div className={styles.pageNumber}>{(pageNumber - 1) * 2 + 1}</div>}
@@ -488,22 +493,31 @@ export default function PhotoFeedPage() {
               <div className={styles.book}>
                 <div className={styles.bookSpine} />
                 <div className={styles.bookPages}>
-                  {/* Render pages in reverse order so cover is on top */}
-                  {Array.from({ length: totalPages }, (_, i) => {
-                    const pageIndex = totalPages - 1 - i;
-                    return (
-                      <BookPage
-                        key={pageIndex}
-                        items={getPageItems(pageIndex)}
-                        pageNumber={pageIndex}
-                        isFlipped={flippedPages.has(pageIndex)}
-                        onFlip={() => handlePageFlip(pageIndex)}
-                        isAuthenticated={isAuthenticated}
-                        onDeleteRequest={requestDeleteMedia}
-                        onMediaClick={openLightbox}
-                      />
-                    );
-                  })}
+                  {/* Render all non-cover pages first */}
+                  {Array.from({ length: totalPages - 1 }, (_, i) => (
+                    <BookPage
+                      key={i + 1}
+                      items={getPageItems(i + 1)}
+                      pageNumber={i + 1}
+                      isFlipped={flippedPages.has(i + 1)}
+                      onFlip={() => handlePageFlip(i + 1)}
+                      isAuthenticated={isAuthenticated}
+                      onDeleteRequest={requestDeleteMedia}
+                      onMediaClick={openLightbox}
+                    />
+                  ))}
+                  {/* Render the cover page last so it's always on top */}
+                  <BookPage
+                    key={0}
+                    items={getPageItems(0)}
+                    pageNumber={0}
+                    isFlipped={flippedPages.has(0)}
+                    onFlip={() => handlePageFlip(0)}
+                    isAuthenticated={isAuthenticated}
+                    onDeleteRequest={requestDeleteMedia}
+                    onMediaClick={openLightbox}
+                    coverBelow={currentPage > 1}
+                  />
                 </div>
               </div>
             </div>
