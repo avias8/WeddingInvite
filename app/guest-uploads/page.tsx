@@ -353,11 +353,6 @@ export default function GuestUploadPage() {
           isOpen={showGuestIdentifyModal}
           onClose={() => {
             setShowGuestIdentifyModal(false);
-            // If modal is closed without any identification (neither specific guest nor anonymous)
-            // and user is not yet identified, prompt them.
-            if (currentGuestId === null && currentGuestName === null) {
-                 setNotification({ message: "Please identify yourself or proceed anonymously to upload photos.", type: "error"});
-            }
           }}
           onGuestIdentified={handleGuestIdentified}
           onSelectAnonymous={handleProceedAnonymously} // Pass the new handler
