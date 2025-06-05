@@ -3,24 +3,24 @@
 /* --- Flip Book Theme Variables --- */
 :root {
   --book-cream: #faf6f0;
-  --book-paper: #f9f4ed;
-  --book-shadow: #e8dfd2;
-  --book-spine: #8b6f47;
-  --book-gold: #d4a574;
-  --book-deep-gold: #b8935a;
-  --book-brown: #6b5d54;
-  --book-dark: #3a3028;
-  --book-red: #c85450;
-  --book-green: #7a9a65;
+  --book-paper: #f9f4ed; /* Slightly off-white for pages */
+  --book-shadow: #e8dfd2; /* Soft shadow for depth */
+  --book-spine: #8b6f47; /* Richer brown for spine */
+  --book-gold: #c89f68; /* Muted gold for accents, less orange */
+  --book-deep-gold: #b08c54; /* Darker gold for highlights/hovers */
+  --book-brown: #6b5d54; /* General text, subtle details */
+  --book-dark: #3a3028; /* Very dark brown for contrast, like ink */
+  --book-red: #c85450; /* For delete/error states */
+  --book-green: #7a9a65; /* For success states */
   
   /* Typography */
-  --font-chapter: 'Playfair Display', 'Georgia', serif;
-  --font-script: 'Dancing Script', 'Brush Script MT', cursive;
-  --font-story: 'Crimson Text', 'Georgia', serif;
+  --font-chapter: 'Playfair Display', 'Georgia', serif; /* Elegant serif for titles */
+  --font-script: 'Dancing Script', 'Brush Script MT', cursive; /* Flowing script for subtitles/dedications */
+  --font-story: 'Crimson Text', 'Georgia', serif; /* Readable serif for main content/dates */
   
   /* Book Dimensions */
-  --book-width: min(90vw, 1000px);
-  --book-height: min(80vh, 700px);
+  --book-width: min(90vw, 960px); /* Adjusted max width */
+  --book-height: min(75vh, 680px); /* Adjusted max height */
   --page-width: calc(var(--book-width) / 2);
 }
 
@@ -28,17 +28,16 @@
 .pageContainer {
   min-height: 100vh;
   background: 
-    radial-gradient(ellipse at center, rgba(212, 165, 116, 0.1) 0%, transparent 60%),
-    linear-gradient(135deg, #2c2416 0%, #1a1611 100%);
+    radial-gradient(ellipse at center, rgba(200, 159, 104, 0.05) 0%, transparent 60%), /* Softer radial */
+    linear-gradient(135deg, #211e19 0%, #1a1611 100%); /* Darker, warmer background */
   padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  overflow: hidden;
+  overflow: hidden; /* Prevent scrollbars from peek-through elements */
 }
 
-/* Wood texture background */
 .pageContainer::before {
   content: '';
   position: absolute;
@@ -49,86 +48,82 @@
   background-image: 
     repeating-linear-gradient(90deg, 
       transparent, 
-      transparent 2px, 
-      rgba(139, 111, 71, 0.03) 2px, 
-      rgba(139, 111, 71, 0.03) 4px
+      transparent 3px, 
+      rgba(139, 111, 71, 0.02) 3px, /* More subtle texture */
+      rgba(139, 111, 71, 0.02) 5px 
     ),
     repeating-linear-gradient(0deg, 
       transparent, 
-      transparent 2px, 
-      rgba(139, 111, 71, 0.03) 2px, 
-      rgba(139, 111, 71, 0.03) 4px
+      transparent 3px, 
+      rgba(139, 111, 71, 0.02) 3px, 
+      rgba(139, 111, 71, 0.02) 5px
     );
   pointer-events: none;
+  opacity: 0.7;
 }
 
 /* --- Title Section --- */
 .titleContainer {
   width: 100%;
   max-width: var(--book-width);
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem; /* Increased spacing */
   text-align: center;
   position: relative;
-  z-index: 10;
+  z-index: 10; /* Keep titles above the book animation */
 }
 
 .pageTitle {
   font-family: var(--font-chapter);
-  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  font-size: clamp(2.2rem, 5.5vw, 3.2rem); /* Adjusted size */
   color: var(--book-gold);
   text-shadow: 
-    2px 2px 4px rgba(0, 0, 0, 0.5),
-    0 0 20px rgba(212, 165, 116, 0.3);
-  margin-bottom: 0.5rem;
-  letter-spacing: 0.05em;
+    1px 1px 3px rgba(0, 0, 0, 0.6), /* Softer shadow */
+    0 0 15px rgba(200, 159, 104, 0.25);
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.03em;
 }
 
 .pageSubtitle {
   font-family: var(--font-script);
-  font-size: clamp(1.2rem, 3vw, 1.6rem);
-  color: var(--book-paper);
-  opacity: 0.9;
+  font-size: clamp(1.1rem, 2.8vw, 1.5rem); /* Adjusted size */
+  color: var(--book-cream);
+  opacity: 0.85;
   font-style: italic;
 }
 
 /* --- Auth Button --- */
 .authToggleButton {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: rgba(212, 165, 116, 0.1);
+  top: 0.5rem; /* Adjusted position */
+  right: 0.5rem;
+  background: rgba(200, 159, 104, 0.15);
   color: var(--book-gold);
   border: 1px solid var(--book-gold);
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
+  padding: 0.6rem 1.1rem; /* Slightly larger padding */
+  border-radius: 22px;
   font-family: var(--font-story);
-  font-size: 0.9rem;
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  font-size: 0.85rem;
+  backdrop-filter: blur(8px);
+  transition: all 0.25s ease-in-out;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 
 .authToggleButton:hover {
   background: var(--book-gold);
   color: var(--book-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 3px 10px rgba(200, 159, 104, 0.35);
 }
 
 /* --- Flip Book Container --- */
-.feedGrid {
-  display: none; /* Hide default grid */
-}
-
-/* New Flip Book Structure */
 .flipBookContainer {
   width: var(--book-width);
   height: var(--book-height);
   position: relative;
-  perspective: 2000px;
+  perspective: 2500px; /* Increased perspective for more depth */
   margin: 2rem auto;
 }
 
@@ -137,7 +132,7 @@
   height: 100%;
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 0.5s;
+  transition: transform 0.5s ease-in-out; /* Smooth book open/close */
 }
 
 .bookPages {
@@ -152,41 +147,30 @@
   position: absolute;
   width: var(--page-width);
   height: 100%;
-  right: 0;
+  top: 0; /* Ensure pages align at the top */
+  right: 0; /* Default position for unflipped pages */
   transform-origin: left center;
-  transform-style: preserve-3d;
-  transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+  transform-style: preserve-3d; /* Crucial for children 3D positioning */
+  transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1); /* Smooth page flip */
   cursor: pointer;
+  border-radius: 0 6px 6px 0; /* Slight rounding for outer edge */
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.1); /* Subtle shadow for page stack */
 }
 
-/* Base z-index for pages */
-.bookPages > .bookPage:nth-last-child(1) { z-index: 100; }
-.bookPages > .bookPage:nth-last-child(2) { z-index: 90; }
-.bookPages > .bookPage:nth-last-child(3) { z-index: 80; }
-.bookPages > .bookPage:nth-last-child(4) { z-index: 70; }
-.bookPages > .bookPage:nth-last-child(5) { z-index: 60; }
-.bookPages > .bookPage:nth-last-child(6) { z-index: 50; }
-.bookPages > .bookPage:nth-last-child(7) { z-index: 40; }
-.bookPages > .bookPage:nth-last-child(8) { z-index: 30; }
-.bookPages > .bookPage:nth-last-child(9) { z-index: 20; }
-.bookPages > .bookPage:nth-last-child(n+10) { z-index: 10; }
-
-/* Flipped pages need to maintain their relative order but be lower */
 .bookPage.flipped {
   transform: rotateY(-180deg);
+  border-radius: 6px 0 0 6px; /* Rounding for flipped edge */
 }
 
-/* Adjust z-index for flipped pages dynamically */
-.bookPages > .bookPage.flipped:nth-last-child(1) { z-index: 9; }
-.bookPages > .bookPage.flipped:nth-last-child(2) { z-index: 8; }
-.bookPages > .bookPage.flipped:nth-last-child(3) { z-index: 7; }
-.bookPages > .bookPage.flipped:nth-last-child(4) { z-index: 6; }
-.bookPages > .bookPage.flipped:nth-last-child(5) { z-index: 5; }
-.bookPages > .bookPage.flipped:nth-last-child(6) { z-index: 4; }
-.bookPages > .bookPage.flipped:nth-last-child(7) { z-index: 3; }
-.bookPages > .bookPage.flipped:nth-last-child(8) { z-index: 2; }
-.bookPages > .bookPage.flipped:nth-last-child(9) { z-index: 1; }
-.bookPages > .bookPage.flipped:nth-last-child(n+10) { z-index: 1; }
+/* This class is applied by JS to the page currently animating */
+.turningPage {
+  /* z-index is set by inline style from JS, but this class can add other effects if needed */
+   box-shadow: 0 0 30px rgba(0,0,0,0.3); /* Emphasize turning page */
+}
+.coverPage.bookPage { /* Specific styles for the cover if needed, e.g., thicker feel */
+   /* border-left: 1px solid var(--book-spine); */ /* If spine isn't separate element */
+}
+
 
 /* Page Sides */
 .pageFront,
@@ -194,110 +178,129 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  backface-visibility: hidden;
-  background: var(--book-paper);
+  backface-visibility: hidden; /* Crucial for 3D flip */
+  background: var(--book-paper); /* Default background, cover will override for its front */
   box-shadow: 
-    inset 0 0 30px rgba(139, 111, 71, 0.1),
-    0 0 20px rgba(0, 0, 0, 0.2);
-  border: 1px solid var(--book-shadow);
+    inset 5px 0 15px -5px rgba(0, 0, 0, 0.07); /* Inner shadow for page curl illusion */
   overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 2rem;
+  justify-content: flex-start; /* Content starts from top */
+  padding: 1.8rem; /* Adjusted padding */
+  box-sizing: border-box; /* Ensure padding doesn't expand dimensions */
 }
 
 .pageFront {
-  z-index: 2;
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 5px 5px 0; /* Match parent .bookPage or specific */
+  z-index: 1; /* Lower stacking order within the page */
 }
 
 .pageBack {
-  transform: rotateY(180deg);
-  border-radius: 8px 0 0 8px;
+  transform: rotateY(180deg); /* Pre-rotate to face the "back" of the page container */
+  border-radius: 5px 0 0 5px; /* Match parent .bookPage or specific */
+  z-index: 2; /* Higher stacking order, should be visible when parent rotates */
 }
 
 /* Book Spine */
 .bookSpine {
   position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 4px;
+  left: calc(var(--page-width) - 3px); /* Adjusted for visual center */
+  top: -1px; /* Slight overlap */
+  bottom: -1px;
+  width: 6px; /* Slightly thicker spine */
   background: linear-gradient(to right, 
-    var(--book-spine),
-    var(--book-deep-gold),
-    var(--book-spine)
+    rgba(0,0,0,0.2),
+    var(--book-spine) 30%, 
+    var(--book-deep-gold) 50%,
+    var(--book-spine) 70%,
+    rgba(0,0,0,0.2)
   );
-  transform: translateX(-50%);
-  z-index: 100;
+  transform-style: preserve-3d; /* If you add 3D details to spine */
+  z-index: 500; /* High z-index to be visually prominent (relative to bookPages container) */
+  border-radius: 2px;
   box-shadow: 
-    0 0 10px rgba(0, 0, 0, 0.3),
-    inset 0 0 5px rgba(0, 0, 0, 0.2);
+    1px 0 3px rgba(0,0,0,0.2), 
+    -1px 0 3px rgba(0,0,0,0.2);
 }
 
-/* Page Numbers */
-.pageNumber {
-  position: absolute;
-  bottom: 1rem;
-  font-family: var(--font-story);
-  font-size: 0.9rem;
-  color: var(--book-brown);
-  opacity: 0.7;
-}
 
-.pageFront .pageNumber {
-  right: 1rem;
-}
-
-.pageBack .pageNumber {
-  left: 1rem;
-}
-
-/* Media Content in Book Pages */
-.pageContent {
+/* Page Content Styling */
+.pageContent { /* General container for text on a page, like dedications */
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 2rem;
+  justify-content: center; /* Center content like dedications */
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+.pageContentItem { /* Container for each media item + its info */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem; /* Space between items if multiple on a page (not current design) */
+  width: 100%;
 }
 
+
+/* Page Numbers */
+.pageNumber {
+  position: absolute;
+  bottom: 0.8rem; /* Closer to bottom */
+  font-family: var(--font-story);
+  font-size: 0.85rem;
+  color: var(--book-brown);
+  opacity: 0.6;
+  padding: 0.2rem 0.4rem;
+  background-color: rgba(249, 244, 237, 0.5); /* Subtle background for readability */
+  border-radius: 3px;
+}
+
+.pageFront .pageNumber {
+  right: 0.8rem;
+}
+
+.pageBack .pageNumber {
+  left: 0.8rem;
+}
+
+/* Media Content in Book Pages */
 .pageMediaWrapper {
   width: 100%;
-  max-width: 350px;
-  aspect-ratio: 4/3;
-  background: white;
-  padding: 10px;
+  max-width: 330px; /* Slightly smaller max */
+  aspect-ratio: 4 / 3;
+  background: #fff; /* White frame for photos */
+  padding: 8px; /* Thinner frame */
   box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    inset 0 0 20px rgba(0, 0, 0, 0.05);
+    0 3px 10px rgba(0, 0, 0, 0.12), /* Softer shadow */
+    inset 0 0 10px rgba(0, 0, 0, 0.03);
   border: 1px solid var(--book-shadow);
-  position: relative;
+  position: relative; /* For delete button positioning */
   overflow: hidden;
-  transform: rotate(-1deg);
-  margin-bottom: 1rem;
+  transform: rotate(-0.5deg); /* Slight tilt */
+  margin-bottom: 0.8rem;
+  border-radius: 3px; /* Slight rounding of photo frame */
 }
 
-.pageMediaWrapper:nth-child(even) {
-  transform: rotate(1deg);
+.pageMediaWrapper:nth-child(even) { /* Alternate tilt if you have multiple items per page side */
+  transform: rotate(0.5deg);
 }
 
 .mediaContent {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* Ensures image covers the area */
   display: block;
+  border-radius: 1px; /* Tiny rounding inside frame */
 }
 
 .videoPlaceholder {
   width: 100%;
   height: 100%;
   position: relative;
-  background: #000;
+  background: #1c1c1c; /* Dark background for video */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -306,7 +309,7 @@
 .videoPlaceholder video {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* Or contain, depending on preference */
 }
 
 .playIconOverlay {
@@ -314,141 +317,197 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 60px;
-  height: 60px;
-  background: rgba(212, 165, 116, 0.9);
+  width: 50px; /* Smaller play icon */
+  height: 50px;
+  background: rgba(200, 159, 104, 0.85); /* Use book gold */
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 24px;
-  pointer-events: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  font-size: 20px;
+  pointer-events: none; /* Click through to video */
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.2s ease;
 }
+.pageMediaWrapper:hover .playIconOverlay {
+    background: rgba(176, 140, 84, 1); /* Darken on hover */
+}
+
 
 .pageMediaInfo {
   text-align: center;
   font-family: var(--font-script);
-  font-size: 1.1rem;
+  font-size: 1rem; /* Slightly smaller */
   color: var(--book-brown);
-  margin-top: 1rem;
+  margin-top: 0.5rem; /* Reduced margin */
   font-style: italic;
+  opacity: 0.9;
 }
+
+/* Unsupported Media Placeholder */
+.unsupportedMedia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border: 2px dashed var(--book-shadow);
+  color: var(--book-brown);
+  font-family: var(--font-story);
+  padding: 1rem;
+  box-sizing: border-box;
+  background-color: rgba(232, 223, 210, 0.2);
+}
+.unsupportedIcon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.7;
+}
+
 
 /* Navigation Controls */
 .bookControls {
-  position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
+  /* position: absolute; Remove absolute positioning to flow naturally */
+  /* bottom: 1.5rem; */
+  /* left: 50%; */
+  /* transform: translateX(-50%); */
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem; /* Reduced gap */
   align-items: center;
-  z-index: 10;
+  z-index: 10; /* Keep controls accessible */
+  margin-top: 2.5rem; /* Space above controls */
+  padding: 0.5rem;
+  background-color: rgba(42, 36, 25, 0.3); /* Subtle bg */
+  border-radius: 30px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
 
 .pageButton {
   background: var(--book-gold);
   color: white;
   border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 25px;
+  padding: 0.7rem 1.3rem; /* Adjusted padding */
+  border-radius: 20px; /* Rounded buttons */
   font-family: var(--font-story);
-  font-size: 1rem;
+  font-size: 0.9rem;
+  font-weight: 500; /* Normal weight */
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 8px rgba(200, 159, 104, 0.25);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .pageButton:hover:not(:disabled) {
   background: var(--book-deep-gold);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(212, 165, 116, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(176, 140, 84, 0.35);
 }
 
 .pageButton:disabled {
-  opacity: 0.5;
+  opacity: 0.4; /* More pronounced disabled state */
   cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
 .pageIndicator {
   font-family: var(--font-story);
+  color: var(--book-cream); /* Brighter for better contrast on dark bg */
+  font-size: 1rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  min-width: 100px; /* Ensure space for text */
+  text-align: center;
+}
+
+/* --- Book Cover Specifics --- */
+.bookCover { /* Applied to .pageFront of the cover page */
+  background: var(--book-spine); /* Solid cover color */
+  color: var(--book-cream);
+  justify-content: center; /* Center title elements */
+  padding: 2.5rem;
+  box-shadow: 
+    inset 0 0 0 10px var(--book-deep-gold), /* Inner border effect */
+    inset 0 0 0 12px var(--book-gold), /* Outer part of inner border */
+    5px 5px 15px rgba(0,0,0,0.3); /* Outer shadow for cover */
+}
+
+.bookCover::before { /* Decorative border inside the padding */
+  content: '';
+  position: absolute;
+  top: 25px; /* Adjusted for padding */
+  left: 25px;
+  right: 25px;
+  bottom: 25px;
+  border: 1.5px solid var(--book-gold);
+  border-radius: 2px; /* Slight rounding for inner border */
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.bookCoverTitle {
+  font-family: var(--font-chapter);
+  font-size: clamp(1.8rem, 4vw, 2.4rem); /* Responsive title */
+  color: var(--book-cream);
+  text-shadow: 
+    1px 1px 2px rgba(0, 0, 0, 0.7);
+  margin-bottom: 0.8rem;
+  z-index: 1; /* Ensure title is above ::before if it ever conflicts */
+  text-align: center;
+}
+
+.bookCoverSubtitle {
+  font-family: var(--font-script);
+  font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+  color: var(--book-cream);
+  opacity: 0.85;
+  margin-bottom: 1.5rem;
+  z-index: 1;
+  text-align: center;
+}
+
+.bookCoverDate { /* "Click to open" text */
+  font-family: var(--font-story);
+  font-size: 0.9rem;
   color: var(--book-gold);
-  font-size: 1.1rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  margin-top: 2rem;
+  z-index: 1;
+  border: 1px solid var(--book-gold);
+  padding: 0.4rem 0.8rem;
+  border-radius: 15px;
+  background-color: rgba(0,0,0,0.1);
 }
 
-/* Book Cover Back Page */
-.bookCoverBack {
-  background: var(--book-paper);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.bookCoverBack { /* Applied to .pageBack of the cover page */
+  background: var(--book-paper); /* Standard page color for inside cover */
+  justify-content: center; /* If showing dedication */
 }
 
-.bookCoverBackContent {
+.bookCoverBackContent { /* For dedication text */
   text-align: center;
   padding: 2rem;
+  color: var(--book-brown);
 }
 
 .dedicationText {
   font-family: var(--font-script);
-  font-size: 1.6rem;
-  color: var(--book-brown);
-  margin: 0.5rem 0;
+  font-size: 1.5rem;
+  color: var(--book-dark); /* Darker for readability */
+  margin: 0.4rem 0;
   font-style: italic;
   opacity: 0.8;
 }
 
 .decorativeDivider {
-  font-size: 2rem;
+  font-size: 1.8rem;
   color: var(--book-gold);
-  margin-top: 2rem;
-  opacity: 0.7;
+  margin-top: 1.5rem;
+  opacity: 0.6;
 }
 
-.bookCover::before {
-  content: '';
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  right: 20px;
-  bottom: 20px;
-  border: 2px solid var(--book-gold);
-  border-radius: 4px;
-  opacity: 0.5;
-}
-
-.bookCoverTitle {
-  font-family: var(--font-chapter);
-  font-size: 2.5rem;
-  color: var(--book-gold);
-  text-shadow: 
-    2px 2px 4px rgba(0, 0, 0, 0.5),
-    0 0 20px rgba(212, 165, 116, 0.3);
-  margin-bottom: 1rem;
-  z-index: 1;
-}
-
-.bookCoverSubtitle {
-  font-family: var(--font-script);
-  font-size: 1.5rem;
-  color: var(--book-paper);
-  opacity: 0.9;
-  z-index: 1;
-}
-
-.bookCoverDate {
-  font-family: var(--font-story);
-  font-size: 1.2rem;
-  color: var(--book-gold);
-  margin-top: 2rem;
-  z-index: 1;
-}
 
 /* Loading & Empty States */
 .loadingIndicator {
@@ -456,17 +515,18 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem;
+  padding: 3rem;
   color: var(--book-gold);
-  gap: 1.5rem;
+  gap: 1.2rem;
   font-family: var(--font-script);
-  font-size: 1.4rem;
+  font-size: 1.3rem;
+  min-height: 300px; /* Ensure it takes some space */
 }
 
 .spinnerIcon {
-  font-size: 3rem;
+  font-size: 2.8rem;
   color: var(--book-gold);
-  animation: spin 2s linear infinite;
+  animation: spin 1.5s linear infinite;
 }
 
 @keyframes spin {
@@ -475,53 +535,54 @@
 }
 
 .emptyStateContainer {
-  background: rgba(212, 165, 116, 0.1);
-  border: 2px dashed var(--book-gold);
-  border-radius: 12px;
-  padding: 3rem;
+  background: rgba(200, 159, 104, 0.08);
+  border: 1.5px dashed var(--book-gold);
+  border-radius: 10px;
+  padding: 2.5rem;
   text-align: center;
-  max-width: 600px;
+  max-width: 550px;
   margin: 2rem auto;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(5px);
 }
 
 .emptyStateIcon {
-  font-size: 3rem;
+  font-size: 2.8rem;
   color: var(--book-gold);
-  margin-bottom: 1rem;
-  opacity: 0.7;
+  margin-bottom: 0.8rem;
+  opacity: 0.6;
 }
 
 .errorMessage {
-  color: var(--book-paper);
-  font-size: 1.2rem;
+  color: var(--book-cream);
+  font-size: 1.1rem;
   font-family: var(--font-story);
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
-/* Delete Button for Admin */
+/* Delete Button for Admin on Media Items */
 .deleteButton {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: rgba(200, 84, 80, 0.9);
+  top: 0.6rem; /* Adjusted position */
+  right: 0.6rem;
+  background: rgba(200, 84, 80, 0.85); /* var(--book-red) with alpha */
   color: white;
   border: none;
-  width: 35px;
-  height: 35px;
+  width: 30px; /* Smaller button */
+  height: 30px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.9rem; /* Smaller icon */
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+  z-index: 5; /* Ensure it's above media content, but below page-level z-index */
 }
 
 .deleteButton:hover {
-  background: var(--book-red);
-  transform: scale(1.1) rotate(10deg);
+  background: var(--book-red); /* Solid red on hover */
+  transform: scale(1.15) rotate(5deg);
 }
 
 /* Lightbox */
@@ -531,13 +592,13 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.95);
+  background: rgba(26, 22, 17, 0.97); /* Darker, from page background */
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
-  padding: 2rem;
-  animation: fadeIn 0.3s ease-out;
+  padding: 1rem; /* Reduced padding */
+  animation: fadeIn 0.25s ease-out;
 }
 
 @keyframes fadeIn {
@@ -547,74 +608,81 @@
 
 .lightboxContent {
   position: relative;
-  max-width: 90vw;
-  max-height: 90vh;
-  background: var(--book-dark);
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  border: 3px solid var(--book-gold);
+  max-width: 95vw; /* Allow slightly larger */
+  max-height: 95vh;
+  background: var(--book-dark); /* Match theme */
+  padding: 15px; /* Reduced padding */
+  border-radius: 6px;
+  box-shadow: 0 15px 50px rgba(0,0,0,0.4);
+  border: 2px solid var(--book-gold);
 }
 
 .lightboxMedia {
   display: block;
   max-width: 100%;
-  max-height: calc(90vh - 60px);
+  max-height: calc(95vh - 50px); /* Account for padding and close button */
   width: auto;
   height: auto;
   object-fit: contain;
-  border: 5px solid white;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  border: 4px solid var(--book-cream); /* Cream border */
+  box-shadow: 0 3px 15px rgba(0,0,0,0.25);
+  border-radius: 2px;
+}
+.unsupportedText {
+    color: var(--book-cream);
+    font-family: var(--font-story);
+    padding: 2rem;
 }
 
 .lightboxClose {
   position: absolute;
-  top: -15px;
-  right: -15px;
+  top: -18px; /* Adjusted for better placement */
+  right: -18px;
   background: var(--book-gold);
-  border: 3px solid white;
-  color: white;
-  font-size: 1.5rem;
-  width: 40px;
-  height: 40px;
+  border: 2.5px solid var(--book-cream); /* Cream border */
+  color: var(--book-dark); /* Dark icon for contrast */
+  font-size: 1.3rem; /* Smaller icon */
+  width: 36px; /* Smaller button */
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
 .lightboxClose:hover {
   background: var(--book-deep-gold);
-  transform: rotate(90deg) scale(1.1);
+  color: white;
+  transform: rotate(90deg) scale(1.05);
 }
 
 /* Auth Modal */
 .authModalOverlay {
-  position: fixed;
+  position: fixed; /* Use fixed for full viewport coverage */
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(26, 22, 17, 0.9); /* Dark overlay */
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1500;
   padding: 1rem;
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.25s ease-out;
 }
 
 .authModalContent {
   background: var(--book-paper);
-  padding: 3rem 2.5rem;
-  border-radius: 12px;
-  border: 3px solid var(--book-gold);
-  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  padding: 2.5rem 2rem; /* Adjusted padding */
+  border-radius: 10px;
+  border: 2px solid var(--book-gold);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
   width: 100%;
-  max-width: 400px;
+  max-width: 380px; /* Slightly smaller max-width */
   text-align: center;
   position: relative;
 }
@@ -622,135 +690,146 @@
 .authModalContent h2 {
   font-family: var(--font-chapter);
   color: var(--book-dark);
-  margin-bottom: 2rem;
-  font-size: 2rem;
+  margin-bottom: 1.8rem;
+  font-size: 1.8rem;
 }
 
 .modalCloseButton {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: 12px; /* Adjusted position */
+  right: 12px;
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 1.4rem; /* Adjusted size */
   color: var(--book-brown);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
+  padding: 5px; /* Make clickable area larger */
 }
 
 .modalCloseButton:hover {
   color: var(--book-dark);
-  transform: rotate(90deg);
+  transform: rotate(45deg) scale(1.1);
 }
 
 .authInput {
   width: 100%;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  border: 2px solid var(--book-gold);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.8);
+  padding: 0.9rem; /* Adjusted padding */
+  margin-bottom: 1.2rem;
+  border: 1.5px solid var(--book-gold);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.7);
   font-family: var(--font-story);
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--book-dark);
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
+  box-sizing: border-box; /* Include padding and border in width */
 }
 
 .authInput:focus {
   border-color: var(--book-deep-gold);
   background: white;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.2);
+  box-shadow: 0 0 0 2.5px rgba(200, 159, 104, 0.2);
 }
 
 .authError {
   color: var(--book-red);
-  background: rgba(200, 84, 80, 0.1);
-  border: 1px solid var(--book-red);
-  padding: 0.75rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  background: rgba(200, 84, 80, 0.08);
+  border: 1px solid rgba(200, 84, 80, 0.7);
+  padding: 0.7rem;
+  border-radius: 5px;
+  font-size: 0.85rem;
   margin-bottom: 1rem;
   font-family: var(--font-story);
 }
 
-/* Button Styles */
+/* General Button Styles (used in modals) */
 .button {
-  padding: 0.8rem 1.5rem;
-  border-radius: 25px;
+  padding: 0.75rem 1.4rem;
+  border-radius: 22px; /* Consistent with auth toggle */
   font-family: var(--font-story);
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
+  transition: all 0.25s ease;
+  border: 1.5px solid transparent;
   display: inline-flex;
   align-items: center;
+  justify-content: center; /* Center text in button */
   gap: 0.5rem;
   text-decoration: none;
+  line-height: 1.2; /* Ensure text fits */
 }
 
-.authSubmitButton {
+.authSubmitButton { /* Specific for auth modal login */
   background: var(--book-gold);
   color: white;
   width: 100%;
-  border: none;
-  font-size: 1.1rem;
-  padding: 1rem;
-  margin-top: 0.5rem;
+  border-color: var(--book-gold);
+  font-size: 1rem;
+  padding: 0.9rem;
+  margin-top: 0.3rem;
 }
 
 .authSubmitButton:hover {
   background: var(--book-deep-gold);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+  border-color: var(--book-deep-gold);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(200, 159, 104, 0.3);
 }
 
-.buttonSecondary {
-  background: white;
+.buttonSecondary { /* For cancel buttons */
+  background: transparent;
   color: var(--book-brown);
-  border: 2px solid var(--book-gold);
+  border: 1.5px solid var(--book-gold);
 }
 
 .buttonSecondary:hover {
-  background: var(--book-paper);
+  background: rgba(200, 159, 104, 0.1);
+  border-color: var(--book-deep-gold);
+  color: var(--book-dark);
 }
 
-.buttonDanger {
+.buttonDanger { /* For confirm delete */
   background: var(--book-red);
   color: white;
+  border-color: var(--book-red);
 }
 
 .buttonDanger:hover {
-  background: #b64541;
+  background: #b64541; /* Darker red */
+  border-color: #b64541;
+  transform: translateY(-1px);
 }
 
 /* Notification Bar */
 .notificationBar {
   position: fixed;
-  top: 20px;
+  top: 15px; /* Adjusted position */
   left: 50%;
   transform: translateX(-50%);
-  padding: 1rem 2rem;
-  border-radius: 30px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-  z-index: 2500;
+  padding: 0.9rem 1.8rem;
+  border-radius: 25px;
+  box-shadow: 0 3px 15px rgba(0,0,0,0.15);
+  z-index: 2500; /* Highest z-index for notifications */
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.8rem;
   font-family: var(--font-story);
-  font-size: 1rem;
-  border: 2px solid;
-  animation: slideDown 0.5s ease-out;
+  font-size: 0.95rem;
+  border: 1.5px solid;
+  animation: slideDown 0.4s ease-out forwards;
+  opacity: 0; /* Start hidden for animation */
 }
 
 @keyframes slideDown {
   from { 
-    top: -100px; 
+    top: -60px; 
     opacity: 0; 
   }
   to { 
-    top: 20px; 
+    top: 15px; 
     opacity: 1; 
   }
 }
@@ -758,140 +837,197 @@
 .notificationBar.success {
   background: var(--book-green);
   color: white;
-  border-color: rgba(255,255,255,0.3);
+  border-color: rgba(255,255,255,0.25);
 }
 
 .notificationBar.error {
   background: var(--book-red);
   color: white;
-  border-color: rgba(255,255,255,0.3);
+  border-color: rgba(255,255,255,0.25);
 }
 
 .notificationIcon {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
 }
 
 .notificationClose {
   background: none;
   border: none;
   color: white;
-  opacity: 0.8;
-  font-size: 1.3rem;
-  margin-left: 1rem;
+  opacity: 0.75;
+  font-size: 1.2rem;
+  margin-left: 0.8rem;
   cursor: pointer;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s ease;
+  padding: 0.2rem; /* Clickable area */
 }
 
 .notificationClose:hover {
   opacity: 1;
 }
 
-/* Confirmation Modal */
-.confirmationModalOverlay {
+/* Confirmation Modal (Delete) */
+.confirmationModalOverlay { /* Similar to Auth Modal Overlay */
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(26, 22, 17, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2100;
+  z-index: 2100; /* Above lightbox but below notifications */
   padding: 1rem;
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.25s ease-out;
 }
 
-.confirmationModalContent {
+.confirmationModalContent { /* Similar to Auth Modal Content */
   background: var(--book-paper);
-  padding: 2.5rem;
-  border-radius: 12px;
-  border: 3px solid var(--book-gold);
-  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  padding: 2.2rem; /* Adjusted */
+  border-radius: 10px;
+  border: 2px solid var(--book-gold);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
   width: 100%;
-  max-width: 450px;
+  max-width: 420px; /* Adjusted */
   text-align: center;
 }
 
 .confirmationModalContent h3 {
   font-family: var(--font-chapter);
   color: var(--book-dark);
-  margin-bottom: 1.5rem;
-  font-size: 1.8rem;
+  margin-bottom: 1.2rem;
+  font-size: 1.7rem;
 }
 
 .confirmationModalContent p {
-  margin-bottom: 2rem;
-  font-size: 1.1rem;
-  line-height: 1.6;
+  margin-bottom: 1.8rem;
+  font-size: 1.05rem;
+  line-height: 1.5;
   color: var(--book-brown);
   font-family: var(--font-story);
 }
 
 .confirmationModalActions {
   display: flex;
-  justify-content: center;
-  gap: 1rem;
+  justify-content: center; /* Or space-around for more gap */
+  gap: 0.8rem;
 }
 
 /* Mobile Styles */
 @media (max-width: 768px) {
   :root {
-    --book-width: 90vw;
-    --book-height: 70vh;
+    --book-width: 92vw; /* Slightly wider on tablet */
+    --book-height: 65vh; /* Adjust height for better ratio */
   }
   
   .flipBookContainer {
-    margin: 1rem auto;
+    margin: 1.5rem auto; /* Adjusted margin */
+    perspective: 1800px; /* Less perspective on smaller screens */
   }
   
-  .pageContent {
-    padding: 1rem;
+  .pageFront, .pageBack {
+    padding: 1.2rem; /* Reduced padding on pages */
   }
   
   .pageMediaWrapper {
-    max-width: 280px;
+    max-width: 90%; /* Allow media to be larger % of page */
+    padding: 6px;
   }
   
   .bookCoverTitle {
-    font-size: 2rem;
+    font-size: clamp(1.6rem, 5vw, 2rem);
+  }
+  .bookCoverSubtitle {
+    font-size: clamp(1rem, 3.5vw, 1.3rem);
   }
   
   .bookControls {
-    bottom: 1rem;
     gap: 1rem;
+    margin-top: 2rem;
+    padding: 0.4rem;
   }
   
   .pageButton {
-    padding: 0.6rem 1.2rem;
+    padding: 0.6rem 1.1rem;
+    font-size: 0.8rem;
+  }
+  .pageIndicator {
     font-size: 0.9rem;
+    min-width: 80px;
   }
   
   .authToggleButton {
-    position: static;
-    margin: 1rem auto;
-    display: block;
+    position: static; /* Stack in flow on small screens */
+    margin: 1rem auto 1.5rem; /* Center and add margin */
+    display: table; /* To allow auto margins for centering */
+  }
+
+  .titleContainer {
+    margin-bottom: 0.5rem; /* Reduce space if auth button moves */
+  }
+  .notificationBar {
+    width: 90%;
+    padding: 0.8rem 1.2rem;
+    font-size: 0.9rem;
   }
 }
 
 @media (max-width: 480px) {
+  :root {
+     --book-height: 60vh; 
+  }
   .pageTitle {
-    font-size: 2rem;
+    font-size: clamp(1.8rem, 7vw, 2.2rem);
   }
   
   .pageSubtitle {
-    font-size: 1.1rem;
+    font-size: clamp(1rem, 4.5vw, 1.2rem);
+  }
+
+  .pageFront, .pageBack {
+    padding: 0.8rem;
   }
   
   .bookCoverTitle {
-    font-size: 1.5rem;
+    font-size: clamp(1.4rem, 6vw, 1.8rem);
   }
-  
   .bookCoverSubtitle {
-    font-size: 1.2rem;
+    font-size: clamp(0.9rem, 4vw, 1.1rem);
+  }
+  .bookCoverDate {
+    font-size: 0.8rem;
+    margin-top: 1.5rem;
   }
   
   .pageMediaWrapper {
-    max-width: 220px;
+    max-width: 95%; /* Take up more space on mobile */
+  }
+  .pageMediaInfo {
+    font-size: 0.9rem;
+  }
+  .pageNumber {
+    font-size: 0.75rem;
+    bottom: 0.5rem;
+    right: 0.5rem; /* For front */
+  }
+  .pageBack .pageNumber {
+    left: 0.5rem;
+  }
+  .bookControls {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .pageButton {
+    width: 80%;
+    justify-content: center;
+  }
+  .authModalContent, .confirmationModalContent {
+    padding: 1.8rem 1.2rem;
+    max-width: calc(100vw - 2rem); /* Full width minus padding */
+  }
+  .authModalContent h2, .confirmationModalContent h3 {
+    font-size: 1.5rem;
   }
 }
+
