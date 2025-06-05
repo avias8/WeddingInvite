@@ -941,13 +941,14 @@
   background: linear-gradient(135deg, var(--color-secondary-accent), var(--color-accent));
   color: white;
   border-radius: 50px;
-  box-shadow: 
+  box-shadow:
     0 8px 16px rgba(0, 0, 0, 0.2),
     0 4px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   position: relative;
   overflow: hidden;
+  margin-top: 1rem; /* Give it some space */
 }
 
 .memoryGalleryButton::before {
@@ -964,7 +965,7 @@
 .memoryGalleryButton:hover {
   background: linear-gradient(135deg, var(--color-accent), var(--color-secondary-accent));
   transform: translateY(-4px) scale(1.05);
-  box-shadow: 
+  box-shadow:
     0 16px 32px rgba(0, 0, 0, 0.3),
     0 8px 16px rgba(0, 0, 0, 0.2);
 }
@@ -975,7 +976,7 @@
 
 .memoryGalleryButton:active {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 
+  box-shadow:
     0 8px 16px rgba(0, 0, 0, 0.2),
     0 4px 8px rgba(0, 0, 0, 0.1);
 }

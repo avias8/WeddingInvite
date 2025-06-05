@@ -491,15 +491,20 @@ export default function GuestUploadPage() {
             <div className={`${styles.message} ${
                 overallMessageType === "success" ? styles.successMessage : 
                 overallMessageType === "error" ? styles.errorMessage : 
-                overallMessageType === "info" ? styles.infoMessage : // Assuming you'll add .infoMessage style
-                styles.loadingMessage // Default or general loading
+                overallMessageType === "info" ? styles.infoMessage :
+                styles.loadingMessage
             }`} role="alert"> 
               {overallMessage} 
             </div>
           )}
 
           <p className={styles.thankYouNote}> Every photo tells our story... Thank you for being part of it! 💫 </p>
-          <p className={styles.photoFeedLink}> <a href="/photo-feed" className={styles.link}> 🖼️ Explore Our Memory Gallery </a> </p>
+          
+          {/* START: MODIFIED CODE */}
+          <a href="/photo-feed" className={styles.memoryGalleryButton}>
+            🖼️ Explore Our Memory Gallery
+          </a>
+          {/* END: MODIFIED CODE */}
         </div>
       </div>
     </>
