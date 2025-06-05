@@ -99,6 +99,14 @@
   letter-spacing: 0.3px;
 }
 
+.fileInputLabel.disabledLabel {
+  background: #e0e0e0; /* Muted grey background */
+  color: #a0a0a0; /* Muted text color */
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
 .fileInputLabel::before {
   content: '📸';
   margin-right: 0.7rem;

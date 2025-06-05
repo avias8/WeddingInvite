@@ -396,7 +396,12 @@ export default function GuestUploadPage() {
 
           <form onSubmit={handleSubmit} className={styles.uploadForm}>
             <div className={styles.fileInputContainer}>
-              <label htmlFor="fileUpload" className={`${styles.fileInputLabel} ${(!currentGuestId && currentGuestId !== 0) ? styles.disabledLabel : ''}`}>
+              <label
+                htmlFor="fileUpload"
+                className={`${styles.fileInputLabel} ${
+                  (!currentGuestId && currentGuestId !== ANONYMOUS_GUEST_DETAILS.id) ? styles.disabledLabel : ''
+                }`}
+              >
                 {selectedFiles && selectedFiles.length > 0
                   ? `${selectedFiles.length} beautiful ${selectedFiles.length === 1 ? 'file' : 'files'} selected`
                   : "Choose Your Favorite Memories"}
@@ -409,7 +414,7 @@ export default function GuestUploadPage() {
                 accept="image/*,video/*"
                 onChange={handleFileChange}
                 className={styles.fileInput}
-                disabled={isSubmitting || (currentGuestId === null && currentGuestId !== ANONYMOUS_GUEST_DETAILS.id)} // Disable if not identified (allow if anon ID is set)
+                disabled={!currentGuestId || currentGuestId === ANONYMOUS_GUEST_DETAILS.id || isSubmitting} // Disable if not identified
               />
             </div>
 
