@@ -159,8 +159,20 @@
   cursor: pointer;
 }
 
+.bookPage:nth-child(1) { z-index: 10; }
+.bookPage:nth-child(2) { z-index: 9; }
+.bookPage:nth-child(3) { z-index: 8; }
+.bookPage:nth-child(4) { z-index: 7; }
+.bookPage:nth-child(5) { z-index: 6; }
+.bookPage:nth-child(6) { z-index: 5; }
+.bookPage:nth-child(7) { z-index: 4; }
+.bookPage:nth-child(8) { z-index: 3; }
+.bookPage:nth-child(9) { z-index: 2; }
+.bookPage:nth-child(n+10) { z-index: 1; }
+
 .bookPage.flipped {
   transform: rotateY(-180deg);
+  z-index: 1;
 }
 
 /* Page Sides */

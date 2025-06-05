@@ -235,8 +235,11 @@ const BookPage = ({
           <div className={styles.bookCoverDate}>Click to open</div>
         </div>
         <div className={styles.pageBack}>
-          {items[0] && renderMediaItem(items[0])}
-          <div className={styles.pageNumber}>1</div>
+          <div className={styles.pageContent}>
+            <p style={{ textAlign: 'center', color: 'var(--book-brown)', fontStyle: 'italic', fontSize: '1.2rem' }}>
+              Turn the page to begin...
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -407,7 +410,7 @@ export default function PhotoFeedPage() {
   };
 
   const getPageItems = (pageIndex: number): MediaItem[] => {
-    if (pageIndex === 0) return mediaItems.slice(0, 1); // Cover page shows first item on back
+    if (pageIndex === 0) return []; // Cover page shows nothing on back
     const startIndex = (pageIndex - 1) * itemsPerPage;
     return mediaItems.slice(startIndex, startIndex + itemsPerPage);
   };
@@ -489,7 +492,7 @@ export default function PhotoFeedPage() {
                       onDeleteRequest={requestDeleteMedia}
                       onMediaClick={openLightbox}
                     />
-                  ))}
+                  )).reverse()}
                 </div>
               </div>
             </div>
