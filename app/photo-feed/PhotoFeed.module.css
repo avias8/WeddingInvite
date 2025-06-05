@@ -916,7 +916,7 @@
 
 /* Mobile Styles */
 @media (max-width: 768px) {
-  :global(:root) { /* MODIFIED HERE - Also apply :global here if variables are overridden */
+  .pageContainer :global(:root) { /* MODIFIED HERE - Also apply :global here if variables are overridden */
     --book-width: 92vw; /* Slightly wider on tablet */
     --book-height: 65vh; /* Adjust height for better ratio */
   }
