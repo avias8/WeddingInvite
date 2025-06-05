@@ -78,7 +78,7 @@ export default function GuestSelector({
   const handleInviteeSelectionChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const inviteeId = e.target.value;
     setSelectedInviteeId(inviteeId);
-    setMessage(null);
+    setMessage(null); // Clear message when changing invitee
     setIsUsingCustomName(false); // Reset custom name when family changes
     setCustomNameValue('');
 
@@ -91,11 +91,11 @@ export default function GuestSelector({
 
         if (guests.length === 0) {
           if (foundInvitee.guests === 1) {
-             setMessage(`No specific guest names found for ${foundInvitee.name}'s party. We'll assume you are ${foundInvitee.name}.`);
-             setStep('infoState');
-             onGuestIdentified({ id: foundInvitee.id, name: foundInvitee.name, inviteeId: foundInvitee.id });
-             onClose();
-             return;
+            setMessage(`No specific guest names found for ${foundInvitee.name}'s party. We'll assume you are ${foundInvitee.name}.`);
+            setStep('infoState');
+            onGuestIdentified({ id: foundInvitee.id, name: foundInvitee.name, inviteeId: foundInvitee.id });
+            onClose();
+            return;
           } else {
             setMessage(`No guest names are currently listed for ${foundInvitee.name}'s party. Please contact the hosts to update details.`);
             setStep('infoState');
@@ -105,13 +105,10 @@ export default function GuestSelector({
         } else if (guests.length === 1) {
           setFinalSelectedGuestId(guests[0].id.toString());
           setCustomNameValue(guests[0].name); // Pre-fill custom name input
-          // Do not auto-submit here, let them confirm or customize name
           setStep('guestSelect');
         } else {
           setFinalSelectedGuestId(guests.length > 0 ? guests[0].id.toString() : '');
-          if (guests.length > 0) {
-            setCustomNameValue(guests.find(g => g.id.toString() === (guests[0].id.toString()))?.name || '');
-          }
+          setCustomNameValue(guests.find(g => g.id.toString() === (guests[0].id.toString()))?.name || '');
           setStep('guestSelect');
         }
       } else {
@@ -141,12 +138,13 @@ export default function GuestSelector({
   // Handle Final Guest Selection and Submission
   const handleGuestConfirmation = (e: FormEvent) => {
     e.preventDefault();
+    setMessage(null); // Clear message on confirmation attempt
     if (!selectedInvitee || !finalSelectedGuestId) {
       setMessage("Please select your family and then your name.");
       setStep('errorState');
       return;
     }
-    
+
     const originalGuest = guestsOfSelectedInvitee.find(g => g.id.toString() === finalSelectedGuestId);
     if (!originalGuest) {
       setMessage("Selected guest not found. Please try again.");
@@ -157,10 +155,9 @@ export default function GuestSelector({
     const nameToUse = (isUsingCustomName && customNameValue.trim()) ? customNameValue.trim() : originalGuest.name;
 
     if (!nameToUse) {
-        setMessage("Name cannot be empty.");
-        // Optionally keep them on guestSelect step if custom name was attempted and failed
-        setStep('guestSelect'); 
-        return;
+      setMessage("Name cannot be empty.");
+      setStep('guestSelect');
+      return;
     }
 
     onGuestIdentified({ id: originalGuest.id, name: nameToUse, inviteeId: selectedInvitee.id });

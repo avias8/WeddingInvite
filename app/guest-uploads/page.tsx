@@ -305,18 +305,43 @@ export default function GuestUploadPage() {
         type={notification ? notification.type : "success"}
         onClose={() => setNotification(null)}
       />
+
+      {showGuestIdentifyModal && (
+        <GuestSelector
+            isOpen={showGuestIdentifyModal}
+            onClose={() => {
+                setShowGuestIdentifyModal(false);
+                if (!currentGuestId) {
+                    setNotification({ message: "Please identify yourself to upload photos.", type: "error" });
+                }
+            }}
+            onGuestIdentified={handleGuestIdentified}
+            context="upload"
+        />
+      )}
+
       <div className={styles.pageContainer}>
-        <SelectedUserBadge />
+        {(!currentGuestName && !showGuestIdentifyModal) && (
+          <div className={`${styles.identifiedGuestBanner} ${styles.guestNotIdentifiedBanner}`}>
+            <FaCamera className={styles.guestAvatar} />
+            <span className={styles.uploadingAsText}>Please identify yourself to share photos!</span>
+            <button onClick={() => setShowGuestIdentifyModal(true)} className={styles.identifyButton}>
+              Identify Yourself
+            </button>
+          </div>
+        )}
+        {currentGuestName && (
+          <div className={styles.identifiedGuestBanner}>
+            <FaUserCircle className={styles.guestAvatar} />
+            <span className={styles.uploadingAsText}>
+              Uploading as <strong>{currentGuestName}</strong>
+            </span>
+            <button onClick={handleChangeGuest} className={styles.identifyButton}>
+              Change Guest
+            </button>
+          </div>
+        )}
         <div className={styles.uploadCard}>
-          {!currentGuestName && !showGuestIdentifyModal && (
-            <div className={`${styles.identifiedGuestBanner} ${styles.guestNotIdentifiedBanner}`}>
-              <FaCamera className={styles.guestAvatar} />
-              <span className={styles.uploadingAsText}>Please identify yourself to share photos!</span>
-              <button onClick={() => setShowGuestIdentifyModal(true)} className={styles.identifyButton}>
-                Identify Yourself
-              </button>
-            </div>
-          )}
           <h1 className={styles.title}>Share Your Wedding Moments!</h1>
           <p className={styles.instructions}>
             We&apos;d love to see the wedding through your eyes! Please upload your
@@ -417,18 +442,6 @@ export default function GuestUploadPage() {
           <p className={styles.photoFeedLink}> <a href="/photo-feed" className={styles.link}> 🖼️ Explore Our Memory Gallery </a> </p>
         </div>
       </div>
-
-      {showGuestIdentifyModal && (
-        <GuestSelector
-            isOpen={showGuestIdentifyModal}
-            onClose={() => {
-                setShowGuestIdentifyModal(false);
-                if (!currentGuestId) setNotification({message: "Please identify yourself to upload photos.", type: "error"});
-            }}
-            onGuestIdentified={handleGuestIdentified}
-            context="upload"
-        />
-      )}
     </>
   );
 }
