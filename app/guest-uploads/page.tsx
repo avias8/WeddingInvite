@@ -269,7 +269,6 @@ export default function GuestUploadPage() {
 
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -285,17 +284,6 @@ export default function GuestUploadPage() {
       default: return "📄";
     }
   };
-
-  const SelectedUserBadge = () =>
-    currentGuestName ? (
-      <div className={styles.selectedUserBadgeCard}>
-        <span className={styles.userAvatar}><FaUserCircle /></span>
-        <span className={styles.userName}>{currentGuestName}</span>
-        <button className={styles.changeUserBtn} onClick={handleChangeGuest}>
-          Change
-        </button>
-      </div>
-    ) : null;
 
   return (
     <>
