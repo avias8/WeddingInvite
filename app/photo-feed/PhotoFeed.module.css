@@ -1011,3 +1011,30 @@
     font-size: 1.5rem;
   }
 }
+
+/* Caption Styles */
+.captionFrame {
+  margin-top: 1rem;
+  padding: 0.8rem 1.2rem; /* Adjusted padding for better proportions */
+  background: rgba(249, 244, 237, 0.9); /* Slightly brighter background */
+  border: 1px solid var(--book-gold);
+  border-radius: 6px; /* Slightly smaller rounding */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Softer shadow */
+  text-align: center;
+}
+
+.captionText {
+  font-family: var(--font-script);
+  font-size: 1rem; /* Slightly smaller font size */
+  color: var(--book-dark);
+  font-style: italic;
+  line-height: 1.4; /* Adjusted line height */
+  margin-bottom: 0.5rem; /* Space between text and attribution */
+}
+
+.captionAttribution {
+  font-family: var(--font-story);
+  font-size: 0.85rem; /* Slightly smaller font size */
+  color: var(--book-brown);
+  font-weight: normal; /* Normal weight for subtler appearance */
+}

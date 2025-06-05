@@ -19,6 +19,7 @@ interface MediaItem {
   uploaderId?: number | null;
   uploaderName?: string | null;
   guestMediaDbId?: number; // The actual ID from the GuestMedia table in your database
+  caption?: string | null; // Added caption field
 }
 
 interface ApiResponse {
@@ -227,8 +228,17 @@ const BookPage = ({
         )}
       </div>
       <div className={styles.pageMediaInfo}>
-        {/* MODIFICATION: Display uploader name */}
-        Uploaded by {item.uploaderName || "a Guest"} on {formatDate(item.timeCreated)}
+        <span className={styles.uploadInfo}>
+          Uploaded by {item.uploaderName || "a Guest"} on {formatDate(item.timeCreated)}
+        </span>
+        {item.caption && (
+          <div className={styles.captionFrame}>
+            <p className={styles.captionText}>
+              “{item.caption}” <br />
+              <span className={styles.captionAttribution}>- {item.uploaderName || "Guest"}</span>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
