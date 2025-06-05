@@ -26,8 +26,6 @@ export default function GuestSelector({
   const [message, setMessage] = useState<string | null>(null);
   
   const [allInvitees, setAllInvitees] = useState<InviteeWithGuests[]>([]);
-  // selectedInviteeId is still useful to know which one is formally picked
-  const [selectedInviteeId, setSelectedInviteeId] = useState<string>(''); 
   const [selectedInvitee, setSelectedInvitee] = useState<InviteeWithGuests | null>(null);
   const [guestsOfSelectedInvitee, setGuestsOfSelectedInvitee] = useState<Guest[]>([]);
   const [finalSelectedGuestId, setFinalSelectedGuestId] = useState<string>('');
@@ -49,7 +47,6 @@ export default function GuestSelector({
       setIsLoading(true);
       setMessage(null);
       setStep('inviteeSelect');
-      setSelectedInviteeId('');
       setSelectedInvitee(null);
       setGuestsOfSelectedInvitee([]);
       setFinalSelectedGuestId('');
@@ -123,7 +120,6 @@ export default function GuestSelector({
   // Function to handle selecting an invitee (family/party)
   const selectInvitee = (inviteeToSelect: InviteeWithGuests | null) => {
     if (inviteeToSelect) {
-      setSelectedInviteeId(inviteeToSelect.id.toString());
       setSelectedInvitee(inviteeToSelect);
       setFamilySearchTerm(inviteeToSelect.name); // Update input to show selected family
       setIsFamilyListVisible(false); // Hide the list
@@ -155,10 +151,7 @@ export default function GuestSelector({
         setStep('guestSelect');
       }
     } else { // Deselecting
-      setSelectedInviteeId('');
       setSelectedInvitee(null);
-      // familySearchTerm might be kept as is, or cleared. Let's clear it for full reset.
-      // setFamilySearchTerm(''); // User might want to keep typing
       setGuestsOfSelectedInvitee([]);
       setFinalSelectedGuestId('');
       setStep('inviteeSelect');
@@ -171,7 +164,6 @@ export default function GuestSelector({
     setIsFamilyListVisible(true); // Show list when typing
     // If user clears input, deselect current family
     if (term === '') {
-      setSelectedInviteeId('');
       setSelectedInvitee(null);
       setGuestsOfSelectedInvitee([]);
       setFinalSelectedGuestId('');
@@ -179,7 +171,6 @@ export default function GuestSelector({
     } else {
         // If typing again after a selection, clear previous selection to force re-selection from list
         if (selectedInvitee && term !== selectedInvitee.name) {
-            setSelectedInviteeId('');
             setSelectedInvitee(null);
             setGuestsOfSelectedInvitee([]);
             setFinalSelectedGuestId('');
