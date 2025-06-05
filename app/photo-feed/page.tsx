@@ -423,7 +423,7 @@ export default function PhotoFeedPage() {
       setNotification({ message: result.message || "Media item deleted successfully.", type: "success" });
       
       // Recalculate totalBookPages based on new items length
-      const newTotalBookPages = updatedMediaItems.length > 0 ? (Math.ceil(Math.max(0, updatedMediaItems.length - 1) / itemsPerSpread) + 1) : 1;
+      const newTotalBookPages = updatedMediaItems.length > 0 ? (Math.ceil(Math.max(0, updatedMediaItems.length) / itemsPerSpread) + 1) : 1;
       
       if (currentPage >= newTotalBookPages) {
         // If current page is now out of bounds, move to the new last page
@@ -536,6 +536,8 @@ export default function PhotoFeedPage() {
       }
     }
   }
+
+  const totalPagesDisplayed = Math.max(1, mediaItems.length) + 1; // Add one to total pages
 
 
   return (
@@ -664,7 +666,7 @@ export default function PhotoFeedPage() {
                  </button>
                  <span className={styles.pageIndicator} aria-live="polite">
                     {/* Page indicator: "Cover" or "Page X" or "Pages X-Y" / Total User Pages */}
-                    {currentViewingPageLabel} / {Math.max(1, mediaItems.length)}
+                    {currentViewingPageLabel} / {totalPagesDisplayed}
                  </span>
                  <button 
                    onClick={handleNextPage}
