@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, FormEvent, ChangeEvent, useCallback } from "react";
+import React, { useState, useEffect, useRef, FormEvent, ChangeEvent, useCallback, useMemo } from "react";
 import Header from "../components/Header";
 import styles from "./PhotoFeed.module.css";
 import Image from "next/image";
@@ -156,6 +156,7 @@ const BookPage = ({
   onMediaClick,
   zIndexValue,
   isTurning,
+  isMobileLayout,
 }: {
   items: MediaItem[]; 
   pageNumber: number;
@@ -166,6 +167,7 @@ const BookPage = ({
   onMediaClick: (item: MediaItem) => void;
   zIndexValue: number;
   isTurning: boolean;
+  isMobileLayout: boolean;
 }) => {
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return "Unknown date";
@@ -269,47 +271,59 @@ const BookPage = ({
           <div className={styles.bookCoverDate}>Click to open</div>
         </div>
         <div className={`${styles.pageBack} ${styles.bookCoverBack}`}>
-          {items[0] ? renderMediaItem(items[0]) : (
-            <div className={styles.pageContent}> {/* Ensure consistent structure for empty back cover */}
-                 <div className={styles.bookCoverBackContent}>
-                   <p className={styles.dedicationText}>Dedicated to our friends and family</p>
-                   <p className={styles.dedicationText}>who made this day special.</p>
-                   <div className={styles.decorativeDivider}>❦</div>
-                 </div>
+          {!isMobileLayout && items[0] ? renderMediaItem(items[0]) : (
+            <div className={styles.pageContent}>
+              <div className={styles.bookCoverBackContent}>
+                <p className={styles.dedicationText}>Dedicated to our friends and family</p>
+                <p className={styles.dedicationText}>who made this day special.</p>
+                <div className={styles.decorativeDivider}>❦</div>
+              </div>
             </div>
           )}
-          {items[0] && <div className={styles.pageNumber}>1</div>}
+          {!isMobileLayout && items[0] && <div className={styles.pageNumber}>1</div>}
         </div>
       </div>
     );
   }
-
-  // Regular content pages
-  // User-facing page numbers (1-indexed for content after cover)
-  // pageNumber here is the 0-indexed component index.
-  // pageNumber = 1 is the first content page component.
-  // Its front is user page 2 (mediaItems[1]), back is user page 3 (mediaItems[2])
-  const userPageFront = (pageNumber -1) * 2 + 2; 
-  const userPageBack = (pageNumber - 1) * 2 + 3;
-
-  return (
-    <div
-      className={`${styles.bookPage} ${isFlipped ? styles.flipped : ""} ${isTurning ? styles.turningPage : ''}`}
-      onClick={onFlip}
-      style={{ zIndex: zIndexValue }}
-      role="region"
-      aria-label={`Page spread ${userPageFront}-${userPageBack}`}
-    >
-      <div className={styles.pageFront}>
-        {items[0] && renderMediaItem(items[0])}
-        {items[0] && <div className={styles.pageNumber}>{userPageFront}</div>}
+  if (isMobileLayout) {
+    const userPageNum = pageNumber;
+    return (
+      <div
+        className={`${styles.bookPage} ${isFlipped ? styles.flipped : ""} ${isTurning ? styles.turningPage : ''}`}
+        onClick={onFlip}
+        style={{ zIndex: zIndexValue }}
+        role="region"
+        aria-label={`Page ${userPageNum}`}
+      >
+        <div className={styles.pageFront}>
+          {items[0] && renderMediaItem(items[0])}
+          {items[0] && <div className={styles.pageNumber}>{userPageNum}</div>}
+        </div>
+        <div className={styles.pageBack}></div>
       </div>
-      <div className={styles.pageBack}>
-        {items[1] && renderMediaItem(items[1])}
-        {items[1] && <div className={styles.pageNumber}>{userPageBack}</div>}
+    );
+  } else {
+    const userPageFront = (pageNumber - 1) * 2 + 2;
+    const userPageBack = (pageNumber - 1) * 2 + 3;
+    return (
+      <div
+        className={`${styles.bookPage} ${isFlipped ? styles.flipped : ""} ${isTurning ? styles.turningPage : ''}`}
+        onClick={onFlip}
+        style={{ zIndex: zIndexValue }}
+        role="region"
+        aria-label={`Page spread ${userPageFront}-${userPageBack}`}
+      >
+        <div className={styles.pageFront}>
+          {items[0] && renderMediaItem(items[0])}
+          {items[0] && <div className={styles.pageNumber}>{userPageFront}</div>}
+        </div>
+        <div className={styles.pageBack}>
+          {items[1] && renderMediaItem(items[1])}
+          {items[1] && <div className={styles.pageNumber}>{userPageBack}</div>}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 };
 
 
@@ -335,10 +349,30 @@ export default function PhotoFeedPage() {
   const [flippedPages, setFlippedPages] = useState<Set<number>>(new Set());
   const [pageToAnimate, setPageToAnimate] = useState<number | null>(null);
 
-  const itemsPerSpread = 2; // Items per content page component (1 for front, 1 for back)
-  // totalBookPages: Number of flippable BookPage components. 1 (cover) + content pages.
-  const totalBookPages = mediaItems.length > 0 ? (Math.ceil(Math.max(0, mediaItems.length) / itemsPerSpread) + 1) : 1;
+  const [isMobileLayout, setIsMobileLayout] = useState(false);
 
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const mobile = window.matchMedia('(max-width: 1023px) and (orientation: portrait), (max-width: 767px)').matches;
+      setIsMobileLayout(mobile);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    window.addEventListener('orientationchange', checkScreenSize);
+
+    return () => {
+      window.removeEventListener('resize', checkScreenSize);
+      window.removeEventListener('orientationchange', checkScreenSize);
+    };
+  }, []);
+
+  const itemsPerSpread = isMobileLayout ? 1 : 2;
+
+  const totalBookPages = useMemo(() => {
+    if (mediaItems.length === 0) return 1;
+    return isMobileLayout ? mediaItems.length + 1 : Math.ceil(Math.max(0, mediaItems.length) / itemsPerSpread) + 1;
+  }, [mediaItems.length, isMobileLayout, itemsPerSpread]);
 
   const fetchMedia = useCallback(async () => {
     setIsLoading(true);
@@ -476,57 +510,92 @@ export default function PhotoFeedPage() {
     setFlippedPages(prev => {
       const newSet = new Set(prev);
       if (newSet.has(pageIndexToFlip)) {
-        newSet.delete(pageIndexToFlip); // This would be for "unflipping" back
+        newSet.delete(pageIndexToFlip); // Unflip the page
       } else {
-        newSet.add(pageIndexToFlip); // This is for "flipping" forward
+        newSet.add(pageIndexToFlip); // Flip the page
       }
       return newSet;
     });
-    // Animation duration should match CSS
-    setTimeout(() => setPageToAnimate(null), 800); 
+    // Adjust animation duration for mobile layout
+    const animationDuration = isMobileLayout ? 500 : 800; // Shorter duration for single-page flip
+    setTimeout(() => setPageToAnimate(null), animationDuration);
   };
 
   const handleNextPage = () => {
     if (isLoading) return;
-
-    if (currentPage < totalBookPages - 1) { 
-      // If there's another page component to turn to
-      handlePageFlip(currentPage); // Flip the current one
-      setCurrentPage(currentPage + 1); // Advance to the next page component
-    } else if (currentPage === 0 && totalBookPages === 1 && mediaItems.length > 0 && !flippedPages.has(0)) {
-      // Special case: Only cover exists, it has content, and it's not yet flipped.
-      // Action: Flip the cover. CurrentPage remains 0.
-      handlePageFlip(0);
+    if (isMobileLayout) {
+      if (currentPage < totalBookPages - 1) {
+        handlePageFlip(currentPage);
+        setCurrentPage(currentPage + 1);
+      } else if (currentPage === 0 && !flippedPages.has(0)) {
+        handlePageFlip(0);
+      }
+    } else {
+      if (currentPage < totalBookPages - 1) {
+        handlePageFlip(currentPage);
+        setCurrentPage(currentPage + 1);
+      } else if (currentPage === 0 && totalBookPages === 1 && mediaItems.length > 0 && !flippedPages.has(0)) {
+        handlePageFlip(0);
+      }
     }
   };
 
   const handlePrevPage = () => {
     if (isLoading) return;
-
-    if (currentPage > 0) {
-      // We are on a content page (currentPage = 1, 2, ...), or cover is flipped (currentPage = 0 but target is to unflip cover's content)
-      const pageToUnflipAndShow = currentPage - 1;
-      // We want to unflip the page that is currently 'to the left' and open, making it the new 'right hand page' of the current view
-      handlePageFlip(pageToUnflipAndShow); // This will remove pageToUnflipAndShow from flippedPages
-      setCurrentPage(pageToUnflipAndShow);
+    if (isMobileLayout) {
+      if (currentPage > 0) {
+        const pageToUnflip = currentPage - 1;
+        handlePageFlip(pageToUnflip);
+        setCurrentPage(pageToUnflip);
+      }
+    } else {
+      if (currentPage > 0) {
+        const pageToUnflipAndShow = currentPage - 1;
+        handlePageFlip(pageToUnflipAndShow);
+        setCurrentPage(pageToUnflipAndShow);
+      }
     }
-    // No action if currentPage is 0 and cover is not flipped (already at the very beginning).
   };
   
-  const getPageItemsForBookPage = (pageIdx: number): MediaItem[] => {
-    // pageIdx is the 0-indexed index of the BookPage component.
-    if (pageIdx === 0) { // Cover page component
-      return mediaItems.length > 0 ? [mediaItems[0]] : []; // Item for back of cover
+  const getPageItemsForBookPage = useCallback((pageIdx: number): MediaItem[] => {
+    if (pageIdx === 0) {
+      return isMobileLayout ? [] : mediaItems.length > 0 ? [mediaItems[0]] : [];
     }
-    // For content page components (pageIdx = 1, 2, ...)
-    // Item index for the front of this content page: (pageIdx - 1) * itemsPerSpread + 1
-    // (because mediaItems[0] is on cover back)
-    const startIndex = (pageIdx - 1) * itemsPerSpread + 1;
-    
-    // Ensure startIndex is within bounds of mediaItems array
-    if (startIndex < 0 || startIndex >= mediaItems.length) return []; 
-    
-    return mediaItems.slice(startIndex, startIndex + itemsPerSpread);
+    if (isMobileLayout) {
+      const itemIndex = pageIdx - 1;
+      return itemIndex < mediaItems.length ? [mediaItems[itemIndex]] : [];
+    } else {
+      const startIndex = (pageIdx - 1) * itemsPerSpread + 1;
+      return startIndex < 0 || startIndex >= mediaItems.length ? [] : mediaItems.slice(startIndex, startIndex + itemsPerSpread);
+    }
+  }, [mediaItems, isMobileLayout, itemsPerSpread]);
+
+  const getCurrentViewingPageLabel = () => {
+    if (mediaItems.length === 0) return "Cover";
+    if (isMobileLayout) {
+      return currentPage === 0 ? "Cover" : `Page ${currentPage}`;
+    } else {
+      if (currentPage === 0 && flippedPages.has(0)) return "Page 1";
+      if (currentPage > 0) {
+        const firstItemOnSpreadIndex = (currentPage - 1) * itemsPerSpread + 1;
+        const firstUserPageNum = firstItemOnSpreadIndex + 1;
+        const secondItemOnSpreadIndex = firstItemOnSpreadIndex + 1;
+        return secondItemOnSpreadIndex < mediaItems.length ? `Pages ${firstUserPageNum}-${firstUserPageNum + 1}` : `Page ${firstUserPageNum}`;
+      }
+      return "Cover";
+    }
+  };
+
+  const getTotalPagesDisplayed = () => {
+    return isMobileLayout ? Math.max(1, mediaItems.length) : Math.max(1, mediaItems.length) + 1;
+  };
+
+  const isNextDisabled = () => {
+    return isMobileLayout ? isLoading || (currentPage >= totalBookPages - 1 && flippedPages.has(currentPage)) : isLoading || (currentPage >= totalBookPages - 1 && (totalBookPages > 1 || (totalBookPages === 1 && flippedPages.has(0))));
+  };
+
+  const isPrevDisabled = () => {
+    return isMobileLayout ? isLoading || currentPage === 0 : isLoading || (currentPage === 0 && !flippedPages.has(0));
   };
 
   const MAX_Z_INDEX_BASE = totalBookPages + 10;
@@ -549,9 +618,6 @@ export default function PhotoFeedPage() {
       }
     }
   }
-
-  const totalPagesDisplayed = Math.max(1, mediaItems.length) + 1; // Add one to total pages
-
 
   return (
     <>
@@ -659,6 +725,7 @@ export default function PhotoFeedPage() {
                         onMediaClick={openLightbox}
                         zIndexValue={zIndexValue}
                         isTurning={pageToAnimate === pageComponentIndex}
+                        isMobileLayout={isMobileLayout}
                       />
                     );
                   })}
@@ -671,24 +738,18 @@ export default function PhotoFeedPage() {
                  <div className={styles.bookControls}>
                  <button 
                    onClick={handlePrevPage} 
-                   disabled={isLoading || currentPage === 0 && !flippedPages.has(0) } // Disabled if on cover and cover isn't flipped
+                   disabled={isPrevDisabled()}
                    className={styles.pageButton}
                    aria-label="Previous page"
                  >
                    <FaChevronLeft /> Previous
                  </button>
                  <span className={styles.pageIndicator} aria-live="polite">
-                    {/* Page indicator: "Cover" or "Page X" or "Pages X-Y" / Total User Pages */}
-                    {currentViewingPageLabel} / {totalPagesDisplayed}
+                    {getCurrentViewingPageLabel()} / {getTotalPagesDisplayed()}
                  </span>
                  <button 
                    onClick={handleNextPage}
-                   disabled={
-                     isLoading ||
-                     (currentPage >= totalBookPages - 1 && // On the last physical page component
-                       (totalBookPages > 1 || (totalBookPages === 1 && flippedPages.has(0))) // And it's multi-page book, or single-page book that's already flipped
-                     )
-                   }
+                   disabled={isNextDisabled()}
                    className={styles.pageButton}
                    aria-label="Next page"
                  >

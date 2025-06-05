@@ -2,21 +2,25 @@
 
 /* --- Main Page Container --- */
 .pageContainer {
-   /* Book Dimensions */
-  --book-width: min(90vw, 960px); /* Adjusted max width */
-  --book-height: min(75vh, 680px); /* Adjusted max height */
+  /* Book Dimensions - Now responsive */
+  --book-width: min(90vw, 960px);
+  --book-height: min(75vh, 680px);
   --page-width: calc(var(--book-width) / 2);
+  
+  /* Mobile/Portrait: Single page layout */
+  --mobile-page-width: min(85vw, 400px);
+  --mobile-book-height: min(70vh, 600px);
 
   min-height: 100vh;
   background: 
-    radial-gradient(ellipse at center, rgba(200, 159, 104, 0.05) 0%, transparent 60%), /* Softer radial */
-    linear-gradient(135deg, #211e19 0%, #1a1611 100%); /* Darker, warmer background */
+    radial-gradient(ellipse at center, rgba(200, 159, 104, 0.05) 0%, transparent 60%),
+    linear-gradient(135deg, #211e19 0%, #1a1611 100%);
   padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  overflow: hidden; /* Prevent scrollbars from peek-through elements */
+  overflow: hidden;
 }
 
 .pageContainer::before {
@@ -30,7 +34,7 @@
     repeating-linear-gradient(90deg, 
       transparent, 
       transparent 3px, 
-      rgba(139, 111, 71, 0.02) 3px, /* More subtle texture */
+      rgba(139, 111, 71, 0.02) 3px,
       rgba(139, 111, 71, 0.02) 5px 
     ),
     repeating-linear-gradient(0deg, 
@@ -47,18 +51,18 @@
 .titleContainer {
   width: 100%;
   max-width: var(--book-width);
-  margin-bottom: 2.5rem; /* Increased spacing */
+  margin-bottom: 2.5rem;
   text-align: center;
   position: relative;
-  z-index: 10; /* Keep titles above the book animation */
+  z-index: 10;
 }
 
 .pageTitle {
   font-family: var(--font-chapter);
-  font-size: clamp(2.2rem, 5.5vw, 3.2rem); /* Adjusted size */
+  font-size: clamp(2.2rem, 5.5vw, 3.2rem);
   color: var(--book-gold);
   text-shadow: 
-    1px 1px 3px rgba(0, 0, 0, 0.6), /* Softer shadow */
+    1px 1px 3px rgba(0, 0, 0, 0.6),
     0 0 15px rgba(200, 159, 104, 0.25);
   margin-bottom: 0.75rem;
   letter-spacing: 0.03em;
@@ -66,7 +70,7 @@
 
 .pageSubtitle {
   font-family: var(--font-script);
-  font-size: clamp(1.1rem, 2.8vw, 1.5rem); /* Adjusted size */
+  font-size: clamp(1.1rem, 2.8vw, 1.5rem);
   color: var(--book-cream);
   opacity: 0.85;
   font-style: italic;
@@ -75,12 +79,12 @@
 /* --- Auth Button --- */
 .authToggleButton {
   position: absolute;
-  top: 0.5rem; /* Adjusted position */
+  top: 0.5rem;
   right: 0.5rem;
   background: rgba(200, 159, 104, 0.15);
   color: var(--book-gold);
   border: 1px solid var(--book-gold);
-  padding: 0.6rem 1.1rem; /* Slightly larger padding */
+  padding: 0.6rem 1.1rem;
   border-radius: 22px;
   font-family: var(--font-story);
   font-size: 0.85rem;
@@ -104,7 +108,7 @@
   width: var(--book-width);
   height: var(--book-height);
   position: relative;
-  perspective: 2500px; /* Increased perspective for more depth */
+  perspective: 2500px;
   margin: 2rem auto;
 }
 
@@ -113,7 +117,7 @@
   height: 100%;
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 0.5s ease-in-out; /* Smooth book open/close */
+  transition: transform 0.5s ease-in-out;
 }
 
 .bookPages {
@@ -123,33 +127,30 @@
   transform-style: preserve-3d;
 }
 
-/* Individual Pages */
+/* Individual Pages - Desktop/Landscape Layout */
 .bookPage {
   position: absolute;
   width: var(--page-width);
   height: 100%;
-  top: 0; /* Ensure pages align at the top */
-  right: 0; /* Default position for unflipped pages */
+  top: 0;
+  right: 0;
   transform-origin: left center;
-  transform-style: preserve-3d; /* Crucial for children 3D positioning */
-  transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1); /* Smooth page flip */
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
   cursor: pointer;
-  border-radius: 0 6px 6px 0; /* Slight rounding for outer edge */
-  box-shadow: 2px 2px 10px rgba(0,0,0,0.1); /* Subtle shadow for page stack */
+  border-radius: 0 6px 6px 0;
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
 }
 
 .bookPage.flipped {
   transform: rotateY(-180deg);
-  border-radius: 6px 0 0 6px; /* Rounding for flipped edge */
+  border-radius: 6px 0 0 6px;
+  box-shadow: -2px 2px 10px rgba(0,0,0,0.15);
 }
 
-/* This class is applied by JS to the page currently animating */
 .turningPage {
-  /* z-index is set by inline style from JS, but this class can add other effects if needed */
-   box-shadow: 0 0 30px rgba(0,0,0,0.3); /* Emphasize turning page */
+  box-shadow: 0 0 30px rgba(0,0,0,0.3);
 }
-
-
 
 /* Page Sides */
 .pageFront,
@@ -157,37 +158,37 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  backface-visibility: hidden; /* Crucial for 3D flip */
-  background: var(--book-paper); /* Default background, cover will override for its front */
+  backface-visibility: hidden;
+  background: var(--book-paper);
   box-shadow: 
-    inset 5px 0 15px -5px rgba(0, 0, 0, 0.07); /* Inner shadow for page curl illusion */
+    inset 5px 0 15px -5px rgba(0, 0, 0, 0.07);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* Content starts from top */
-  padding: 1.8rem; /* Adjusted padding */
-  box-sizing: border-box; /* Ensure padding doesn't expand dimensions */
+  justify-content: flex-start;
+  padding: 1.8rem;
+  box-sizing: border-box;
 }
 
 .pageFront {
-  border-radius: 0 5px 5px 0; /* Match parent .bookPage or specific */
-  z-index: 1; /* Lower stacking order within the page */
+  border-radius: 0 5px 5px 0;
+  z-index: 1;
 }
 
 .pageBack {
-  transform: rotateY(180deg); /* Pre-rotate to face the "back" of the page container */
-  border-radius: 5px 0 0 5px; /* Match parent .bookPage or specific */
-  z-index: 2; /* Higher stacking order, should be visible when parent rotates */
+  transform: rotateY(180deg);
+  border-radius: 5px 0 0 5px;
+  z-index: 2;
 }
 
-/* Book Spine */
+/* Book Spine - Desktop/Landscape */
 .bookSpine {
   position: absolute;
-  left: calc(var(--page-width) - 3px); /* Adjusted for visual center */
-  top: -1px; /* Slight overlap */
+  left: calc(var(--page-width) - 3px);
+  top: -1px;
   bottom: -1px;
-  width: 6px; /* Slightly thicker spine */
+  width: 6px;
   background: linear-gradient(to right, 
     rgba(0,0,0,0.2),
     var(--book-spine) 30%, 
@@ -195,45 +196,44 @@
     var(--book-spine) 70%,
     rgba(0,0,0,0.2)
   );
-  transform-style: preserve-3d; /* If you add 3D details to spine */
-  z-index: 500; /* High z-index to be visually prominent (relative to bookPages container) */
+  transform-style: preserve-3d;
+  z-index: 500;
   border-radius: 2px;
   box-shadow: 
     1px 0 3px rgba(0,0,0,0.2), 
     -1px 0 3px rgba(0,0,0,0.2);
 }
 
-
 /* Page Content Styling */
-.pageContent { /* General container for text on a page, like dedications */
+.pageContent {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* Center content like dedications */
+  justify-content: center;
   padding: 1.5rem;
   box-sizing: border-box;
 }
-.pageContentItem { /* Container for each media item + its info */
+
+.pageContentItem {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 1.5rem; /* Space between items if multiple on a page (not current design) */
+  margin-bottom: 1.5rem;
   width: 100%;
 }
-
 
 /* Page Numbers */
 .pageNumber {
   position: absolute;
-  bottom: 0.8rem; /* Closer to bottom */
+  bottom: 0.8rem;
   font-family: var(--font-story);
   font-size: 0.85rem;
   color: var(--book-brown);
   opacity: 0.6;
   padding: 0.2rem 0.4rem;
-  background-color: rgba(249, 244, 237, 0.5); /* Subtle background for readability */
+  background-color: rgba(249, 244, 237, 0.5);
   border-radius: 3px;
 }
 
@@ -248,38 +248,38 @@
 /* Media Content in Book Pages */
 .pageMediaWrapper {
   width: 100%;
-  max-width: 400px; /* Slightly smaller max */
+  max-width: 400px;
   aspect-ratio: 4 / 3;
-  background: #fff; /* White frame for photos */
-  padding: 8px; /* Thinner frame */
+  background: #fff;
+  padding: 8px;
   box-shadow: 
-    0 3px 10px rgba(0, 0, 0, 0.12), /* Softer shadow */
+    0 3px 10px rgba(0, 0, 0, 0.12),
     inset 0 0 10px rgba(0, 0, 0, 0.03);
   border: 1px solid var(--book-shadow);
-  position: relative; /* For delete button positioning */
+  position: relative;
   overflow: hidden;
-  transform: rotate(-0.5deg); /* Slight tilt */
+  transform: rotate(-0.5deg);
   margin-bottom: 0.8rem;
-  border-radius: 3px; /* Slight rounding of photo frame */
+  border-radius: 3px;
 }
 
-.pageMediaWrapper:nth-child(even) { /* Alternate tilt if you have multiple items per page side */
+.pageMediaWrapper:nth-child(even) {
   transform: rotate(0.5deg);
 }
 
 .mediaContent {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Ensures image covers the area */
+  object-fit: cover;
   display: block;
-  border-radius: 1px; /* Tiny rounding inside frame */
+  border-radius: 1px;
 }
 
 .videoPlaceholder {
   width: 100%;
   height: 100%;
   position: relative;
-  background: #1c1c1c; /* Dark background for video */
+  background: #1c1c1c;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -288,7 +288,7 @@
 .videoPlaceholder video {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Or contain, depending on preference */
+  object-fit: cover;
 }
 
 .playIconOverlay {
@@ -296,30 +296,30 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 50px; /* Smaller play icon */
+  width: 50px;
   height: 50px;
-  background: rgba(200, 159, 104, 0.85); /* Use book gold */
+  background: rgba(200, 159, 104, 0.85);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-size: 20px;
-  pointer-events: none; /* Click through to video */
+  pointer-events: none;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
   transition: background-color 0.2s ease;
 }
-.pageMediaWrapper:hover .playIconOverlay {
-    background: rgba(176, 140, 84, 1); /* Darken on hover */
-}
 
+.pageMediaWrapper:hover .playIconOverlay {
+  background: rgba(176, 140, 84, 1);
+}
 
 .pageMediaInfo {
   text-align: center;
   font-family: var(--font-script);
-  font-size: 1rem; /* Slightly smaller */
+  font-size: 1rem;
   color: var(--book-brown);
-  margin-top: 0.5rem; /* Reduced margin */
+  margin-top: 0.5rem;
   font-style: italic;
   opacity: 0.9;
 }
@@ -339,26 +339,22 @@
   box-sizing: border-box;
   background-color: rgba(232, 223, 210, 0.2);
 }
+
 .unsupportedIcon {
   font-size: 2.5rem;
   margin-bottom: 0.5rem;
   opacity: 0.7;
 }
 
-
 /* Navigation Controls */
 .bookControls {
-  /* position: absolute; Remove absolute positioning to flow naturally */
-  /* bottom: 1.5rem; */
-  /* left: 50%; */
-  /* transform: translateX(-50%); */
   display: flex;
-  gap: 1.5rem; /* Reduced gap */
+  gap: 1.5rem;
   align-items: center;
-  z-index: 10; /* Keep controls accessible */
-  margin-top: 2.5rem; /* Space above controls */
+  z-index: 10;
+  margin-top: 2.5rem;
   padding: 0.5rem;
-  background-color: rgba(42, 36, 25, 0.3); /* Subtle bg */
+  background-color: rgba(42, 36, 25, 0.3);
   border-radius: 30px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
@@ -367,11 +363,11 @@
   background: var(--book-gold);
   color: white;
   border: none;
-  padding: 0.7rem 1.3rem; /* Adjusted padding */
-  border-radius: 20px; /* Rounded buttons */
+  padding: 0.7rem 1.3rem;
+  border-radius: 20px;
   font-family: var(--font-story);
   font-size: 0.9rem;
-  font-weight: 500; /* Normal weight */
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.25s ease;
   box-shadow: 0 3px 8px rgba(200, 159, 104, 0.25);
@@ -387,7 +383,7 @@
 }
 
 .pageButton:disabled {
-  opacity: 0.4; /* More pronounced disabled state */
+  opacity: 0.4;
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
@@ -395,46 +391,46 @@
 
 .pageIndicator {
   font-family: var(--font-story);
-  color: var(--book-cream); /* Brighter for better contrast on dark bg */
+  color: var(--book-cream);
   font-size: 1rem;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-  min-width: 100px; /* Ensure space for text */
+  min-width: 100px;
   text-align: center;
 }
 
 /* --- Book Cover Specifics --- */
-.bookCover { /* Applied to .pageFront of the cover page */
-  background: var(--book-spine); /* Solid cover color */
+.bookCover {
+  background: var(--book-spine);
   color: var(--book-cream);
-  justify-content: center; /* Center title elements */
+  justify-content: center;
   padding: 2.5rem;
   box-shadow: 
-    inset 0 0 0 10px var(--book-deep-gold), /* Inner border effect */
-    inset 0 0 0 12px var(--book-gold), /* Outer part of inner border */
-    5px 5px 15px rgba(0,0,0,0.3); /* Outer shadow for cover */
+    inset 0 0 0 10px var(--book-deep-gold),
+    inset 0 0 0 12px var(--book-gold),
+    5px 5px 15px rgba(0,0,0,0.3);
 }
 
-.bookCover::before { /* Decorative border inside the padding */
+.bookCover::before {
   content: '';
   position: absolute;
-  top: 25px; /* Adjusted for padding */
+  top: 25px;
   left: 25px;
   right: 25px;
   bottom: 25px;
   border: 1.5px solid var(--book-gold);
-  border-radius: 2px; /* Slight rounding for inner border */
+  border-radius: 2px;
   opacity: 0.6;
   pointer-events: none;
 }
 
 .bookCoverTitle {
   font-family: var(--font-chapter);
-  font-size: clamp(1.8rem, 4vw, 2.4rem); /* Responsive title */
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
   color: var(--book-cream);
   text-shadow: 
     1px 1px 2px rgba(0, 0, 0, 0.7);
   margin-bottom: 0.8rem;
-  z-index: 1; /* Ensure title is above ::before if it ever conflicts */
+  z-index: 1;
   text-align: center;
 }
 
@@ -448,7 +444,7 @@
   text-align: center;
 }
 
-.bookCoverDate { /* "Click to open" text */
+.bookCoverDate {
   font-family: var(--font-story);
   font-size: 0.9rem;
   color: var(--book-gold);
@@ -460,12 +456,12 @@
   background-color: rgba(0,0,0,0.1);
 }
 
-.bookCoverBack { /* Applied to .pageBack of the cover page */
-  background: var(--book-paper); /* Standard page color for inside cover */
-  justify-content: center; /* If showing dedication */
+.bookCoverBack {
+  background: var(--book-paper);
+  justify-content: center;
 }
 
-.bookCoverBackContent { /* For dedication text */
+.bookCoverBackContent {
   text-align: center;
   padding: 2rem;
   color: var(--book-brown);
@@ -474,7 +470,7 @@
 .dedicationText {
   font-family: var(--font-script);
   font-size: 1.5rem;
-  color: var(--book-dark); /* Darker for readability */
+  color: var(--book-dark);
   margin: 0.4rem 0;
   font-style: italic;
   opacity: 0.8;
@@ -487,7 +483,6 @@
   opacity: 0.6;
 }
 
-
 /* Loading & Empty States */
 .loadingIndicator {
   display: flex;
@@ -499,7 +494,7 @@
   gap: 1.2rem;
   font-family: var(--font-script);
   font-size: 1.3rem;
-  min-height: 300px; /* Ensure it takes some space */
+  min-height: 300px;
 }
 
 .spinnerIcon {
@@ -543,33 +538,31 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(40, 30, 20, 0.6); /* A dark, semi-transparent background */
-  color: white; /* This color will be inherited by the icon */
+  background: rgba(40, 30, 20, 0.6);
+  color: white;
   border: 1px solid rgba(255, 255, 255, 0.2);
   width: 28px;
   height: 28px;
-  border-radius: 6px; /* Rounded square instead of a circle */
+  border-radius: 6px;
   cursor: pointer;
-  /* font-size removed, we will size the svg directly */
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.25s ease-in-out;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
   z-index: 5;
-  backdrop-filter: blur(2px); /* A nice frosted glass effect */
+  backdrop-filter: blur(2px);
 }
 
-/* New rule to explicitly size the SVG icon */
 .deleteButton svg {
   width: 14px;
   height: 14px;
 }
 
 .deleteButton:hover {
-  background: var(--book-red); /* Use the theme's red color for hover */
-  transform: scale(1.1); /* A simple, clean scale effect */
-  box-shadow: 0 2px 8px rgba(200, 84, 80, 0.5); /* A subtle glow in the theme's red */
+  background: var(--book-red);
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(200, 84, 80, 0.5);
 }
 
 /* Lightbox */
@@ -579,12 +572,12 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(26, 22, 17, 0.97); /* Darker, from page background */
+  background: rgba(26, 22, 17, 0.97);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
-  padding: 1rem; /* Reduced padding */
+  padding: 1rem;
   animation: fadeIn 0.25s ease-out;
 }
 
@@ -595,10 +588,10 @@
 
 .lightboxContent {
   position: relative;
-  max-width: 95vw; /* Allow slightly larger */
+  max-width: 95vw;
   max-height: 95vh;
-  background: var(--book-dark); /* Match theme */
-  padding: 15px; /* Reduced padding */
+  background: var(--book-dark);
+  padding: 15px;
   border-radius: 6px;
   box-shadow: 0 15px 50px rgba(0,0,0,0.4);
   border: 2px solid var(--book-gold);
@@ -607,29 +600,30 @@
 .lightboxMedia {
   display: block;
   max-width: 100%;
-  max-height: calc(95vh - 50px); /* Account for padding and close button */
+  max-height: calc(95vh - 50px);
   width: auto;
   height: auto;
   object-fit: contain;
-  border: 4px solid var(--book-cream); /* Cream border */
+  border: 4px solid var(--book-cream);
   box-shadow: 0 3px 15px rgba(0,0,0,0.25);
   border-radius: 2px;
 }
+
 .unsupportedText {
-    color: var(--book-cream);
-    font-family: var(--font-story);
-    padding: 2rem;
+  color: var(--book-cream);
+  font-family: var(--font-story);
+  padding: 2rem;
 }
 
 .lightboxClose {
   position: absolute;
-  top: -18px; /* Adjusted for better placement */
+  top: -18px;
   right: -18px;
   background: var(--book-gold);
-  border: 2.5px solid var(--book-cream); /* Cream border */
-  color: var(--book-dark); /* Dark icon for contrast */
-  font-size: 1.3rem; /* Smaller icon */
-  width: 36px; /* Smaller button */
+  border: 2.5px solid var(--book-cream);
+  color: var(--book-dark);
+  font-size: 1.3rem;
+  width: 36px;
   height: 36px;
   border-radius: 50%;
   display: flex;
@@ -648,12 +642,12 @@
 
 /* Auth Modal */
 .authModalOverlay {
-  position: fixed; /* Use fixed for full viewport coverage */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(26, 22, 17, 0.9); /* Dark overlay */
+  background: rgba(26, 22, 17, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -664,12 +658,12 @@
 
 .authModalContent {
   background: var(--book-paper);
-  padding: 2.5rem 2rem; /* Adjusted padding */
+  padding: 2.5rem 2rem;
   border-radius: 10px;
   border: 2px solid var(--book-gold);
   box-shadow: 0 8px 30px rgba(0,0,0,0.25);
   width: 100%;
-  max-width: 380px; /* Slightly smaller max-width */
+  max-width: 380px;
   text-align: center;
   position: relative;
 }
@@ -683,15 +677,15 @@
 
 .modalCloseButton {
   position: absolute;
-  top: 12px; /* Adjusted position */
+  top: 12px;
   right: 12px;
   background: none;
   border: none;
-  font-size: 1.4rem; /* Adjusted size */
+  font-size: 1.4rem;
   color: var(--book-brown);
   cursor: pointer;
   transition: all 0.25s ease;
-  padding: 5px; /* Make clickable area larger */
+  padding: 5px;
 }
 
 .modalCloseButton:hover {
@@ -701,7 +695,7 @@
 
 .authInput {
   width: 100%;
-  padding: 0.9rem; /* Adjusted padding */
+  padding: 0.9rem;
   margin-bottom: 1.2rem;
   border: 1.5px solid var(--book-gold);
   border-radius: 6px;
@@ -710,7 +704,7 @@
   font-size: 0.95rem;
   color: var(--book-dark);
   transition: all 0.25s ease;
-  box-sizing: border-box; /* Include padding and border in width */
+  box-sizing: border-box;
 }
 
 .authInput:focus {
@@ -731,10 +725,10 @@
   font-family: var(--font-story);
 }
 
-/* General Button Styles (used in modals) */
+/* General Button Styles */
 .button {
   padding: 0.75rem 1.4rem;
-  border-radius: 22px; /* Consistent with auth toggle */
+  border-radius: 22px;
   font-family: var(--font-story);
   font-size: 0.95rem;
   font-weight: 500;
@@ -743,13 +737,13 @@
   border: 1.5px solid transparent;
   display: inline-flex;
   align-items: center;
-  justify-content: center; /* Center text in button */
+  justify-content: center;
   gap: 0.5rem;
   text-decoration: none;
-  line-height: 1.2; /* Ensure text fits */
+  line-height: 1.2;
 }
 
-.authSubmitButton { /* Specific for auth modal login */
+.authSubmitButton {
   background: var(--book-gold);
   color: white;
   width: 100%;
@@ -766,7 +760,7 @@
   box-shadow: 0 3px 10px rgba(200, 159, 104, 0.3);
 }
 
-.buttonSecondary { /* For cancel buttons */
+.buttonSecondary {
   background: transparent;
   color: var(--book-brown);
   border: 1.5px solid var(--book-gold);
@@ -778,14 +772,14 @@
   color: var(--book-dark);
 }
 
-.buttonDanger { /* For confirm delete */
+.buttonDanger {
   background: var(--book-red);
   color: white;
   border-color: var(--book-red);
 }
 
 .buttonDanger:hover {
-  background: #b64541; /* Darker red */
+  background: #b64541;
   border-color: #b64541;
   transform: translateY(-1px);
 }
@@ -793,13 +787,13 @@
 /* Notification Bar */
 .notificationBar {
   position: fixed;
-  top: 15px; /* Adjusted position */
+  top: 15px;
   left: 50%;
   transform: translateX(-50%);
   padding: 0.9rem 1.8rem;
   border-radius: 25px;
   box-shadow: 0 3px 15px rgba(0,0,0,0.15);
-  z-index: 2500; /* Highest z-index for notifications */
+  z-index: 2500;
   display: flex;
   align-items: center;
   gap: 0.8rem;
@@ -807,7 +801,7 @@
   font-size: 0.95rem;
   border: 1.5px solid;
   animation: slideDown 0.4s ease-out forwards;
-  opacity: 0; /* Start hidden for animation */
+  opacity: 0;
 }
 
 @keyframes slideDown {
@@ -846,15 +840,15 @@
   margin-left: 0.8rem;
   cursor: pointer;
   transition: opacity 0.25s ease;
-  padding: 0.2rem; /* Clickable area */
+  padding: 0.2rem;
 }
 
 .notificationClose:hover {
   opacity: 1;
 }
 
-/* Confirmation Modal (Delete) */
-.confirmationModalOverlay { /* Similar to Auth Modal Overlay */
+/* Confirmation Modal */
+.confirmationModalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -864,19 +858,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2100; /* Above lightbox but below notifications */
+  z-index: 2100;
   padding: 1rem;
   animation: fadeIn 0.25s ease-out;
 }
 
-.confirmationModalContent { /* Similar to Auth Modal Content */
+.confirmationModalContent {
   background: var(--book-paper);
-  padding: 2.2rem; /* Adjusted */
+  padding: 2.2rem;
   border-radius: 10px;
   border: 2px solid var(--book-gold);
   box-shadow: 0 8px 30px rgba(0,0,0,0.25);
   width: 100%;
-  max-width: 420px; /* Adjusted */
+  max-width: 420px;
   text-align: center;
 }
 
@@ -897,75 +891,227 @@
 
 .confirmationModalActions {
   display: flex;
-  justify-content: center; /* Or space-around for more gap */
+  justify-content: center;
   gap: 0.8rem;
 }
 
-/* Mobile Styles */
-@media (max-width: 768px) {
+/* Caption Styles */
+.captionFrame {
+  margin-top: 1rem;
+  padding: 0.8rem 1.2rem;
+  background: rgba(249, 244, 237, 0.9);
+  border: 1px solid var(--book-gold);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.captionText {
+  font-family: var(--font-script);
+  font-size: 1rem;
+  color: var(--book-dark);
+  font-style: italic;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.captionAttribution {
+  font-family: var(--font-story);
+  font-size: 0.85rem;
+  color: var(--book-brown);
+  font-weight: normal;
+}
+
+/* ============================================ */
+/* RESPONSIVE BREAKPOINTS */
+/* ============================================ */
+
+/* Large Landscape Tablets and Desktop (Two-page spread) */
+@media (min-width: 1024px) and (orientation: landscape), 
+       (min-width: 1200px) {
+  /* Desktop/Large tablet layout keeps the two-page spread as is */
+  /* No major changes needed - existing styles work well */
+}
+
+/* Medium Tablets in Landscape (Two-page spread but smaller) */
+@media (min-width: 768px) and (max-width: 1023px) and (orientation: landscape) {
   .pageContainer {
-      /* Book Dimensions */
-    --book-width: 92vw; /* Slightly wider on tablet */
-    --book-height: 65vh; /* Adjust height for better ratio */
+    --book-width: 85vw;
+    --book-height: 70vh;
+    --page-width: calc(var(--book-width) / 2);
   }
   
   .flipBookContainer {
-    margin: 1.5rem auto; /* Adjusted margin */
-    perspective: 1800px; /* Less perspective on smaller screens */
+    perspective: 2000px;
   }
   
   .pageFront, .pageBack {
-    padding: 1.2rem; /* Reduced padding on pages */
+    padding: 1.4rem;
   }
   
   .pageMediaWrapper {
-    max-width: 90%; /* Allow media to be larger % of page */
+    max-width: 320px;
     padding: 6px;
   }
   
   .bookCoverTitle {
-    font-size: clamp(1.6rem, 5vw, 2rem);
-  }
-  .bookCoverSubtitle {
-    font-size: clamp(1rem, 3.5vw, 1.3rem);
+    font-size: clamp(1.6rem, 4.5vw, 2rem);
   }
   
+  .bookCoverSubtitle {
+    font-size: clamp(1.1rem, 3vw, 1.4rem);
+  }
+}
+
+/* Portrait Tablets and Large Mobile (Single page layout) */
+@media (max-width: 1023px) and (orientation: portrait),
+       (max-width: 767px) {
+
+  .pageContainer {
+    --book-width: var(--mobile-page-width);
+    --book-height: var(--mobile-book-height);
+    --page-width: var(--mobile-page-width);
+  }
+
+  .flipBookContainer {
+    width: var(--mobile-page-width);
+    height: var(--mobile-book-height);
+    perspective: 1500px;
+    margin: 1.5rem auto;
+  }
+
+  /* Single page layout - pages are full width */
+  .bookPage {
+    width: 100%;
+    right: 0;
+    /* FIX: Changed transform-origin to be consistent with book-like pivot */
+    transform-origin: left center;
+    border-radius: 6px;
+    transition: transform 0.5s cubic-bezier(0.645, 0.045, 0.355, 1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  }
+
+  .bookPage.flipped {
+    /* Single page flip: rotate from left edge */
+    transform: rotateY(-180deg);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+  }
+
+  .turningPage {
+    /* Slightly stronger shadow while animating */
+    box-shadow: 0 0 24px rgba(0,0,0,0.22);
+  }
+
+  .pageFront,
+  .pageBack {
+    border-radius: 6px;
+    padding: 1.2rem;
+    backface-visibility: hidden;
+  }
+  
+  /* FIX: REMOVED `display: none;` from .pageBack to allow flip animation */
+  .pageBack {
+    /* The back side is now visible during the flip animation. */
+    /* It's okay that it's empty, it will just show the paper background. */
+  }
+
+
+  /* Adjust page content for single page */
+  .pageMediaWrapper {
+    max-width: 90%;
+    padding: 6px;
+    margin-bottom: 1rem;
+  }
+  
+  .pageMediaInfo {
+    font-size: 0.9rem;
+  }
+  
+  .pageNumber {
+    font-size: 0.8rem;
+    bottom: 0.6rem;
+  }
+  
+  .pageFront .pageNumber,
+  .pageBack .pageNumber {
+    right: 0.6rem;
+    left: auto;
+  }
+  
+  /* Cover adjustments for mobile */
+  .bookCover {
+    padding: 2rem;
+    border-radius: 6px;
+  }
+  
+  .bookCover::before {
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+  }
+  
+  .bookCoverTitle {
+    font-size: clamp(1.6rem, 6vw, 2rem);
+  }
+  
+  .bookCoverSubtitle {
+    font-size: clamp(1rem, 4vw, 1.3rem);
+  }
+  
+  .bookCoverDate {
+    font-size: 0.85rem;
+    margin-top: 1.5rem;
+  }
+  
+  .bookCoverBack {
+    border-radius: 6px;
+  }
+  
+  .bookCoverBackContent {
+    padding: 1.5rem;
+  }
+  
+  .dedicationText {
+    font-size: 1.2rem;
+  }
+  
+  /* Navigation controls for mobile */
   .bookControls {
     gap: 1rem;
     margin-top: 2rem;
     padding: 0.4rem;
+    flex-wrap: wrap;
+    justify-content: center;
   }
   
   .pageButton {
     padding: 0.6rem 1.1rem;
-    font-size: 0.8rem;
-  }
-  .pageIndicator {
-    font-size: 0.9rem;
-    min-width: 80px;
+    font-size: 0.85rem;
   }
   
-  .authToggleButton {
-    position: static; /* Stack in flow on small screens */
-    margin: 1rem auto 1.5rem; /* Center and add margin */
-    display: table; /* To allow auto margins for centering */
-  }
-
-  .titleContainer {
-    margin-bottom: 0.5rem; /* Reduce space if auth button moves */
-  }
-  .notificationBar {
-    width: 90%;
-    padding: 0.8rem 1.2rem;
+  .pageIndicator {
     font-size: 0.9rem;
+    min-width: 120px;
+    order: -1; /* Move indicator above buttons on mobile */
+    width: 100%;
+    margin-bottom: 0.5rem;
   }
 }
 
+/* Small Mobile Devices */
 @media (max-width: 480px) {
-  /* No :global(html) or :global(:root) needed here if not overriding the variables themselves, */
-  /* only styles using them. If variables ARE overridden, then yes, :global needed. */
-  /* Assuming no variable overrides for this block for now. */
-
+  .pageContainer {
+    --mobile-page-width: min(92vw, 350px);
+    --mobile-book-height: min(65vh, 500px);
+    padding: 1.5rem 0.5rem;
+  }
+  
+  .titleContainer {
+    margin-bottom: 1.5rem;
+  }
+  
   .pageTitle {
     font-size: clamp(1.8rem, 7vw, 2.2rem);
   }
@@ -973,76 +1119,183 @@
   .pageSubtitle {
     font-size: clamp(1rem, 4.5vw, 1.2rem);
   }
-
-  .pageFront, .pageBack {
-    padding: 0.8rem;
+  
+  .authToggleButton {
+    position: static;
+    margin: 1rem auto 0;
+    display: table;
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
   }
   
-  .bookCoverTitle {
-    font-size: clamp(1.4rem, 6vw, 1.8rem);
+  .flipBookContainer {
+    margin: 1rem auto;
   }
-  .bookCoverSubtitle {
-    font-size: clamp(0.9rem, 4vw, 1.1rem);
-  }
-  .bookCoverDate {
-    font-size: 0.8rem;
-    margin-top: 1.5rem;
+  
+  .pageFront,
+  .pageBack {
+    padding: 1rem;
   }
   
   .pageMediaWrapper {
-    max-width: 95%; /* Take up more space on mobile */
+    max-width: 95%;
+    margin-bottom: 0.8rem;
   }
+  
   .pageMediaInfo {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    margin-top: 0.4rem;
   }
+  
   .pageNumber {
     font-size: 0.75rem;
     bottom: 0.5rem;
-    right: 0.5rem; /* For front */
+    right: 0.5rem;
   }
-  .pageBack .pageNumber {
-    left: 0.5rem;
+  
+  .bookCover {
+    padding: 1.5rem;
   }
+  
+  .bookCover::before {
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    bottom: 15px;
+  }
+  
+  .bookCoverTitle {
+    font-size: clamp(1.4rem, 6.5vw, 1.8rem);
+  }
+  
+  .bookCoverSubtitle {
+    font-size: clamp(0.9rem, 4.2vw, 1.1rem);
+  }
+  
+  .bookCoverDate {
+    font-size: 0.8rem;
+    margin-top: 1.2rem;
+    padding: 0.3rem 0.6rem;
+  }
+  
+  .bookCoverBackContent {
+    padding: 1.2rem;
+  }
+  
+  .dedicationText {
+    font-size: 1.1rem;
+  }
+  
+  .decorativeDivider {
+    font-size: 1.5rem;
+    margin-top: 1.2rem;
+  }
+  
   .bookControls {
     flex-direction: column;
     gap: 0.8rem;
+    margin-top: 1.5rem;
   }
+  
   .pageButton {
     width: 80%;
     justify-content: center;
+    padding: 0.7rem;
+    font-size: 0.8rem;
   }
-  .authModalContent, .confirmationModalContent {
+  
+  .pageIndicator {
+    font-size: 0.85rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  /* Caption adjustments for small mobile */
+  .captionFrame {
+    margin-top: 0.8rem;
+    padding: 0.6rem 1rem;
+  }
+  
+  .captionText {
+    font-size: 0.9rem;
+    line-height: 1.3;
+  }
+  
+  .captionAttribution {
+    font-size: 0.8rem;
+  }
+  
+  /* Modal adjustments for small mobile */
+  .authModalContent,
+  .confirmationModalContent {
     padding: 1.8rem 1.2rem;
-    max-width: calc(100vw - 2rem); /* Full width minus padding */
+    max-width: calc(100vw - 2rem);
   }
-  .authModalContent h2, .confirmationModalContent h3 {
+  
+  .authModalContent h2,
+  .confirmationModalContent h3 {
     font-size: 1.5rem;
   }
+  
+  .notificationBar {
+    width: 90%;
+    padding: 0.8rem 1.2rem;
+    font-size: 0.9rem;
+  }
 }
 
-/* Caption Styles */
-.captionFrame {
-  margin-top: 1rem;
-  padding: 0.8rem 1.2rem; /* Adjusted padding for better proportions */
-  background: rgba(249, 244, 237, 0.9); /* Slightly brighter background */
-  border: 1px solid var(--book-gold);
-  border-radius: 6px; /* Slightly smaller rounding */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Softer shadow */
-  text-align: center;
+/* Extra Small Mobile (very narrow screens) */
+@media (max-width: 360px) {
+  .pageContainer {
+    --mobile-page-width: min(95vw, 320px);
+    --mobile-book-height: min(60vh, 450px);
+    padding: 1rem 0.25rem;
+  }
+  
+  .pageFront,
+  .pageBack {
+    padding: 0.8rem;
+  }
+  
+  .bookCover {
+    padding: 1.2rem;
+  }
+  
+  .bookCoverTitle {
+    font-size: clamp(1.2rem, 7vw, 1.6rem);
+  }
+  
+  .bookCoverSubtitle {
+    font-size: clamp(0.8rem, 4.5vw, 1rem);
+  }
+  
+  .pageMediaInfo {
+    font-size: 0.8rem;
+  }
+  
+  .captionFrame {
+    padding: 0.5rem 0.8rem;
+  }
+  
+  .captionText {
+    font-size: 0.85rem;
+  }
+  
+  .captionAttribution {
+    font-size: 0.75rem;
+  }
 }
 
-.captionText {
-  font-family: var(--font-script);
-  font-size: 1rem; /* Slightly smaller font size */
-  color: var(--book-dark);
-  font-style: italic;
-  line-height: 1.4; /* Adjusted line height */
-  margin-bottom: 0.5rem; /* Space between text and attribution */
-}
-
-.captionAttribution {
-  font-family: var(--font-story);
-  font-size: 0.85rem; /* Slightly smaller font size */
-  color: var(--book-brown);
-  font-weight: normal; /* Normal weight for subtler appearance */
+/* Landscape orientation for mobile phones */
+@media (max-height: 500px) and (orientation: landscape) {
+  .pageContainer {
+    --mobile-book-height: min(85vh, 400px);
+  }
+  
+  .flipBookContainer {
+    margin: 1rem auto;
+  }
+  
+  .bookControls {
+    margin-top: 1rem;
+  }
 }
