@@ -6,7 +6,7 @@ import Header from "../components/Header";
 import styles from "./GuestUploads.module.css";
 import GuestSelector from "../components/GuestSelector";
 import { FaUserCircle, FaCamera } from "react-icons/fa";
-import Image from "next/image"; // Import next/image
+import Image from "next/image";
 
 interface UploadResponse {
   success: boolean;
@@ -26,6 +26,7 @@ interface IndividualFileStatus {
   fileType: 'image' | 'video' | 'other';
   errorMessage?: string;
   gcsObjectName?: string;
+  caption?: string; // Added caption field
 }
 
 // NotificationBar Component
@@ -109,12 +110,20 @@ export default function GuestUploadPage() {
         } else if (file.type.startsWith("video/")) {
           fileType = 'video';
         }
-        return { file, status: "pending" as const, progress: 0, previewUrl, fileType, errorMessage: undefined, gcsObjectName: undefined };
+        // Initialize caption as empty string
+        return { file, status: "pending" as const, progress: 0, previewUrl, fileType, errorMessage: undefined, gcsObjectName: undefined, caption: "" };
       });
       setFilesStatus(newFilesStatusArray);
     } else {
       setFilesStatus([]);
     }
+  };
+
+  // Function to update caption for a specific file
+  const handleCaptionChange = (index: number, caption: string) => {
+    setFilesStatus(prev =>
+      prev.map((fs, i) => (i === index ? { ...fs, caption } : fs))
+    );
   };
 
   const updateFileStatus = (index: number, status: IndividualFileStatus["status"], gcsObjectName?: string, errorMessage?: string, progress?: number) => {
@@ -166,9 +175,8 @@ export default function GuestUploadPage() {
 
     setIsSubmitting(true);
     setOverallMessage(`✨ Processing your beautiful memories, ${currentGuestName}...`);
-    setOverallMessageType(null); // Clear previous type, will be set based on outcome
+    setOverallMessageType(null);
 
-    // Use a new array for results to determine overall status accurately
     const operationResults: { success: boolean; fileName: string; error?: string }[] = [];
 
     for (let i = 0; i < filesStatus.length; i++) {
@@ -177,7 +185,6 @@ export default function GuestUploadPage() {
       updateFileStatus(i, "uploading", undefined, undefined, 0);
 
       try {
-        // 1. Get Signed URL
         const signedUrlResponse = await fetch("/api/generate-upload-url", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -188,7 +195,6 @@ export default function GuestUploadPage() {
           throw new Error(signedUrlData.error || signedUrlData.details || "Failed to get an upload URL.");
         }
 
-        // 2. Upload to GCS
         await new Promise<void>((resolve, reject) => {
           const xhr = new XMLHttpRequest();
           xhr.open("PUT", signedUrlData.signedUrl as string, true);
@@ -211,7 +217,6 @@ export default function GuestUploadPage() {
           xhr.send(file);
         });
 
-        // 3. Finalize Upload (save metadata to DB)
         const finalizeResponse = await fetch('/api/media/finalize-upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -219,7 +224,8 @@ export default function GuestUploadPage() {
             gcsObjectName: signedUrlData.gcsObjectName,
             originalFileName: file.name,
             contentType: file.type,
-            uploaderId: currentGuestId
+            uploaderId: currentGuestId,
+            caption: fs.caption, // Send the caption for this file
           })
         });
         const finalizeData: UploadResponse = await finalizeResponse.json();
@@ -234,10 +240,10 @@ export default function GuestUploadPage() {
       } catch (error) {
         const errMsg = error instanceof Error ? error.message : "An unknown error occurred during processing.";
         if (process.env.NODE_ENV !== 'production') console.error(`Error processing ${file.name}:`, error);
-        updateFileStatus(i, "error", fs.gcsObjectName, errMsg, 0); // Keep gcsObjectName if it was obtained
+        updateFileStatus(i, "error", fs.gcsObjectName, errMsg, 0);
         operationResults.push({ success: false, fileName: file.name, error: errMsg });
       }
-    } // End of for loop
+    }
 
     setIsSubmitting(false);
     const successfulUploadsCount = operationResults.filter(r => r.success).length;
@@ -246,16 +252,16 @@ export default function GuestUploadPage() {
     if (allSuccessful && filesStatus.length > 0) {
       setOverallMessage(`🎉 Amazing, ${currentGuestName}! ${successfulUploadsCount} precious ${successfulUploadsCount === 1 ? 'memory has' : 'memories have'} been uploaded successfully! Thank you! ✨`);
       setOverallMessageType("success");
-      setSelectedFiles(null); // Clear selected files from input
-      setFilesStatus([]);    // Clear the status list
-      if (fileInputRef.current) fileInputRef.current.value = ""; // Reset file input
+      setSelectedFiles(null);
+      setFilesStatus([]);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } else if (successfulUploadsCount > 0) {
       setOverallMessage(`📸 Great progress, ${currentGuestName}! ${successfulUploadsCount} ${successfulUploadsCount === 1 ? 'file has' : 'files have'} been uploaded. Some others had issues - please check their status below.`);
-      setOverallMessageType("error"); // Still an error overall if some failed
-    } else if (filesStatus.length > 0) { // All failed if any were attempted
+      setOverallMessageType("error");
+    } else if (filesStatus.length > 0) {
       setOverallMessage(`😔 Oops, ${currentGuestName}! All uploads encountered issues. Please check individual file errors below and try again.`);
       setOverallMessageType("error");
-    } else { // No files were processed (shouldn't happen if validation is correct)
+    } else {
         setOverallMessage(`No files were processed.`);
         setOverallMessageType(null);
     }
@@ -273,7 +279,7 @@ export default function GuestUploadPage() {
   const getStatusIcon = (status: IndividualFileStatus["status"]): string => {
     switch (status) {
       case "pending": return "⏳";
-      case "uploading": return "�";
+      case "uploading": return "📤";
       case "success": return "✅";
       case "error": return "❌";
       default: return "📄";
@@ -302,7 +308,7 @@ export default function GuestUploadPage() {
       <div className={styles.pageContainer}>
         <SelectedUserBadge />
         <div className={styles.uploadCard}>
-          {!currentGuestName && !showGuestIdentifyModal && ( // Only show if modal is not active
+          {!currentGuestName && !showGuestIdentifyModal && (
             <div className={`${styles.identifiedGuestBanner} ${styles.guestNotIdentifiedBanner}`}>
               <FaCamera className={styles.guestAvatar} />
               <span className={styles.uploadingAsText}>Please identify yourself to share photos!</span>
@@ -365,6 +371,21 @@ export default function GuestUploadPage() {
                         <span className={`${styles.statusText} ${styles[fs.status]}`}>
                           {fs.status === "uploading" ? `${fs.progress}%` : fs.status}
                         </span>
+                      </div>
+                      {/* Caption Input for each file */}
+                      <div className={styles.captionInputContainer}>
+                        <textarea
+                          placeholder="Add a caption (optional, max 150 chars)"
+                          value={fs.caption || ""}
+                          onChange={(e) => handleCaptionChange(index, e.target.value)}
+                          maxLength={150}
+                          className={styles.captionTextarea}
+                          rows={2}
+                          disabled={isSubmitting || fs.status === 'success' || fs.status === 'error'}
+                        />
+                         <span className={styles.charCount}>
+                           {(fs.caption?.length || 0)}/150
+                         </span>
                       </div>
                       {(fs.status === "uploading" || fs.status === "success") && fs.progress > 0 && (
                         <div className={styles.progressBarContainer}>
