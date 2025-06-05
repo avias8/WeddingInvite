@@ -567,6 +567,32 @@
 .notificationCloseButton:hover { opacity: 1; }
 
 
+.memoryGalleryButton {
+  display: inline-block;
+  padding: 0.8rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, var(--color-secondary-accent), var(--color-accent));
+  color: white;
+  border-radius: 30px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease-in-out;
+  text-decoration: none;
+}
+
+.memoryGalleryButton:hover {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-secondary-accent));
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.memoryGalleryButton:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .pageContainer {
