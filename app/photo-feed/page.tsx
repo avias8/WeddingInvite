@@ -249,11 +249,11 @@ const BookPage = ({
     <div className={`${styles.bookPage} ${isFlipped ? styles.flipped : ''}`} onClick={onFlip}>
       <div className={styles.pageFront}>
         {items[0] && renderMediaItem(items[0])}
-        <div className={styles.pageNumber}>{pageNumber * 2}</div>
+        {pageNumber > 0 && <div className={styles.pageNumber}>{(pageNumber - 1) * 2 + 1}</div>}
       </div>
       <div className={styles.pageBack}>
         {items[1] && renderMediaItem(items[1])}
-        <div className={styles.pageNumber}>{pageNumber * 2 + 1}</div>
+        {pageNumber > 0 && <div className={styles.pageNumber}>{(pageNumber - 1) * 2 + 2}</div>}
       </div>
     </div>
   );
@@ -481,18 +481,22 @@ export default function PhotoFeedPage() {
               <div className={styles.book}>
                 <div className={styles.bookSpine} />
                 <div className={styles.bookPages}>
-                  {Array.from({ length: totalPages }, (_, i) => (
-                    <BookPage
-                      key={i}
-                      items={getPageItems(i)}
-                      pageNumber={i}
-                      isFlipped={flippedPages.has(i)}
-                      onFlip={() => handlePageFlip(i)}
-                      isAuthenticated={isAuthenticated}
-                      onDeleteRequest={requestDeleteMedia}
-                      onMediaClick={openLightbox}
-                    />
-                  )).reverse()}
+                  {/* Render pages in reverse order so cover is on top */}
+                  {Array.from({ length: totalPages }, (_, i) => {
+                    const pageIndex = totalPages - 1 - i;
+                    return (
+                      <BookPage
+                        key={pageIndex}
+                        items={getPageItems(pageIndex)}
+                        pageNumber={pageIndex}
+                        isFlipped={flippedPages.has(pageIndex)}
+                        onFlip={() => handlePageFlip(pageIndex)}
+                        isAuthenticated={isAuthenticated}
+                        onDeleteRequest={requestDeleteMedia}
+                        onMediaClick={openLightbox}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             </div>

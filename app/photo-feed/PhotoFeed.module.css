@@ -159,20 +159,21 @@
   cursor: pointer;
 }
 
-.bookPage:nth-child(1) { z-index: 10; }
-.bookPage:nth-child(2) { z-index: 9; }
-.bookPage:nth-child(3) { z-index: 8; }
-.bookPage:nth-child(4) { z-index: 7; }
-.bookPage:nth-child(5) { z-index: 6; }
-.bookPage:nth-child(6) { z-index: 5; }
-.bookPage:nth-child(7) { z-index: 4; }
-.bookPage:nth-child(8) { z-index: 3; }
-.bookPage:nth-child(9) { z-index: 2; }
-.bookPage:nth-child(n+10) { z-index: 1; }
+/* Pages rendered in DOM order need descending z-index */
+.bookPages > .bookPage:nth-last-child(1) { z-index: 10; }
+.bookPages > .bookPage:nth-last-child(2) { z-index: 9; }
+.bookPages > .bookPage:nth-last-child(3) { z-index: 8; }
+.bookPages > .bookPage:nth-last-child(4) { z-index: 7; }
+.bookPages > .bookPage:nth-last-child(5) { z-index: 6; }
+.bookPages > .bookPage:nth-last-child(6) { z-index: 5; }
+.bookPages > .bookPage:nth-last-child(7) { z-index: 4; }
+.bookPages > .bookPage:nth-last-child(8) { z-index: 3; }
+.bookPages > .bookPage:nth-last-child(9) { z-index: 2; }
+.bookPages > .bookPage:nth-last-child(n+10) { z-index: 1; }
 
 .bookPage.flipped {
   transform: rotateY(-180deg);
-  z-index: 1;
+  z-index: 20 !important; /* Flipped pages go on top */
 }
 
 /* Page Sides */
@@ -369,7 +370,7 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Book Cover (First Page) */
+/* Book Cover (First Page) - Special styling */
 .bookCover {
   background: linear-gradient(135deg, var(--book-spine) 0%, var(--book-brown) 100%);
   border: 2px solid var(--book-gold);
@@ -380,6 +381,7 @@
   text-align: center;
   position: relative;
   overflow: hidden;
+  z-index: 15 !important; /* Ensure cover is always on top initially */
 }
 
 .bookCover::before {
