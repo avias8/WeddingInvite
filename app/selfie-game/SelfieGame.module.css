@@ -1,22 +1,28 @@
+/* SelfieGame.module.css */
+
+/* Use CSS variables from :root for consistency if available, e.g., var(--color-primary) */
+
 .bannerContainer {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    align-items: center; /* Center content horizontally */
+    gap: 1.5rem; /* Consistent spacing */
     max-width: 1200px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 2rem;
-    background-color: var(--color-background);
-    font-family: var(--font-body);
-    color: var(--color-text-primary);
+    width: 95%; /* Use percentage for better responsiveness */
+    margin: 2rem auto; /* Vertical and horizontal centering */
+    padding: 1.5rem;
+    background-color: #f8f9fa; /* Lighter background */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #333;
+    border-radius: 16px; /* Softer corners */
+    box-shadow: 0 8px 16px rgba(0,0,0,0.05);
 }
 
 .sectionHeading {
-    font-family: var(--font-wedding);
-    font-size: clamp(1.8rem, 4vw, 2.5rem);
-    color: var(--color-accent);
+    font-size: clamp(2rem, 5vw, 2.8rem); /* Responsive font size */
+    color: #333;
     text-align: center;
-    margin-bottom: 1rem;
+    margin: 0; /* Remove default margins */
 }
 
 .controlsContainer {
@@ -24,28 +30,33 @@
     flex-direction: column;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 2rem;
+    width: 100%;
 }
 
 .controls {
     display: flex;
+    flex-wrap: wrap; /* Allow controls to wrap on small screens */
     gap: 1rem;
     align-items: center;
+    justify-content: center; /* Center controls when they wrap */
 }
 
+/* More accessible and modern file input styling */
+.fileInput {
+    font-size: 0.95rem;
+}
 .fileInput::file-selector-button {
-    margin-right: 1rem;
-    border: 1px solid #ccc;
-    background: #fff;
+    margin-right: 0.8rem;
+    border: 1px solid #ced4da;
+    background: #ffffff;
     padding: 0.6rem 1.2rem;
     border-radius: 8px;
-    color: #333;
+    color: #495057;
     cursor: pointer;
     transition: background-color 0.2s ease-in-out;
 }
-
 .fileInput::file-selector-button:hover {
-    background-color: #f0f0f0;
+    background-color: #e9ecef;
 }
 
 .btn {
@@ -62,7 +73,6 @@
 .btnPrimary {
     background-color: #007bff;
 }
-
 .btnPrimary:hover {
     background-color: #0056b3;
     transform: translateY(-2px);
@@ -72,7 +82,6 @@
 .btnSecondary {
     background-color: #dc3545;
 }
-
 .btnSecondary:hover {
     background-color: #c82333;
     transform: translateY(-2px);
@@ -87,29 +96,62 @@
 }
 
 .error {
-    color: #dc3545;
+    color: #721c24;
     background-color: #f8d7da;
     border: 1px solid #f5c6cb;
     padding: 1rem;
     border-radius: 8px;
-    margin-bottom: 1rem;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    box-sizing: border-box; /* Ensures padding is included in the width */
 }
 
 .imageContainer {
-    margin-top: 2rem;
+    margin-top: 1rem;
     border: 5px solid white;
     border-radius: 15px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    width: 100%;
+    max-width: 600px; /* Limit max size on desktop */
+    display: flex; /* Center the image inside */
+    justify-content: center;
+    align-items: center;
 }
 
 .image {
-    max-width: 90vw;
-    max-height: 70vh;
+    width: 100%; /* Make image fill the container */
+    height: auto; /* Maintain aspect ratio */
     display: block;
 }
 
 .placeholder {
     font-size: 1.2rem;
     color: #6c757d;
+    padding: 2rem;
+    text-align: center;
+}
+
+/* Media Queries for Mobile Responsiveness */
+@media (max-width: 768px) {
+    .bannerContainer {
+        padding: 1rem;
+        width: 100%;
+        box-sizing: border-box; /* Important for full-width elements */
+    }
+
+    .controls {
+        flex-direction: column; /* Stack controls vertically on mobile */
+        width: 100%;
+    }
+
+    .fileInput, .btn {
+        width: 100%; /* Make buttons and input full-width */
+        text-align: center;
+    }
+
+    .imageContainer {
+        border-width: 3px;
+    }
 }
