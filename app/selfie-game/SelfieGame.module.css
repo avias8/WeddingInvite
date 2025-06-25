@@ -1,103 +1,115 @@
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2rem;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: #f7f7f7;
-  min-height: 100vh;
+.bannerContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: var(--color-background);
+    font-family: var(--font-body);
+    color: var(--color-text-primary);
 }
 
-.title {
-  font-size: 2.5rem;
-  color: #333;
-  margin-bottom: 2rem;
+.sectionHeading {
+    font-family: var(--font-wedding);
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    color: var(--color-accent);
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.controlsContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
 }
 
 .controls {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  align-items: center;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
 }
 
 .fileInput::file-selector-button {
-  margin-right: 1rem;
-  border: 1px solid #ccc;
-  background: #fff;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  color: #333;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
+    margin-right: 1rem;
+    border: 1px solid #ccc;
+    background: #fff;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
 }
 
 .fileInput::file-selector-button:hover {
-  background-color: #f0f0f0;
+    background-color: #f0f0f0;
 }
 
 .btn {
-  padding: 0.7rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  color: white;
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    color: white;
 }
 
 .btnPrimary {
-  background-color: #007bff;
+    background-color: #007bff;
 }
 
 .btnPrimary:hover {
-  background-color: #0056b3;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .btnSecondary {
-  background-color: #dc3545;
+    background-color: #dc3545;
 }
 
 .btnSecondary:hover {
-  background-color: #c82333;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    background-color: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .btn:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 .error {
-  color: #dc3545;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
 }
 
 .imageContainer {
-  margin-top: 2rem;
-  border: 5px solid white;
-  border-radius: 15px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+    margin-top: 2rem;
+    border: 5px solid white;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
 .image {
-  max-width: 90vw;
-  max-height: 70vh;
-  display: block;
+    max-width: 90vw;
+    max-height: 70vh;
+    display: block;
 }
 
 .placeholder {
-  font-size: 1.2rem;
-  color: #6c757d;
+    font-size: 1.2rem;
+    color: #6c757d;
 }

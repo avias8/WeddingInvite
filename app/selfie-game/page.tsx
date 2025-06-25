@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import app from '../../lib/firebase';
-import styles from './SelfieGame.module.css'; // Import the CSS module
+import Header from '../components/Header';
+import styles from './SelfieGame.module.css';
 
 const storage = getStorage(app);
 
@@ -16,30 +17,16 @@ const SelfieGamePage = () => {
   const imageRef = ref(storage, 'selfie-game/active-selfie.jpg');
 
   useEffect(() => {
-    console.log("Attempting to fetch initial selfie...");
     getDownloadURL(imageRef)
-      .then((url) => {
-        console.info("Successfully fetched existing selfie URL:", url);
-        setImageUrl(url);
-      })
+      .then((url) => setImageUrl(url))
       .catch((err) => {
-        if (err.code === 'storage/object-not-found') {
-          console.log("No active selfie found.");
-          setImageUrl(null);
-        } else {
-          console.error("Firebase Error: Failed to fetch initial image.", err);
-          setError("Could not load the current selfie. Please try refreshing.");
-        }
+        if (err.code === 'storage/object-not-found') setImageUrl(null);
+        else setError("Could not load the current selfie.");
       });
   }, [imageRef]);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
-      console.log(`File selected: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
-      setSelectedFile(file);
-      setError(null);
-    }
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) setSelectedFile(e.target.files[0]);
   };
 
   const handleUpload = async () => {
@@ -52,8 +39,7 @@ const SelfieGamePage = () => {
       setImageUrl(url);
       setSelectedFile(null);
     } catch (err) {
-      console.error("Firebase Error: Upload failed.", err);
-      setError("Something went wrong during the upload. Please try again.");
+      setError("Upload failed. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -65,31 +51,37 @@ const SelfieGamePage = () => {
       await deleteObject(imageRef);
       setImageUrl(null);
     } catch (err) {
-      console.error("Firebase Error: Deletion failed.", err);
-      setError("Could not clear the selfie. Please try again.");
+      setError("Failed to clear the selfie.");
     }
   };
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>Selfie Game</h1>
-      {error && <p className={styles.error}>{error}</p>}
-      <div className={styles.controls}>
-        <input type="file" accept="image/*" onChange={handleFileChange} className={styles.fileInput} />
-        <button onClick={handleUpload} disabled={!selectedFile || uploading} className={`${styles.btn} ${styles.btnPrimary}`}>
-          {uploading ? 'Uploading...' : 'Upload'}
-        </button>
-        <button onClick={handleClear} disabled={!imageUrl} className={`${styles.btn} ${styles.btnSecondary}`}>
-          Clear Selfie
-        </button>
-      </div>
-      {imageUrl ? (
-        <div className={styles.imageContainer}>
-          <img src={imageUrl} alt="Current Selfie" className={styles.image} />
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <Header />
+      <main style={{ flexGrow: 1 }}>
+        <div className={styles.bannerContainer}>
+          <h1 className={styles.sectionHeading}>Selfie Game</h1>
+          <div className={styles.controlsContainer}>
+            {error && <p className={styles.error}>{error}</p>}
+            <div className={styles.controls}>
+              <input type="file" accept="image/*" onChange={handleFileChange} className={styles.fileInput} />
+              <button onClick={handleUpload} disabled={!selectedFile || uploading} className={`${styles.btn} ${styles.btnPrimary}`}>
+                {uploading ? 'Uploading...' : 'Upload'}
+              </button>
+              <button onClick={handleClear} disabled={!imageUrl} className={`${styles.btn} ${styles.btnSecondary}`}>
+                Clear Selfie
+              </button>
+            </div>
+          </div>
+          {imageUrl ? (
+            <div className={styles.imageContainer}>
+              <img src={imageUrl} alt="Current Selfie" className={styles.image} />
+            </div>
+          ) : (
+            <p className={styles.placeholder}>No selfie has been uploaded yet. Be the first!</p>
+          )}
         </div>
-      ) : (
-        <p className={styles.placeholder}>No selfie has been uploaded yet. Be the first!</p>
-      )}
+      </main>
     </div>
   );
 };
