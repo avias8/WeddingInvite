@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { FaCameraRetro, FaCog, FaBars, FaTimes } from "react-icons/fa"; // Added FaBars and FaTimes for menu
+import { FaCameraRetro, FaCog, FaBars, FaTimes, FaGamepad } from "react-icons/fa"; // Added FaGamepad
 import "./Header.css"; // Ensure this path is correct
 
 export default function Header() {
@@ -62,6 +62,10 @@ export default function Header() {
       <Link href="/guest-uploads" className="header-link icon-link" onClick={() => setIsMobileMenuOpen(false)}>
         <FaCameraRetro className="link-icon" aria-hidden="true" />
         Share Photos
+      </Link>
+      <Link href="/selfie-game" className="header-link icon-link" onClick={() => setIsMobileMenuOpen(false)}>
+        <FaGamepad className="link-icon" aria-hidden="true" />
+        Selfie Game
       </Link>
       <Link href="/management" className="header-link management-link" aria-label="Management Settings" onClick={() => setIsMobileMenuOpen(false)}>
         <FaCog className="header-cog-icon" title="Management" aria-hidden="true" />
