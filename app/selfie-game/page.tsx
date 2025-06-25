@@ -38,7 +38,7 @@ const SelfieGamePage = () => {
       const url = await getDownloadURL(imageRef);
       setImageUrl(url);
       setSelectedFile(null);
-    } catch (_err) {
+    } catch {
       setError("Upload failed. Please try again.");
     } finally {
       setUploading(false);
@@ -50,7 +50,7 @@ const SelfieGamePage = () => {
     try {
       await deleteObject(imageRef);
       setImageUrl(null);
-    } catch (_err) {
+    } catch {
       setError("Failed to clear the selfie.");
     }
   };
