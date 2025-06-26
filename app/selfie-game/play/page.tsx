@@ -158,7 +158,7 @@ const SelfieGamePlayPage = () => {
       <main className={styles.mainContent}>
         {liveMessage && (
             <div className={styles.liveMessageBanner}>
-                <p>📣 Theme: "{liveMessage}"</p>
+                <p>📣 Theme: &quot;{liveMessage}&quot;</p>
             </div>
         )}
         <div className={styles.controlsContainer}>

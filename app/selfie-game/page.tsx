@@ -19,7 +19,7 @@ const SelfieGameIntroPage = () => {
             <ol className={styles.rulesList}>
               <li>The wedding hosts (admins) will announce a selfie theme.</li>
               <li>Get your table together and take a selfie that best matches the theme.</li>
-              <li>Upload your table's best selfie to the game.</li>
+              <li>Upload your table&apos;s best selfie to the game.</li>
               <li>The winning table gets to eat first!</li>
             </ol>
           </div>
