@@ -13,7 +13,8 @@ import {
   orderBy, 
   serverTimestamp,
   setDoc,
-  writeBatch // Import writeBatch for bulk operations
+  writeBatch,
+  Timestamp // Import Timestamp type
 } from "firebase/firestore";
 
 import app from '../../lib/firebase';
@@ -30,7 +31,7 @@ interface Submission {
   imageUrl: string;
   storagePath: string;
   tableNumber: number;
-  timestamp: any; // Firestore timestamp object
+  timestamp: Timestamp; // Use the specific Firestore Timestamp type instead of any
 }
 
 const SelfieGamePage = () => {
@@ -71,7 +72,7 @@ const SelfieGamePage = () => {
       setLoadingInitial(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [submissionsColRef]); // Added missing dependency
 
   // Real-time listener for the admin message
   useEffect(() => {
@@ -85,7 +86,7 @@ const SelfieGamePage = () => {
       console.error("Firestore admin message listener error:", err);
     });
     return () => unsubscribe();
-  }, []);
+  }, [adminMessageDocRef]); // Added missing dependency
 
   // Check for admin auth state in session storage
   useEffect(() => {
@@ -276,7 +277,7 @@ const SelfieGamePage = () => {
         <div className={styles.bannerContainer}>
           <h1 className={styles.sectionHeading}>Wedding Selfie Game</h1>
           <p className={styles.instructions}>
-            It's a race to get your table's selfie on the board! Select your table number, snap a pic, and upload it to join the fun.
+            It&apos;s a race to get your table&apos;s selfie on the board! Select your table number, snap a pic, and upload it to join the fun.
           </p>
         </div>
 
