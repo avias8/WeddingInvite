@@ -1,157 +1,296 @@
-/* SelfieGame.module.css */
+/* SelfieGame.module.css - Mobile First & Responsive Design */
 
-/* Use CSS variables from :root for consistency if available, e.g., var(--color-primary) */
+/* --- Page Layout & Global Styles --- */
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f4f4f9; /* Soft background color */
+}
+
+.mainContent {
+  flex-grow: 1;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem;
+  box-sizing: border-box;
+}
 
 .bannerContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Center content horizontally */
-    gap: 1.5rem; /* Consistent spacing */
-    max-width: 1200px;
-    width: 95%; /* Use percentage for better responsiveness */
-    margin: 2rem auto; /* Vertical and horizontal centering */
-    padding: 1.5rem;
-    background-color: #f8f9fa; /* Lighter background */
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    color: #333;
-    border-radius: 16px; /* Softer corners */
-    box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+  text-align: center;
+  padding: 2rem 1rem;
+  background: white;
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .sectionHeading {
-    font-size: clamp(2rem, 5vw, 2.8rem); /* Responsive font size */
-    color: #333;
-    text-align: center;
-    margin: 0; /* Remove default margins */
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  color: #2c3e50;
+  margin: 0 0 0.5rem 0;
 }
 
+.instructions {
+  font-size: clamp(1rem, 2.5vw, 1.1rem);
+  color: #555;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* --- Live Message Banner (Persistent) --- */
+.liveMessageBanner {
+    background: linear-gradient(45deg, #f39c12, #f1c40f);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem; /* Sits above other content */
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3);
+    animation: pulse 2.5s infinite;
+}
+.liveMessageBanner p {
+    margin: 0;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+/* --- Controls Section --- */
 .controlsContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    width: 100%;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  margin-bottom: 2rem;
 }
 
 .controls {
-    display: flex;
-    flex-wrap: wrap; /* Allow controls to wrap on small screens */
-    gap: 1rem;
-    align-items: center;
-    justify-content: center; /* Center controls when they wrap */
+  display: flex;
+  flex-direction: column; /* Stack controls vertically on mobile */
+  gap: 1rem;
+  align-items: stretch; /* Make all control elements full width */
 }
 
-/* More accessible and modern file input styling */
+.tableSelector, .fileInputLabel, .btn {
+  padding: 0.9rem 1.2rem;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: #fff;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.tableSelector:hover, .fileInputLabel:hover {
+    border-color: #007bff;
+}
+
 .fileInput {
-    font-size: 0.95rem;
-}
-.fileInput::file-selector-button {
-    margin-right: 0.8rem;
-    border: 1px solid #ced4da;
-    background: #ffffff;
-    padding: 0.6rem 1.2rem;
-    border-radius: 8px;
-    color: #495057;
-    cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
-}
-.fileInput::file-selector-button:hover {
-    background-color: #e9ecef;
+    display: none; /* Hide the default file input */
 }
 
+.fileInputLabel {
+    display: block; /* Make label a block to fill width */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- Buttons --- */
 .btn {
-    padding: 0.7rem 1.5rem;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    color: white;
+  border: none;
+  color: white;
 }
 
 .btnPrimary {
-    background-color: #007bff;
+  background-color: #007bff;
 }
 .btnPrimary:hover {
-    background-color: #0056b3;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-.btnSecondary {
+.btnDanger {
     background-color: #dc3545;
 }
-.btnSecondary:hover {
+.btnDanger:hover {
     background-color: #c82333;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .btn:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+  background-color: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
-.error {
-    color: #721c24;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    padding: 1rem;
-    border-radius: 8px;
-    width: 100%;
-    max-width: 500px;
-    text-align: center;
-    box-sizing: border-box; /* Ensures padding is included in the width */
+/* --- Submissions Grid --- */
+.submissionsGrid {
+    display: grid;
+    grid-template-columns: 1fr; /* Single column on mobile */
+    gap: 1.5rem;
 }
 
-.imageContainer {
-    margin-top: 1rem;
-    border: 5px solid white;
-    border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+.submissionCard {
+    position: relative;
+    border-radius: 12px;
     overflow: hidden;
-    width: 100%;
-    max-width: 600px; /* Limit max size on desktop */
-    display: flex; /* Center the image inside */
-    justify-content: center;
-    align-items: center;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    aspect-ratio: 1 / 1;
+    transition: transform 0.3s ease;
+}
+.submissionCard:hover {
+    transform: scale(1.02);
 }
 
 .image {
-    width: 100%; /* Make image fill the container */
-    height: auto; /* Maintain aspect ratio */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     display: block;
 }
 
-.placeholder {
+.cardOverlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+    color: white;
+    padding: 1.5rem 1rem 1rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+.cardOverlay p {
+    margin: 0;
     font-size: 1.2rem;
-    color: #6c757d;
-    padding: 2rem;
-    text-align: center;
+    font-weight: bold;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
 }
 
-/* Media Queries for Mobile Responsiveness */
-@media (max-width: 768px) {
-    .bannerContainer {
-        padding: 1rem;
-        width: 100%;
-        box-sizing: border-box; /* Important for full-width elements */
-    }
+.deleteBtn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 1.2rem;
+    line-height: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+.deleteBtn:hover {
+    background: #dc3545;
+    transform: scale(1.1);
+}
 
+/* --- Admin Section --- */
+.adminSection {
+    margin-top: 3rem;
+    padding: 1.5rem;
+    background: #e9ecef;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+.adminToggle {
+    background: #6c757d;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+}
+
+.adminForm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    width: 100%;
+    max-width: 400px;
+}
+.adminForm input {
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+.adminForm .btn {
+    margin-top: 0.5rem;
+}
+
+
+/* --- General --- */
+.error {
+  color: #721c24;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  padding: 1rem;
+  border-radius: 8px;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.placeholder {
+  font-size: 1.2rem;
+  color: #6c757d;
+  padding: 3rem;
+  text-align: center;
+  background: white;
+  border-radius: 12px;
+}
+
+/* --- Responsive Breakpoints --- */
+
+/* Tablet view */
+@media (min-width: 640px) {
     .controls {
-        flex-direction: column; /* Stack controls vertically on mobile */
-        width: 100%;
+        flex-direction: row; /* Horizontal controls on tablet */
+        align-items: center;
+        justify-content: center;
     }
-
-    .fileInput, .btn {
-        width: 100%; /* Make buttons and input full-width */
-        text-align: center;
+    .tableSelector, .fileInputLabel, .btn {
+        width: auto; /* Auto width for buttons and inputs */
     }
+    .submissionsGrid {
+        grid-template-columns: repeat(2, 1fr); /* Two columns */
+    }
+    .adminForm {
+        flex-direction: row;
+    }
+    .adminForm input {
+        flex-grow: 1;
+    }
+    .adminForm .btn {
+        margin-top: 0;
+    }
+}
 
-    .imageContainer {
-        border-width: 3px;
+/* Desktop view */
+@media (min-width: 1024px) {
+    .submissionsGrid {
+        grid-template-columns: repeat(3, 1fr); /* Three columns */
+    }
+}
+
+/* Large Desktop view */
+@media (min-width: 1400px) {
+    .submissionsGrid {
+        grid-template-columns: repeat(4, 1fr); /* Four columns on very large screens */
     }
 }
