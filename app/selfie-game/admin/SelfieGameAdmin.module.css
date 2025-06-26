@@ -1,0 +1,188 @@
+/* --- Login Styles --- */
+.loginContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #f0f2f5;
+}
+.loginForm {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+.loginForm h2 {
+    margin-bottom: 1.5rem;
+}
+.loginForm input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-sizing: border-box;
+}
+
+/* --- Main Admin Page Styles --- */
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f4f4f9;
+}
+.mainContent {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+.header h1 {
+    margin: 0;
+}
+
+/* --- Admin Cards --- */
+.adminCard {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 1.5rem;
+}
+.adminCard h3 {
+    margin-top: 0;
+}
+.adminForm {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+.adminForm input {
+    flex-grow: 1;
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+/* --- Buttons --- */
+.btn {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+  background-color: #6a82fb;
+}
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+.btnDanger {
+    background-color: #e74c3c;
+}
+.btnWarning {
+    background-color: #f39c12;
+}
+.adminToggle {
+    background-color: #34495e;
+}
+
+/* --- Grid & Cards --- */
+.submissionsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+.submissionCard {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 1/1;
+    border: 4px solid transparent;
+}
+.winnerCard {
+    border-color: #ffd700;
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.7);
+}
+.image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.cardOverlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    color: white;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.cardOverlay p {
+    margin: 0;
+    font-weight: bold;
+}
+.winnerBtn {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid white;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+.winnerBtn:disabled {
+    background: #ffd700;
+    color: #333;
+    cursor: not-allowed;
+}
+
+.dangerZone {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.error {
+  color: #c0392b;
+  margin-top: 1rem;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 1rem;
+}
+
+.gameLink {
+    color: #6c757d;
+    text-decoration: none;
+}
+.gameLink:hover {
+    text-decoration: underline;
+}
