@@ -40,7 +40,7 @@ The project follows a standard Next.js `app` directory structure.
     - **`management/`**: The admin dashboard for hosts.
     - **`OurStory/`**: A page dedicated to the couple's story.
     - **`photo-feed/`**: A feed of guest-uploaded media.
-    - **`selfie-game/`**: The interactive selfie game, with separate `admin` and `play` sections.
+    - **`selfie-game/`**: The interactive selfie game, with separate `admin` and `play` sections. The `play` section was recently refactored to include a `SubmissionsGrid.tsx` component and a shared `types.tsx` file to improve type safety and resolve a build issue.
 - **`lib/`**: Contains client-side libraries and setup for Firebase and Prisma.
 - **`prisma/`**: Prisma schema and migration files.
     - **`schema.prisma`**: Defines the database schema for Invitees, Guests, Tables, and Media.
