@@ -124,7 +124,8 @@ const SelfieGameAdminPage = () => {
     await setDoc(winnerDocRef, { 
         submissionId: submission.id,
         imageUrl: submission.imageUrl,
-        tableNumber: submission.tableNumber
+        tableNumber: submission.tableNumber,
+        theme: liveMessage,
     });
   };
 
