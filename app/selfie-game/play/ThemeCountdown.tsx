@@ -1,5 +1,8 @@
+// ThemeCountdown.tsx
+
 import React, { useState, useEffect } from 'react';
 import styles from './ThemeCountdown.module.css';
+import PhotoCollage from '../../components/PhotoCollage'; // <-- IMPORT the new component
 
 interface ThemeCountdownProps {
   theme: string;
@@ -10,11 +13,12 @@ const ThemeCountdown: React.FC<ThemeCountdownProps> = ({ theme, onComplete }) =>
   const [count, setCount] = useState(3);
 
   useEffect(() => {
+    // ... your useEffect logic remains exactly the same
     if (count > 0) {
       const timer = setTimeout(() => setCount(count - 1), 1000);
       return () => clearTimeout(timer);
     } else {
-      const completeTimer = setTimeout(onComplete, 1000); // Hold on "Go!" for a second
+      const completeTimer = setTimeout(onComplete, 1000);
       return () => clearTimeout(completeTimer);
     }
   }, [count, onComplete]);
@@ -28,6 +32,7 @@ const ThemeCountdown: React.FC<ThemeCountdownProps> = ({ theme, onComplete }) =>
 
   return (
     <div className={styles.countdownOverlay}>
+      <PhotoCollage /> {/* <-- ADD the collage component here */}
       <div className={styles.content}>
         <p className={styles.themeLabel}>The Theme Is...</p>
         <h1 className={styles.themeText}>{theme}</h1>

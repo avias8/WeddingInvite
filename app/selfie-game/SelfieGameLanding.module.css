@@ -1,4 +1,4 @@
-
+/* General Page Layout */
 .pageWrapper {
     width: 100%;
     min-height: 100vh;
@@ -7,6 +7,7 @@
     background-color: #1a1a1a; /* Dark background for contrast */
 }
 
+/* Background Photo Collage */
 .photoCollage {
     position: absolute;
     top: 0;
@@ -28,6 +29,7 @@
     border-radius: 8px;
 }
 
+/* Main Content Container */
 .contentOverlay {
     position: relative;
     z-index: 2;
@@ -41,6 +43,7 @@
     font-family: var(--font-body);
 }
 
+/* Intro Card Styling */
 .introCard {
     background: rgba(0, 0, 0, 0.6); /* Semi-transparent card */
     backdrop-filter: blur(10px);
@@ -52,6 +55,7 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
+/* Typography */
 .title {
     font-family: var(--font-wedding);
     font-size: clamp(2.5rem, 6vw, 3.5rem);
@@ -66,9 +70,18 @@
     margin-bottom: 2rem;
 }
 
+/* Rules Section */
 .rules {
     text-align: left;
     margin-bottom: 2rem;
+}
+
+.rulesTitle {
+    /* You might want to add specific styling for the rules title */
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 1rem;
 }
 
 .rulesList {
@@ -81,6 +94,7 @@
     margin-bottom: 1rem;
     display: flex;
     align-items: center;
+    font-size: 1.1rem;
 }
 
 .rulesList .icon {
@@ -89,6 +103,35 @@
     color: var(--color-accent);
 }
 
+/* Hunger Games Image Styling (Corrected) */
+.hungerGamesImageWrapper {
+  /* This centers the wrapper block itself inside the card */
+  margin: 1.5rem auto; 
+  
+  /* This defines the size of the wrapper block */
+  width: 100%;
+  max-width: 240px;
+
+  /* These ensure the image inside is also centered, which is good practice */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hungerGamesImage {
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25), 0 2px 8px rgba(255, 193, 7, 0.15);
+  background: #fff;
+  padding: 0.4rem;
+  width: 100%;
+  max-width: 240px; /* Image can be slightly smaller than its wrapper */
+  height: auto;
+  animation: gentleWiggle 2.5s infinite;
+  object-fit: cover;
+  display: block;
+}
+
+/* User Interaction Controls */
 .navigation {
     display: flex;
     flex-direction: column;
@@ -105,6 +148,8 @@
     text-align: center;
     cursor: pointer;
     appearance: none;
+    -webkit-appearance: none; /* For Safari */
+    -moz-appearance: none; /* For Firefox */
 }
 
 .tableSelector option {
@@ -130,6 +175,7 @@
 
 .btnPlay:disabled {
     background-color: #555;
+    color: #888;
     cursor: not-allowed;
 }
 
@@ -138,6 +184,7 @@
     transform: scale(1.05);
 }
 
+/* Admin Link */
 .adminLinkContainer {
     margin-top: 2rem;
 }
@@ -146,10 +193,35 @@
     font-size: 1rem;
     color: #aaa;
     text-decoration: none;
+    transition: color 0.3s ease;
 }
 
 .btnAdmin:hover {
     color: #fff;
+}
+
+/* Animations */
+@keyframes popIn {
+  0% { transform: scale(0.7) rotate(-10deg); opacity: 0; }
+  60% { transform: scale(1.1) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes gentleWiggle {
+  0%, 100% { transform: rotate(-3deg) scale(1); }
+  50% { transform: rotate(3deg) scale(1.04); }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  .introCard {
+    padding: 1.5rem;
+  }
+
+  .hungerGamesImage {
+    max-width: 240px;
+    padding: 0.2rem;
+  }
 }
 
 @media (min-width: 768px) {

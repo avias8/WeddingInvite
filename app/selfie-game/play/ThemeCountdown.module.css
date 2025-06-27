@@ -1,55 +1,78 @@
+/* ThemeCountdown.module.css */
 .countdownOverlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(15px);
+  background-color: #1a1a1a;
+  
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  
+  /* CHANGE THIS VALUE */
+  z-index: 9999; /* Changed from 1000 to a much higher value */
+
   color: white;
   text-align: center;
-  animation: fadeIn 0.6s ease-out;
+  animation: fadeIn 0.8s ease-out;
 }
 
 .content {
-  animation: popIn 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
-  transform: scale(0.5);
+  /* This content needs to appear on top of the collage */
+  position: relative;
+  z-index: 2; /* Ensures content is above the z-index: 1 collage */
+  
+  background: rgba(0, 0, 0, 0.6); 
+  backdrop-filter: blur(10px); /* This will now blur the collage behind it */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 2rem 3rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  
+  animation: popIn 1s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  transform: scale(0.7);
+  opacity: 0;
 }
 
+/* The rest of your styles (.themeLabel, .themeText, animations, etc.) remain the same */
 .themeLabel {
   font-size: 1.8rem;
-  opacity: 0.8;
-  margin-bottom: 0.75rem;
+  opacity: 0.9;
+  margin-bottom: 0.5rem;
   font-weight: 300;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
 .themeText {
   font-family: var(--font-wedding);
-  font-size: clamp(3rem, 7vw, 4.5rem);
+  font-size: clamp(3rem, 8vw, 5rem);
   color: var(--color-accent);
-  margin: 0 0 2.5rem 0;
+  margin: 0 0 2rem 0;
   line-height: 1.2;
-  text-shadow: 0 0 15px var(--color-accent);
+  text-shadow: 0 0 20px var(--color-accent), 0 0 30px rgba(255, 193, 7, 0.5);
 }
 
 .countdownNumber {
-  font-size: clamp(6rem, 15vw, 10rem);
+  display: inline-block;
+  font-size: clamp(8rem, 20vw, 12rem);
   font-weight: 900;
-  animation: countdownPop 1s infinite;
   line-height: 1;
+  color: #ffffff;
+  text-shadow: 2px 2px 15px rgba(0,0,0,0.5);
+  animation: countdownPop 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
 }
 
 .goText {
+  display: inline-block;
   font-family: var(--font-wedding);
-  font-size: clamp(6rem, 15vw, 10rem);
+  font-size: clamp(7rem, 18vw, 11rem);
   color: var(--color-accent);
-  text-shadow: 0 0 20px var(--color-accent);
-  animation: goPop 0.5s ease-out;
+  text-shadow: 0 0 30px var(--color-accent);
+  animation: goPop 1.2s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  transform: scale(0);
 }
 
 @keyframes fadeIn {
@@ -65,12 +88,13 @@
 }
 
 @keyframes countdownPop {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 1; }
+  99% { transform: scale(1); opacity: 1; }
 }
 
 @keyframes goPop {
-  0% { transform: scale(0.8); opacity: 0; }
-  80% { transform: scale(1.1); }
-  100% { transform: scale(1); opacity: 1; }
+  0% { transform: scale(0.5) rotate(-15deg); opacity: 0; }
+  60% { transform: scale(1.2) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }

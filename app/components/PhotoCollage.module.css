@@ -1,0 +1,45 @@
+/* components/PhotoCollage.module.css */
+
+/* New container to hold the scrolling element and hide overflow */
+.collageContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* This is crucial */
+  z-index: 1;
+}
+
+/* This is the element that will scroll upwards */
+.scrollingCollage {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  opacity: 0.15;
+  filter: grayscale(100%);
+  
+  /* Define the animation */
+  animation: scrollPhotos 150s linear infinite;
+}
+
+.collageImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* New keyframes for the scrolling animation */
+@keyframes scrollPhotos {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    /* We scroll by -50% because we doubled the content.
+      This moves the entire grid up by the height of ONE full set of photos,
+      creating a perfect, seamless loop when the animation repeats.
+    */
+    transform: translateY(-50%);
+  }
+}
