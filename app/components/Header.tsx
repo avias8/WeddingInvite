@@ -65,7 +65,7 @@ export default function Header() {
       </Link>
       <Link href="/selfie-game" className="header-link icon-link" onClick={() => setIsMobileMenuOpen(false)}>
         <FaGamepad className="link-icon" aria-hidden="true" />
-        Selfie Game
+        Hunger Games
       </Link>
       <Link href="/management" className="header-link management-link" aria-label="Management Settings" onClick={() => setIsMobileMenuOpen(false)}>
         <FaCog className="header-cog-icon" title="Management" aria-hidden="true" />
