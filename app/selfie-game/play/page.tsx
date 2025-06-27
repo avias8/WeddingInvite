@@ -1,6 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { 
   getFirestore, 
@@ -17,6 +17,8 @@ import {
 import app from '../../../lib/firebase';
 import Header from '../../components/Header';
 import styles from './SelfieGamePlay.module.css';
+import ThemeCountdown from './ThemeCountdown';
+import Lobby from './Lobby';
 import Link from 'next/link';
 
 // Initialize Firebase services
@@ -39,7 +41,10 @@ interface Winner {
     tableNumber: number;
 }
 
-const SelfieGamePlayPage = () => {
+const SelfieGamePlayContent = () => {
+  const searchParams = useSearchParams();
+  const tableNumFromQuery = searchParams.get('tableNumber');
+
   // Component state management
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [tableNumber, setTableNumber] = useState<number | null>(null);
@@ -49,10 +54,18 @@ const SelfieGamePlayPage = () => {
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [liveMessage, setLiveMessage] = useState('');
   const [winner, setWinner] = useState<Winner | null>(null);
+  const [showCountdown, setShowCountdown] = useState(false);
+
+  useEffect(() => {
+    if (tableNumFromQuery) {
+      const num = parseInt(tableNumFromQuery);
+      if (!isNaN(num)) {
+        setTableNumber(num);
+      }
+    }
+  }, [tableNumFromQuery]);
 
   // Set up a real-time listener for selfie submissions.
-  // This hook ensures that as soon as a new selfie is added to the database,
-  // it appears on everyone's screen instantly.
   useEffect(() => {
     const submissionsColRef = collection(db, 'selfie-game-submissions');
     const q = query(submissionsColRef, orderBy('timestamp', 'desc'));
@@ -64,24 +77,25 @@ const SelfieGamePlayPage = () => {
       setSubmissions(submissionsData);
       setLoadingInitial(false);
     });
-    // Clean up the listener when the component is unmounted
     return () => unsubscribe();
   }, []);
 
   // Set up a real-time listener for the admin's live message/theme.
-  // This will update the theme banner instantly for all players.
   useEffect(() => {
     const adminMessageDocRef = doc(db, 'selfie-game-admin', 'message');
     const unsubscribe = onSnapshot(adminMessageDocRef, (docSnap) => {
-      const messageText = docSnap.exists() ? docSnap.data().text : '';
-      setLiveMessage(messageText);
+      const newMessage = docSnap.exists() ? docSnap.data().text : '';
+      if (newMessage && newMessage !== liveMessage) {
+        setLiveMessage(newMessage);
+        setShowCountdown(true);
+      } else if (!newMessage) {
+        setLiveMessage('');
+      }
     }, (error) => {
       console.error("Error listening to admin message:", error);
     });
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+    return () => unsubscribe();
+  }, [liveMessage]);
   
   // Set up a real-time listener to see if a winner has been declared.
   useEffect(() => {
@@ -91,6 +105,8 @@ const SelfieGamePlayPage = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  const showLobby = loadingInitial || !liveMessage || !!winner;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -115,11 +131,9 @@ const SelfieGamePlayPage = () => {
     const uniqueFileName = `${Date.now()}-${selectedFile.name}`;
     const imageRef = ref(storage, `selfie-game-submissions/${uniqueFileName}`);
     try {
-      // Upload file to Cloud Storage
       await uploadBytes(imageRef, selectedFile);
       const url = await getDownloadURL(imageRef);
       
-      // Add a new document to the Firestore collection
       const submissionsColRef = collection(db, 'selfie-game-submissions');
       await addDoc(submissionsColRef, {
         imageUrl: url,
@@ -136,9 +150,14 @@ const SelfieGamePlayPage = () => {
     }
   };
 
-  // Helper function to render the main content area
   const renderContent = () => {
-    if (loadingInitial) return <p className={styles.placeholder}>Loading Selfies...</p>;
+    if (showLobby) {
+        let message = "Waiting for the next theme...";
+        if (loadingInitial) message = "Loading the game...";
+        if (winner) message = `Table ${winner.tableNumber} won! Waiting for the next round...`;
+        return <Lobby message={message} />;
+    }
+    
     if (submissions.length === 0) return <p className={styles.placeholder}>No selfies yet. Be the first!</p>;
     
     return (
@@ -158,20 +177,17 @@ const SelfieGamePlayPage = () => {
 
   return (
     <div className={styles.pageContainer}>
+      {showCountdown && <ThemeCountdown theme={liveMessage} onComplete={() => setShowCountdown(false)} />}
       <Header />
       <main className={styles.mainContent}>
-        {liveMessage && (
+        {liveMessage && !winner && (
             <div className={styles.liveMessageBanner}>
                 <p>📣 Theme: &quot;{liveMessage}&quot;</p>
             </div>
         )}
-        <div className={styles.controlsContainer}>
+        <div className={`${styles.controlsContainer} ${showLobby ? styles.hidden : ''}`}>
             {error && <p className={styles.error}>{error}</p>}
             <div className={styles.controls}>
-                <select className={styles.tableSelector} onChange={(e) => setTableNumber(parseInt(e.target.value))} value={tableNumber || ""} aria-label="Select your table number">
-                    <option value="" disabled>Select Table #</option>
-                    {Array.from({ length: 24 }, (_, i) => i + 1).map(n => (<option key={n} value={n}>Table {n}</option>))}
-                </select>
                 <input type="file" id="file-input" accept="image/*" onChange={handleFileChange} className={styles.fileInput} />
                 <label htmlFor="file-input" className={styles.fileInputLabel}>
                     {selectedFile ? `Selected: ${selectedFile.name.substring(0, 15)}...` : 'Choose Selfie'}
@@ -194,4 +210,11 @@ const SelfieGamePlayPage = () => {
   );
 };
 
+const SelfieGamePlayPage = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <SelfieGamePlayContent />
+  </Suspense>
+);
+
 export default SelfieGamePlayPage;
+

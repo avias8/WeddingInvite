@@ -197,6 +197,10 @@
   }
 }
 
+.controlsContainer.hidden {
+    display: none;
+}
+
 @media (min-width: 1024px) {
   .submissionsGrid {
     grid-template-columns: repeat(3, 1fr);
