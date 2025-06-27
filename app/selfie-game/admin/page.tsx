@@ -44,11 +44,6 @@ const SelfieGameAdminPage = () => {
   const [liveMessage, setLiveMessage] = useState('');
   const [winner, setWinner] = useState<{submissionId: string} | null>(null);
 
-  // Firestore References
-  const submissionsColRef = collection(db, 'selfie-game-submissions');
-  const adminMessageDocRef = doc(db, 'selfie-game-admin', 'message');
-  const winnerDocRef = doc(db, 'selfie-game-admin', 'winner');
-
   // Check for admin auth status on initial load
   useEffect(() => {
     const authStatus = sessionStorage.getItem("isAdminAuthenticated");
@@ -61,7 +56,10 @@ const SelfieGameAdminPage = () => {
   // This updates the admin view instantly when guests upload photos.
   useEffect(() => {
     if (!isAdmin) return; // Only listen if authenticated as admin
+
+    const submissionsColRef = collection(db, 'selfie-game-submissions');
     const q = query(submissionsColRef, orderBy('timestamp', 'desc'));
+    
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const subs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Submission));
       setSubmissions(subs);
@@ -69,24 +67,27 @@ const SelfieGameAdminPage = () => {
         console.error("Submission listener error:", err);
         setError("Could not connect to the submissions feed.");
     });
+
     return () => unsubscribe();
-  }, [isAdmin, submissionsColRef]);
+  }, [isAdmin]);
 
   // Real-time listener for the admin message/theme
   useEffect(() => {
+    const adminMessageDocRef = doc(db, 'selfie-game-admin', 'message');
     const unsubscribe = onSnapshot(adminMessageDocRef, (docSnap) => {
       setLiveMessage(docSnap.exists() ? docSnap.data().text : 'N/A');
     });
     return () => unsubscribe();
-  }, [adminMessageDocRef]);
+  }, []);
 
   // Real-time listener for the winner document
   useEffect(() => {
+    const winnerDocRef = doc(db, 'selfie-game-admin', 'winner');
     const unsubscribe = onSnapshot(winnerDocRef, (docSnap) => {
         setWinner(docSnap.exists() ? docSnap.data() as {submissionId: string} : null);
     });
     return () => unsubscribe();
-  }, [winnerDocRef]);
+  }, []);
 
   // Admin login handler
   const handleAdminLogin = (e: React.FormEvent) => {
@@ -112,6 +113,7 @@ const SelfieGameAdminPage = () => {
   const handleSetMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const adminMessageDocRef = doc(db, 'selfie-game-admin', 'message');
       await setDoc(adminMessageDocRef, { text: adminMessage });
       setAdminMessage('');
       setError(null); // Clear any previous errors
@@ -124,6 +126,7 @@ const SelfieGameAdminPage = () => {
   // Function to declare a winner
   const handleDeclareWinner = async (submission: Submission) => {
     if (!window.confirm(`Declare Table ${submission.tableNumber} the winner?`)) return;
+    const winnerDocRef = doc(db, 'selfie-game-admin', 'winner');
     await setDoc(winnerDocRef, { 
         submissionId: submission.id,
         imageUrl: submission.imageUrl,
@@ -134,6 +137,7 @@ const SelfieGameAdminPage = () => {
   // Function to clear the current winner
   const handleClearWinner = async () => {
     if (!window.confirm('Are you sure you want to clear the current winner?')) return;
+    const winnerDocRef = doc(db, 'selfie-game-admin', 'winner');
     await deleteDoc(winnerDocRef);
   }
 
@@ -148,6 +152,7 @@ const SelfieGameAdminPage = () => {
     });
     await Promise.all(deletePromises);
     await batch.commit();
+    const winnerDocRef = doc(db, 'selfie-game-admin', 'winner');
     await deleteDoc(winnerDocRef); // Also clear the winner
     setProcessing(false);
   };

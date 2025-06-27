@@ -50,15 +50,11 @@ const SelfieGamePlayPage = () => {
   const [liveMessage, setLiveMessage] = useState('');
   const [winner, setWinner] = useState<Winner | null>(null);
 
-  // Firestore references
-  const submissionsColRef = collection(db, 'selfie-game-submissions');
-  const adminMessageDocRef = doc(db, 'selfie-game-admin', 'message');
-  const winnerDocRef = doc(db, 'selfie-game-admin', 'winner');
-
   // Set up a real-time listener for selfie submissions.
   // This hook ensures that as soon as a new selfie is added to the database,
   // it appears on everyone's screen instantly.
   useEffect(() => {
+    const submissionsColRef = collection(db, 'selfie-game-submissions');
     const q = query(submissionsColRef, orderBy('timestamp', 'desc'));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const submissionsData: Submission[] = [];
@@ -70,11 +66,12 @@ const SelfieGamePlayPage = () => {
     });
     // Clean up the listener when the component is unmounted
     return () => unsubscribe();
-  }, [submissionsColRef]);
+  }, []);
 
   // Set up a real-time listener for the admin's live message/theme.
   // This will update the theme banner instantly for all players.
   useEffect(() => {
+    const adminMessageDocRef = doc(db, 'selfie-game-admin', 'message');
     const unsubscribe = onSnapshot(adminMessageDocRef, (docSnap) => {
       const messageText = docSnap.exists() ? docSnap.data().text : '';
       setLiveMessage(messageText);
@@ -88,11 +85,12 @@ const SelfieGamePlayPage = () => {
   
   // Set up a real-time listener to see if a winner has been declared.
   useEffect(() => {
+    const winnerDocRef = doc(db, 'selfie-game-admin', 'winner');
     const unsubscribe = onSnapshot(winnerDocRef, (docSnap) => {
         setWinner(docSnap.exists() ? docSnap.data() as Winner : null);
     });
     return () => unsubscribe();
-  }, [winnerDocRef]);
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -122,6 +120,7 @@ const SelfieGamePlayPage = () => {
       const url = await getDownloadURL(imageRef);
       
       // Add a new document to the Firestore collection
+      const submissionsColRef = collection(db, 'selfie-game-submissions');
       await addDoc(submissionsColRef, {
         imageUrl: url,
         storagePath: imageRef.fullPath,
