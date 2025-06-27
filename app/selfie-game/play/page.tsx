@@ -35,7 +35,7 @@ interface Submission {
 }
 
 // TypeScript interface for the winner data
-interface Winner {
+interface WinnerData {
     submissionId: string;
     imageUrl: string;
     tableNumber: number;
@@ -53,7 +53,7 @@ const SelfieGamePlayContent = () => {
   const [error, setError] = useState<string | null>(null);
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [liveMessage, setLiveMessage] = useState('');
-  const [winner, setWinner] = useState<Winner | null>(null);
+  const [winner, setWinner] = useState<WinnerData | null>(null);
   const [showCountdown, setShowCountdown] = useState(false);
 
   useEffect(() => {
@@ -101,7 +101,11 @@ const SelfieGamePlayContent = () => {
   useEffect(() => {
     const winnerDocRef = doc(db, 'selfie-game-admin', 'winner');
     const unsubscribe = onSnapshot(winnerDocRef, (docSnap) => {
-        setWinner(docSnap.exists() ? docSnap.data() as Winner : null);
+        if (docSnap.exists()) {
+            setWinner(docSnap.data() as WinnerData);
+        } else {
+            setWinner(null);
+        }
     });
     return () => unsubscribe();
   }, []);
