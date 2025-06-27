@@ -10,8 +10,7 @@ import {
   onSnapshot, 
   query, 
   orderBy, 
-  serverTimestamp,
-  Timestamp
+  serverTimestamp
 } from "firebase/firestore";
 
 import app from '../../../lib/firebase';
@@ -21,25 +20,12 @@ import ThemeCountdown from './ThemeCountdown';
 import Lobby from './Lobby';
 import Link from 'next/link';
 
+import SubmissionsGrid from './SubmissionsGrid';
+import { Submission, Winner } from '../types';
+
 // Initialize Firebase services
 const storage = getStorage(app);
 const db = getFirestore(app);
-
-// TypeScript interface for a single submission
-interface Submission {
-  id: string;
-  imageUrl: string;
-  storagePath: string;
-  tableNumber: number;
-  timestamp: Timestamp;
-}
-
-// TypeScript interface for the winner data
-interface WinnerData {
-    submissionId: string;
-    imageUrl: string;
-    tableNumber: number;
-}
 
 const SelfieGamePlayContent = () => {
   const searchParams = useSearchParams();
@@ -53,7 +39,7 @@ const SelfieGamePlayContent = () => {
   const [error, setError] = useState<string | null>(null);
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [liveMessage, setLiveMessage] = useState('');
-  const [winner, setWinner] = useState<WinnerData | null>(null);
+  const [winner, setWinner] = useState<Winner | null>(null);
   const [showCountdown, setShowCountdown] = useState(false);
 
   useEffect(() => {
@@ -102,7 +88,7 @@ const SelfieGamePlayContent = () => {
     const winnerDocRef = doc(db, 'selfie-game-admin', 'winner');
     const unsubscribe = onSnapshot(winnerDocRef, (docSnap) => {
         if (docSnap.exists()) {
-            setWinner(docSnap.data() as WinnerData);
+            setWinner(docSnap.data() as Winner);
         } else {
             setWinner(null);
         }
@@ -164,19 +150,7 @@ const SelfieGamePlayContent = () => {
     
     if (submissions.length === 0) return <p className={styles.placeholder}>No selfies yet. Be the first!</p>;
     
-    return (
-        <div className={styles.submissionsGrid}>
-            {submissions.map(sub => (
-                <div key={sub.id} className={`${styles.submissionCard} ${winner?.submissionId === sub.id ? styles.winnerCard : ''}`}>
-                    {winner?.submissionId === sub.id && <div className={styles.winnerBadge}>🏆 Winner!</div>}
-                    <img src={sub.imageUrl} alt={`Selfie from Table ${sub.tableNumber}`} className={styles.image} />
-                    <div className={styles.cardOverlay}>
-                        <p>Table {sub.tableNumber}</p>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
+    return <SubmissionsGrid submissions={submissions} winner={winner} />;
   }
 
   return (

@@ -11,8 +11,7 @@ import {
   query, 
   orderBy, 
   setDoc,
-  writeBatch,
-  Timestamp
+  writeBatch
 } from "firebase/firestore";
 
 import app from '../../../lib/firebase';
@@ -24,14 +23,7 @@ import Link from 'next/link';
 const storage = getStorage(app);
 const db = getFirestore(app);
 
-// TypeScript interface for a single submission
-interface Submission {
-  id: string;
-  imageUrl: string;
-  storagePath: string;
-  tableNumber: number;
-  timestamp: Timestamp;
-}
+import { Submission, Winner } from '../types';
 
 const SelfieGameAdminPage = () => {
   // Component State
@@ -42,7 +34,7 @@ const SelfieGameAdminPage = () => {
   const [adminPassword, setAdminPassword] = useState('');
   const [adminMessage, setAdminMessage] = useState('');
   const [liveMessage, setLiveMessage] = useState('');
-  const [winner, setWinner] = useState<{submissionId: string} | null>(null);
+  const [winner, setWinner] = useState<Winner | null>(null);
 
   // Check for admin auth status on initial load
   useEffect(() => {
@@ -84,7 +76,7 @@ const SelfieGameAdminPage = () => {
   useEffect(() => {
     const winnerDocRef = doc(db, 'selfie-game-admin', 'winner');
     const unsubscribe = onSnapshot(winnerDocRef, (docSnap) => {
-        setWinner(docSnap.exists() ? docSnap.data() as {submissionId: string} : null);
+        setWinner(docSnap.exists() ? docSnap.data() as Winner : null);
     });
     return () => unsubscribe();
   }, []);
