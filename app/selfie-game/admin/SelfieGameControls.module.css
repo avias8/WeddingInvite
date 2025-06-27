@@ -2,19 +2,36 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  position: sticky;
+  top: 1rem;
 }
 
 .controlCard {
-  background-color: white;
-  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
   padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .controlCard h3 {
   margin-top: 0;
   margin-bottom: 1rem;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
+  font-family: var(--font-wedding);
+  color: var(--color-accent);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.75rem;
+}
+
+.currentTheme {
+    margin-bottom: 1rem;
+}
+
+.currentTheme strong {
+    color: var(--color-accent);
+    font-weight: 600;
 }
 
 .form {
@@ -25,40 +42,58 @@
 
 .input {
   width: 100%;
-  padding: 0.8rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  padding: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
   box-sizing: border-box;
+  font-size: 1rem;
 }
 
 .btn {
-  padding: 0.8rem 1.5rem;
+  padding: 0.9rem 1.5rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s;
   color: white;
-  background-color: #6a82fb;
+  background-color: var(--color-accent);
 }
 
 .btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  background-color: #c89be2;
 }
 
 .btn:disabled {
-  background-color: #ccc;
+  background-color: #555;
   cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btnPrimary {
+    background-color: #3498db;
+}
+.btnPrimary:hover:not(:disabled) {
+    background-color: #2980b9;
 }
 
 .btnWarning {
   background-color: #f39c12;
 }
+.btnWarning:hover:not(:disabled) {
+    background-color: #e67e22;
+}
 
 .btnDanger {
   background-color: #e74c3c;
+}
+.btnDanger:hover:not(:disabled) {
+    background-color: #c0392b;
 }
 
 .dangerZone {

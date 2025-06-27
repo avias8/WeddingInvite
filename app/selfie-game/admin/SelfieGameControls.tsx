@@ -31,7 +31,7 @@ const SelfieGameControls: React.FC<SelfieGameControlsProps> = ({
     <div className={styles.controlsContainer}>
       <div className={styles.controlCard}>
         <h3>Set Live Theme</h3>
-        <p>Current Theme: <strong>{liveMessage}</strong></p>
+        <p className={styles.currentTheme}>Current: <strong>{liveMessage || 'N/A'}</strong></p>
         <form onSubmit={handleSetMessage} className={styles.form}>
           <input
             type="text"
@@ -48,7 +48,7 @@ const SelfieGameControls: React.FC<SelfieGameControlsProps> = ({
         <h3>Manage Game</h3>
         <div className={styles.dangerZone}>
           <button onClick={handleNextTheme} className={`${styles.btn} ${styles.btnPrimary}`}>
-            Next Theme
+            Next Round
           </button>
           {winner && (
             <button onClick={handleClearWinner} className={`${styles.btn} ${styles.btnWarning}`}>
