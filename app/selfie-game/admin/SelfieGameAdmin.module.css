@@ -1,188 +1,116 @@
-/* --- Login Styles --- */
-.loginContainer {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background-color: #f0f2f5;
-}
-.loginForm {
-    background: white;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-}
-.loginForm h2 {
-    margin-bottom: 1.5rem;
-}
-.loginForm input {
-    width: 100%;
-    padding: 0.8rem;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    box-sizing: border-box;
-}
-
-/* --- Main Admin Page Styles --- */
 .pageContainer {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background-color: #f4f4f9;
-}
-.mainContent {
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
   padding: 1rem;
-  box-sizing: border-box;
+  background-color: #f0f2f5;
+  min-height: 100vh;
 }
+
+.mainContent {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
 }
+
 .header h1 {
-    margin: 0;
+  font-size: 2rem;
+  font-weight: bold;
 }
 
-/* --- Admin Cards --- */
-.adminCard {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    margin-bottom: 1.5rem;
-}
-.adminCard h3 {
-    margin-top: 0;
-}
-.adminForm {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-}
-.adminForm input {
-    flex-grow: 1;
-    padding: 0.8rem;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-}
-
-/* --- Buttons --- */
-.btn {
-  padding: 0.8rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+.adminToggle {
+  background-color: #e74c3c;
   color: white;
-  background-color: #6a82fb;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
 }
-.btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+
+.adminLayout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 2rem;
 }
-.btn:disabled {
-  background-color: #ccc;
+
+.submissionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.submissionCard {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.submissionCard:hover {
+  transform: translateY(-5px);
+}
+
+.winnerCard {
+  border: 4px solid #2ecc71;
+  box-shadow: 0 0 15px rgba(46, 204, 113, 0.7);
+}
+
+.image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.cardOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.winnerBtn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.winnerBtn:disabled {
+  color: #2ecc71;
   cursor: not-allowed;
 }
-.btnDanger {
-    background-color: #e74c3c;
-}
-.btnWarning {
-    background-color: #f39c12;
-}
-.adminToggle {
-    background-color: #34495e;
+
+.loginContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-/* --- Grid & Cards --- */
-.submissionsGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
-}
-.submissionCard {
-    position: relative;
-    border-radius: 12px;
-    overflow: hidden;
-    aspect-ratio: 1/1;
-    border: 4px solid transparent;
-}
-.winnerCard {
-    border-color: #ffd700;
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.7);
-}
-.image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-.cardOverlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-    color: white;
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.cardOverlay p {
-    margin: 0;
-    font-weight: bold;
-}
-.winnerBtn {
-    background: rgba(255,255,255,0.2);
-    border: 1px solid white;
-    color: white;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    font-size: 1.5rem;
-    cursor: pointer;
-}
-.winnerBtn:disabled {
-    background: #ffd700;
-    color: #333;
-    cursor: not-allowed;
-}
-
-.dangerZone {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #eee;
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.error {
-  color: #c0392b;
-  margin-top: 1rem;
+.loginForm {
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .footer {
-    text-align: center;
-    margin-top: 2rem;
-    padding: 1rem;
+  margin-top: 2rem;
+  text-align: center;
 }
 
 .gameLink {
-    color: #6c757d;
-    text-decoration: none;
-}
-.gameLink:hover {
-    text-decoration: underline;
+  color: #3498db;
+  text-decoration: underline;
 }

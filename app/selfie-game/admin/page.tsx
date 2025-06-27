@@ -25,6 +25,8 @@ const db = getFirestore(app);
 
 import { Submission, Winner } from '../types';
 
+import SelfieGameControls from './SelfieGameControls';
+
 const SelfieGameAdminPage = () => {
   // Component State
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -126,28 +128,50 @@ const SelfieGameAdminPage = () => {
     });
   };
 
-  // Function to clear the current winner
   const handleClearWinner = async () => {
     if (!window.confirm('Are you sure you want to clear the current winner?')) return;
     const winnerDocRef = doc(db, 'selfie-game-admin', 'winner');
     await deleteDoc(winnerDocRef);
   }
 
-  // Function to clear all submissions
-  const handleClearAllSubmissions = async () => {
-    if (!window.confirm("ARE YOU SURE you want to delete ALL selfies?")) return;
+  const handleClearGame = async (clearMessage: boolean = false) => {
+    const confirmationMessage = clearMessage
+      ? "Are you sure you want to start the next round? This will clear the theme, all submissions, and the winner."
+      : "ARE YOU SURE you want to delete ALL selfies and the winner?";
+    if (!window.confirm(confirmationMessage)) return;
+
     setProcessing(true);
-    const batch = writeBatch(db);
-    const deletePromises = submissions.map(sub => {
-      batch.delete(doc(db, 'selfie-game-submissions', sub.id));
-      return deleteObject(ref(storage, sub.storagePath)).catch(err => console.warn("Could not delete file:", err));
-    });
-    await Promise.all(deletePromises);
-    await batch.commit();
-    const winnerDocRef = doc(db, 'selfie-game-admin', 'winner');
-    await deleteDoc(winnerDocRef); // Also clear the winner
-    setProcessing(false);
+    try {
+      // Clear submissions
+      const batch = writeBatch(db);
+      submissions.forEach(sub => {
+        batch.delete(doc(db, 'selfie-game-submissions', sub.id));
+        deleteObject(ref(storage, sub.storagePath)).catch(err => console.warn("Could not delete file:", err));
+      });
+      await batch.commit();
+
+      // Clear winner
+      const winnerDocRef = doc(db, 'selfie-game-admin', 'winner');
+      await deleteDoc(winnerDocRef);
+
+      // Optionally clear theme message
+      if (clearMessage) {
+        const adminMessageDocRef = doc(db, 'selfie-game-admin', 'message');
+        await setDoc(adminMessageDocRef, { text: '' });
+      }
+    } catch (err) {
+      console.error("Error clearing game state:", err);
+      setError("Failed to clear game state. Please try again.");
+    } finally {
+      setProcessing(false);
+    }
   };
+
+  // Function to clear all submissions
+  const handleClearAllSubmissions = () => handleClearGame(false);
+
+  // Function to prepare for the next theme
+  const handleNextTheme = () => handleClearGame(true);
 
   // Render the login form if not authenticated
   if (!isAdmin) {
@@ -173,39 +197,33 @@ const SelfieGameAdminPage = () => {
             <button onClick={handleAdminLogout} className={styles.adminToggle}>Logout</button>
         </div>
 
-        <div className={styles.adminCard}>
-            <h3>Set Live Theme/Message</h3>
-            <p>Current Theme: <strong>{liveMessage}</strong></p>
-            <form onSubmit={handleSetMessage} className={styles.adminForm}>
-                <input type="text" value={adminMessage} onChange={e => setAdminMessage(e.target.value)} placeholder="e.g., Best Group Pose!" />
-                <button type="submit" className={styles.btn}>Set Theme</button>
-            </form>
-        </div>
+        <div className={styles.adminLayout}>
+          <SelfieGameControls
+            liveMessage={liveMessage}
+            adminMessage={adminMessage}
+            setAdminMessage={setAdminMessage}
+            handleSetMessage={handleSetMessage}
+            winner={winner}
+            handleClearWinner={handleClearWinner}
+            handleClearAllSubmissions={handleClearAllSubmissions}
+            handleNextTheme={handleNextTheme}
+            processing={processing}
+            submissionsCount={submissions.length}
+          />
 
-        <div className={styles.adminCard}>
-            <h3>Manage Submissions</h3>
-            <p>{submissions.length} total selfies submitted.</p>
-            {winner && <p>Current Winner: <strong>Table {submissions.find(s => s.id === winner.submissionId)?.tableNumber}</strong></p>}
-            <div className={styles.dangerZone}>
-                {winner && <button onClick={handleClearWinner} className={`${styles.btn} ${styles.btnWarning}`}>Clear Winner</button>}
-                <button onClick={handleClearAllSubmissions} disabled={processing || submissions.length === 0} className={`${styles.btn} ${styles.btnDanger}`}>
-                    {processing ? 'Clearing...' : 'Clear All Submissions'}
-                </button>
-            </div>
-        </div>
-
-        <div className={styles.submissionsGrid}>
-            {submissions.map(sub => (
-                <div key={sub.id} className={`${styles.submissionCard} ${winner?.submissionId === sub.id ? styles.winnerCard : ''}`}>
-                    <img src={sub.imageUrl} alt={`Selfie from Table ${sub.tableNumber}`} className={styles.image} />
-                    <div className={styles.cardOverlay}>
-                        <p>Table {sub.tableNumber}</p>
-                        <button onClick={() => handleDeclareWinner(sub)} className={styles.winnerBtn} disabled={winner?.submissionId === sub.id}>
-                          🏆
-                        </button>
-                    </div>
-                </div>
-            ))}
+          <div className={styles.submissionsGrid}>
+              {submissions.map(sub => (
+                  <div key={sub.id} className={`${styles.submissionCard} ${winner?.submissionId === sub.id ? styles.winnerCard : ''}`}>
+                      <img src={sub.imageUrl} alt={`Selfie from Table ${sub.tableNumber}`} className={styles.image} />
+                      <div className={styles.cardOverlay}>
+                          <p>Table {sub.tableNumber}</p>
+                          <button onClick={() => handleDeclareWinner(sub)} className={styles.winnerBtn} disabled={winner?.submissionId === sub.id}>
+                            🏆
+                          </button>
+                      </div>
+                  </div>
+              ))}
+          </div>
         </div>
         <footer className={styles.footer}>
             <Link href="/selfie-game/play" className={styles.gameLink}>
