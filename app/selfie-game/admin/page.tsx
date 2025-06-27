@@ -111,8 +111,14 @@ const SelfieGameAdminPage = () => {
   // Function to set the live theme/message
   const handleSetMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    await setDoc(adminMessageDocRef, { text: adminMessage });
-    setAdminMessage('');
+    try {
+      await setDoc(adminMessageDocRef, { text: adminMessage });
+      setAdminMessage('');
+      setError(null); // Clear any previous errors
+    } catch (err) {
+      console.error("Error setting message:", err);
+      setError("Failed to set message. Please try again.");
+    }
   };
   
   // Function to declare a winner

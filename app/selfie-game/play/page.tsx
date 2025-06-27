@@ -76,10 +76,15 @@ const SelfieGamePlayPage = () => {
   // This will update the theme banner instantly for all players.
   useEffect(() => {
     const unsubscribe = onSnapshot(adminMessageDocRef, (docSnap) => {
-      setLiveMessage(docSnap.exists() ? docSnap.data().text : '');
+      const messageText = docSnap.exists() ? docSnap.data().text : '';
+      setLiveMessage(messageText);
+    }, (error) => {
+      console.error("Error listening to admin message:", error);
     });
-    return () => unsubscribe();
-  }, [adminMessageDocRef]);
+    return () => {
+      unsubscribe();
+    };
+  }, []);
   
   // Set up a real-time listener to see if a winner has been declared.
   useEffect(() => {
