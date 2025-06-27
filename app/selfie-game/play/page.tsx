@@ -1,15 +1,15 @@
 'use client';
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { 
-  getFirestore, 
-  collection, 
-  doc, 
-  addDoc, 
-  onSnapshot, 
-  query, 
-  orderBy, 
+import { getStorage, ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
+import {
+  getFirestore,
+  collection,
+  doc,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
   serverTimestamp
 } from "firebase/firestore";
 import Image from 'next/image';
@@ -53,6 +53,7 @@ const SelfieGamePlayContent = () => {
   const [tableNumber, setTableNumber] = useState<number | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [liveMessage, setLiveMessage] = useState('');
@@ -134,27 +135,44 @@ const SelfieGamePlayContent = () => {
         return;
     }
     setUploading(true);
+    setUploadProgress(0);
     setError(null);
     const uniqueFileName = `${Date.now()}-${selectedFile.name}`;
     const imageRef = ref(storage, `selfie-game-submissions/${uniqueFileName}`);
-    try {
-      await uploadBytes(imageRef, selectedFile);
-      const url = await getDownloadURL(imageRef);
-      
-      const submissionsColRef = collection(db, 'selfie-game-submissions');
-      await addDoc(submissionsColRef, {
-        imageUrl: url,
-        storagePath: imageRef.fullPath,
-        tableNumber: tableNumber,
-        timestamp: serverTimestamp()
-      });
-      setSelectedFile(null);
-    } catch(err) {
-      console.error("Upload failed:", err)
-      setError("Upload failed. Please try again.");
-    } finally {
-      setUploading(false);
-    }
+    
+    const uploadTask = uploadBytesResumable(imageRef, selectedFile);
+
+    uploadTask.on('state_changed',
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setUploadProgress(progress);
+      },
+      (error) => {
+        console.error("Upload failed:", error)
+        setError("Upload failed. Please try again.");
+        setUploading(false);
+        setUploadProgress(null);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then(async (url) => {
+          const submissionsColRef = collection(db, 'selfie-game-submissions');
+          await addDoc(submissionsColRef, {
+            imageUrl: url,
+            storagePath: imageRef.fullPath,
+            tableNumber: tableNumber,
+            timestamp: serverTimestamp()
+          });
+          setSelectedFile(null);
+          setUploading(false);
+          setUploadProgress(null);
+        }).catch((err) => {
+            console.error("Failed to get download URL:", err)
+            setError("Failed to get download URL. Please try again.");
+            setUploading(false);
+            setUploadProgress(null);
+        });
+      }
+    );
   };
 
   const renderContent = () => {
@@ -199,9 +217,14 @@ const SelfieGamePlayContent = () => {
                     {selectedFile ? `Selected: ${selectedFile.name.substring(0, 15)}...` : 'Choose Selfie'}
                 </label>
                 <button onClick={handleUpload} disabled={uploading || !selectedFile || !tableNumber} className={`${styles.btn} ${styles.btnPrimary}`}>
-                    {uploading ? 'Uploading...' : 'Upload Selfie'}
+                    {uploading ? `Uploading: ${uploadProgress?.toFixed(0)}%` : 'Upload Selfie'}
                 </button>
             </div>
+             {uploading && uploadProgress !== null && (
+              <div className={styles.progressBarContainer}>
+                <div className={styles.progressBar} style={{ width: `${uploadProgress}%` }}></div>
+              </div>
+            )}
         </div>
         
         {renderContent()}
@@ -223,4 +246,3 @@ const SelfieGamePlayPage = () => (
 );
 
 export default SelfieGamePlayPage;
-

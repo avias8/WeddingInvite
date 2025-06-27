@@ -192,6 +192,21 @@
     text-decoration: underline;
 }
 
+.progressBarContainer {
+  width: 100%;
+  background-color: #e0e0e0;
+  border-radius: 8px;
+  margin-top: 1rem;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 10px;
+  background-color: #6a82fb;
+  border-radius: 8px;
+  transition: width 0.3s ease-in-out;
+}
+
 @media (min-width: 640px) {
   .controls {
     flex-direction: row;

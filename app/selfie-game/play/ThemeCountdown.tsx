@@ -29,7 +29,7 @@ const ThemeCountdown: React.FC<ThemeCountdownProps> = ({ theme, onComplete }) =>
   return (
     <div className={styles.countdownOverlay}>
       <div className={styles.content}>
-        <p className={styles.themeLabel}>Get Ready For...</p>
+        <p className={styles.themeLabel}>The Theme Is...</p>
         <h1 className={styles.themeText}>{theme}</h1>
         {renderCountdown()}
       </div>
