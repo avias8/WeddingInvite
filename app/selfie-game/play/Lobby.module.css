@@ -58,6 +58,16 @@
   z-index: 10;
 }
 
+.themeDisplay {
+  font-size: 1.1rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+
+.themeDisplay strong {
+  color: #333;
+}
+
 .subMessage {
   font-size: 1rem;
   color: #6c757d;

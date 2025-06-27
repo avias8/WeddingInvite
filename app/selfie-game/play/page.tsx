@@ -155,7 +155,7 @@ const SelfieGamePlayContent = () => {
         let message = "Waiting for the next theme...";
         if (loadingInitial) message = "Loading the game...";
         if (winner) message = `Table ${winner.tableNumber} won! Waiting for the next round...`;
-        return <Lobby message={message} />;
+        return <Lobby message={message} winnerImage={winner?.imageUrl} theme={liveMessage} />;
     }
     
     if (submissions.length === 0) return <p className={styles.placeholder}>No selfies yet. Be the first!</p>;
