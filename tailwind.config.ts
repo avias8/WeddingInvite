@@ -9,6 +9,7 @@ export default {
     extend: {
       fontFamily: {
         wedding: ['"Hernandez Bros"', "serif"], // Add your custom font
+        "dancing-script": ["var(--font-dancing-script)"],
       },
       colors: {
         background: "#fef8f5",

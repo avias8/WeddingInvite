@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google"; // Assuming these are custom font configurations
+import { Geist, Geist_Mono, Dancing_Script } from "next/font/google"; // Assuming these are custom font configurations
 
 const geistSans = Geist({ // Replace with your actual Geist configuration if different
   subsets: ["latin"],
@@ -11,6 +11,13 @@ const geistMono = Geist_Mono({ // Replace with your actual Geist Mono configurat
   subsets: ["latin"],
   variable: "--font-geist-mono",
 });
+
+const dancingScript = Dancing_Script({
+  subsets: ["latin"],
+  weight: "700",
+  variable: "--font-dancing-script",
+});
+
 
 const siteTitle = "Avi & Shakthi's Wedding - June 29, 2025";
 const siteDescription = "You're invited to the wedding of Avi Varma and Shakthi Ganesh on June 29, 2025 in Sylvan Lake, Alberta. Find all the details and RSVP here!";
@@ -61,7 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body
         id="__next" // Required by react-modal
-        className={`${geistSans.variable} ${geistMono.variable} text-gray-900 antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${dancingScript.variable} text-gray-900 antialiased`}
         style={{ backgroundColor: "var(--color-background)" }} // Using your CSS variable
       >
         {children}

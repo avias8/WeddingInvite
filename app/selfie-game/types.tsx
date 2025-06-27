@@ -12,4 +12,5 @@ export interface Winner {
   submissionId: string;
   imageUrl: string;
   tableNumber: number;
+  theme?: string;
 }

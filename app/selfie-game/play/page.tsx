@@ -12,10 +12,12 @@ import {
   orderBy, 
   serverTimestamp
 } from "firebase/firestore";
+import Image from 'next/image';
 
 import app from '../../../lib/firebase';
 import Header from '../../components/Header';
 import styles from './SelfieGamePlay.module.css';
+import landingStyles from '../SelfieGameLanding.module.css'; // Import landing page styles
 import ThemeCountdown from './ThemeCountdown';
 import Lobby from './Lobby';
 import Link from 'next/link';
@@ -26,6 +28,21 @@ import { Submission, Winner } from '../types';
 // Initialize Firebase services
 const storage = getStorage(app);
 const db = getFirestore(app);
+
+const selectedPhotos = [
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(16).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(17).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(18).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(19).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(20).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(21).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(22).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(23).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(24).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(25).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(26).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(27).JPEG",
+];
 
 const SelfieGamePlayContent = () => {
   const searchParams = useSearchParams();
@@ -144,23 +161,34 @@ const SelfieGamePlayContent = () => {
     if (showLobby) {
         let message = "Waiting for the next theme...";
         if (loadingInitial) message = "Loading the game...";
-        if (winner) message = `Table ${winner.tableNumber} won! Waiting for the next round...`;
-        return <Lobby message={message} winnerImage={winner?.imageUrl} theme={liveMessage} />;
+        if (winner) message = `Table ${winner.tableNumber} won!`;
+        return <Lobby message={message} winnerImage={winner?.imageUrl} theme={winner?.theme} />;
     }
-    
-    if (submissions.length === 0) return <p className={styles.placeholder}>No selfies yet. Be the first!</p>;
     
     return <SubmissionsGrid submissions={submissions} winner={winner} />;
   }
 
   return (
-    <div className={styles.pageContainer}>
+    <div className={landingStyles.pageWrapper}>
+      <div className={landingStyles.photoCollage}>
+        {selectedPhotos.map((photo, index) => (
+          <Image
+            key={index}
+            src={photo}
+            alt={`Collage photo ${index + 1}`}
+            width={200}
+            height={200}
+            className={landingStyles.collageImage}
+          />
+        ))}
+      </div>
       {showCountdown && <ThemeCountdown theme={liveMessage} onComplete={() => setShowCountdown(false)} />}
       <Header />
-      <main className={styles.mainContent}>
+      <main className={landingStyles.contentOverlay}>
         {liveMessage && !winner && (
             <div className={styles.liveMessageBanner}>
-                <p>📣 Theme: &quot;{liveMessage}&quot;</p>
+                <span>📣</span>
+                <span>Theme: &quot;{liveMessage}&quot;</span>
             </div>
         )}
         <div className={`${styles.controlsContainer} ${showLobby ? styles.hidden : ''}`}>
@@ -189,7 +217,7 @@ const SelfieGamePlayContent = () => {
 };
 
 const SelfieGamePlayPage = () => (
-  <Suspense fallback={<div>Loading...</div>}>
+  <Suspense fallback={<div className={landingStyles.pageWrapper}><Lobby message="Loading the game..." /></div>}>
     <SelfieGamePlayContent />
   </Suspense>
 );

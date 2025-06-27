@@ -15,16 +15,24 @@
 }
 
 .liveMessageBanner {
-  background: linear-gradient(45deg, #6a82fb, #fc5c7d);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  margin-bottom: 1.5rem;
-  font-weight: 600;
+  padding: 1.25rem 2rem;
+  border-radius: 20px;
+  margin-bottom: 2rem;
   text-align: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  font-size: clamp(1rem, 3vw, 1.25rem);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  font-family: var(--font-wedding);
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
 }
+
 .liveMessageBanner p {
   margin: 0;
 }

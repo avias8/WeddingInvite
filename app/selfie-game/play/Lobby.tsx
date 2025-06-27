@@ -24,10 +24,10 @@ const Lobby: React.FC<LobbyProps> = ({ message, winnerImage, theme }) => {
           </div>
         </>
       ) : (
-        <div className={styles.throbber}></div>
+        <div className={styles.throbber}>💖</div>
       )}
       <h2 className={styles.lobbyMessage}>{message}</h2>
-      {!winnerImage && <p className={styles.subMessage}>Get your cameras ready!</p>}
+      {!winnerImage && <p className={styles.subMessage}>Get your cameras ready for the next round!</p>}
     </div>
   );
 };

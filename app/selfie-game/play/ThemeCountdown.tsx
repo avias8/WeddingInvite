@@ -19,19 +19,19 @@ const ThemeCountdown: React.FC<ThemeCountdownProps> = ({ theme, onComplete }) =>
     }
   }, [count, onComplete]);
 
-  const getCountdownText = () => {
-    if (count > 0) return count;
-    return 'Go!';
+  const renderCountdown = () => {
+    if (count > 0) {
+      return <span className={styles.countdownNumber}>{count}</span>;
+    }
+    return <span className={styles.goText}>Go!</span>;
   };
 
   return (
     <div className={styles.countdownOverlay}>
       <div className={styles.content}>
-        <p className={styles.themeLabel}>New Theme:</p>
+        <p className={styles.themeLabel}>Get Ready For...</p>
         <h1 className={styles.themeText}>{theme}</h1>
-        <div className={styles.countdownCircle}>
-          <span className={styles.countdownNumber}>{getCountdownText()}</span>
-        </div>
+        {renderCountdown()}
       </div>
     </div>
   );
