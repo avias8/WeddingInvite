@@ -2,9 +2,25 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Header from '../components/Header';
-import styles from './SelfieGameIntro.module.css';
 import Link from 'next/link';
+import Image from 'next/image';
+import Header from '../components/Header';
+import styles from './SelfieGameLanding.module.css';
+
+const selectedPhotos = [
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(16).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(17).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(18).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(19).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(20).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(21).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(22).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(23).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(24).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(25).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(26).JPEG",
+    "https://storage.googleapis.com/my-wedding-assets/Images/OurStory%20(27).JPEG",
+];
 
 const SelfieGameIntroPage = () => {
   const [tableNumber, setTableNumber] = useState<number | null>(null);
@@ -17,22 +33,32 @@ const SelfieGameIntroPage = () => {
   };
 
   return (
-    <div className={styles.pageContainer}>
+    <div className={styles.pageWrapper}>
+      <div className={styles.photoCollage}>
+        {selectedPhotos.map((photo, index) => (
+          <Image
+            key={index}
+            src={photo}
+            alt={`Collage photo ${index + 1}`}
+            width={200}
+            height={200}
+            className={styles.collageImage}
+          />
+        ))}
+      </div>
       <Header />
-      <main className={styles.mainContent}>
+      <main className={styles.contentOverlay}>
         <div className={styles.introCard}>
-          <div className={styles.icon}>📸</div>
-          <h1 className={styles.title}>The Wedding Selfie Game!</h1>
+          <h1 className={styles.title}>The Wedding Selfie Game</h1>
+          <p className={styles.subtitle}>Ready to capture some memories? Follow the steps below to join the fun!</p>
           
           <div className={styles.rules}>
-            <h2 className={styles.rulesTitle}>How to Play</h2>
-            <ol className={styles.rulesList}>
-              <li>Select your table number below.</li>
-              <li>The wedding hosts (admins) will announce a selfie theme.</li>
-              <li>Get your table together and take a selfie that best matches the theme.</li>
-              <li>Upload your table&apos;s best selfie to the game.</li>
-              <li>The winning table gets to eat first!</li>
-            </ol>
+            <ul className={styles.rulesList}>
+              <li><span className={styles.icon}>1️⃣</span>Select your table number.</li>
+              <li><span className={styles.icon}>📸</span>Snap a selfie based on the host&apos;s theme.</li>
+              <li><span className={styles.icon}>⬆️</span>Upload your table&apos;s masterpiece.</li>
+              <li><span className={styles.icon}>🏆</span>Win bragging rights (and maybe a prize!).</li>
+            </ul>
           </div>
 
           <div className={styles.navigation}>
@@ -50,12 +76,13 @@ const SelfieGameIntroPage = () => {
               disabled={!tableNumber} 
               className={`${styles.btn} ${styles.btnPlay}`}
             >
-              Start Game
+              Let&apos;s Play!
             </button>
           </div>
+
           <div className={styles.adminLinkContainer}>
             <Link href="/selfie-game/admin" className={styles.btnAdmin}>
-              Admin Panel
+              Host Login
             </Link>
           </div>
         </div>
