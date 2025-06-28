@@ -44,7 +44,7 @@ const TABLE_LAYOUTS: TableLayout[] = [
     { id: 15, name: "Table 12", displayName: "12", x: 530, y: 400, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
     { id: 16, name: "Table 13", displayName: "13", x: 530, y: 550, width: 50, height: 150, capacity: 8, owner: "Shakthi" },
     { id: 17, name: "Table 14", displayName: "14", x: 530, y: 700, width: 50, height: 150, capacity: 8, owner: "Avi" },
-    { id: 18, name: "Table 15", displayName: "15", x: 530, y: 850, width: 50, height: 150, capacity: 9, owner: "Avi" },
+    { id: 18, name: "Table 15", displayName: "15", x: 530, y: 850, width: 50, height: 150, capacity: 8, owner: "Avi" },
     { id: 22, name: "Table 19", displayName: "19", x: 400, y: 400, width: 50, height: 150, capacity: 9, owner: "Avi" },
     { id: 21, name: "Table 18", displayName: "18", x: 400, y: 550, width: 50, height: 150, capacity: 8, owner: "Avi" },
     { id: 20, name: "Table 17", displayName: "17", x: 400, y: 700, width: 50, height: 150, capacity: 8, owner: "Avi" },
