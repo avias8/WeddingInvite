@@ -130,7 +130,6 @@ const LightboxModal = ({ src, alt, type, onClose }: { src: string; alt: string; 
             width={800}
             height={600}
             style={{ objectFit: "contain" }}
-            unoptimized={true} 
             priority
           />
         ) : type?.startsWith("video/") ? (
@@ -212,7 +211,6 @@ const BookPage = ({
               height={262}
               className={styles.mediaContent}
               style={{ objectFit: "cover" }}
-              unoptimized={true}
             />
           ) : item.contentType?.startsWith("video/") ? (
             <div className={styles.videoPlaceholder}>
