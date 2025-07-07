@@ -4,7 +4,7 @@
 .pageContainer {
   /* Book Dimensions - Now responsive */
   --book-width: min(90vw, 960px);
-  --book-height: min(75vh, 680px);
+  --book-height: min(55vh, 680px);
   --page-width: calc(var(--book-width) / 2);
   
   /* Mobile/Portrait: Single page layout */
