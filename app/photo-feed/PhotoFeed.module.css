@@ -1,5 +1,33 @@
 /* app/photo-feed/PhotoFeed.module.css */
 
+/* Next.js/Vercel Optimizations */
+.modalLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: var(--book-gold);
+  font-family: var(--font-story);
+}
+
+/* Performance-first CSS with GPU acceleration */
+.pageContainer {
+  box-sizing: border-box;
+}
+
+.pageContainer *,
+.pageContainer *::before,
+.pageContainer *::after {
+  box-sizing: border-box;
+}
+
+/* Optimize for Vercel's edge functions */
+@supports (backdrop-filter: blur(8px)) {
+  .authToggleButton {
+    backdrop-filter: blur(8px);
+  }
+}
+
 /* --- Main Page Container --- */
 .pageContainer {
   /* Book Dimensions - Now responsive */
@@ -76,6 +104,15 @@
   font-style: italic;
 }
 
+.keyboardHint {
+  font-family: var(--font-story);
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  color: var(--book-gold);
+  opacity: 0.7;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
 /* --- Auth Button --- */
 .authToggleButton {
   position: absolute;
@@ -146,6 +183,16 @@
   transform: rotateY(-180deg);
   border-radius: 6px 0 0 6px;
   box-shadow: -2px 2px 10px rgba(0,0,0,0.15);
+}
+
+.bookPagePlaceholder {
+  position: absolute;
+  width: var(--page-width);
+  height: 100%;
+  top: 0;
+  right: 0;
+  pointer-events: none;
+  opacity: 0;
 }
 
 .turningPage {
@@ -273,6 +320,8 @@
   object-fit: cover;
   display: block;
   border-radius: 1px;
+  will-change: auto;
+  contain: layout style;
 }
 
 .videoPlaceholder {
@@ -283,6 +332,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  contain: layout style;
 }
 
 .videoPlaceholder video {
@@ -420,6 +470,13 @@
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
+}
+
+.pageButton.navigating {
+  background: var(--book-deep-gold);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(176, 140, 84, 0.35);
+  opacity: 0.8;
 }
 
 .pageIndicator {
@@ -647,7 +704,6 @@
   justify-content: center;
   z-index: 10;
 }
-
 
 .lightboxMedia {
   display: block;
@@ -1039,7 +1095,7 @@
     /* FIX: Changed transform-origin to be consistent with book-like pivot */
     transform-origin: left center;
     border-radius: 6px;
-    transition: transform 0.5s cubic-bezier(0.645, 0.045, 0.355, 1);
+    transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
     box-shadow: 0 2px 8px rgba(0,0,0,0.10);
   }
 
@@ -1062,12 +1118,6 @@
     backface-visibility: hidden;
   }
   
-  /* FIX: REMOVED `display: none;` from .pageBack to allow flip animation */
-  .pageBack {
-    /* The back side is now visible during the flip animation. */
-    /* It's okay that it's empty, it will just show the paper background. */
-  }
-
 
   /* Adjust page content for single page */
   .pageMediaWrapper {
@@ -1170,6 +1220,10 @@
   
   .pageSubtitle {
     font-size: clamp(1rem, 4.5vw, 1.2rem);
+  }
+  
+  .keyboardHint {
+    font-size: clamp(0.7rem, 3.5vw, 0.8rem);
   }
   
   .authToggleButton {
@@ -1320,6 +1374,10 @@
     font-size: clamp(0.8rem, 4.5vw, 1rem);
   }
   
+  .keyboardHint {
+    font-size: clamp(0.65rem, 3.2vw, 0.75rem);
+  }
+  
   .pageMediaInfo {
     font-size: 0.8rem;
   }
@@ -1350,37 +1408,8 @@
   .bookControls {
     margin-top: 1rem;
   }
-}
-
-/* Loading & Error States for MediaDisplay */
-.mediaDisplayContainer {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.loadingOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(249, 244, 237, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-}
-
-.loadingSpinner {
-  font-size: 2.5rem;
-  color: var(--book-gold);
-  animation: spin 1.5s linear infinite;
-}
-
-.hidden {
-  visibility: hidden;
+  
+  .keyboardHint {
+    margin-top: 0.3rem;
+  }
 }

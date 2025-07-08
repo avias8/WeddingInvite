@@ -31,7 +31,6 @@ interface ApiResponse {
 // --- Define Anonymous Guest ID ---
 const ANONYMOUS_GUEST_ID = 251;
 
-
 // --- Notification Bar Component ---
 const NotificationBar = ({ message, type, onClose }: { message: string | null; type: "success" | "error"; onClose: () => void }) => {
   useEffect(() => {
@@ -211,9 +210,6 @@ const BookPage = ({
   };
 
   const renderMediaItem = (item: MediaItem, currentLoadingStrategy: "lazy" | "eager") => {
-    // Determine the display name for the uploader
-    // If the uploaderId matches the anonymous ID, display "a guest"
-    // Otherwise, use the uploaderName or "a guest" as a fallback
     const uploaderDisplayName = item.uploaderId === ANONYMOUS_GUEST_ID 
                                ? "a guest" 
                                : item.uploaderName || "a guest";
@@ -229,7 +225,7 @@ const BookPage = ({
               className={styles.deleteButton}
               title="Delete this item"
               aria-label={`Delete media item ${item.name}`}
-              style={{ zIndex: 1000 }} // Ensure button is above other elements
+              style={{ zIndex: 1000 }}
             >
               <FaTrash />
             </button>
@@ -243,7 +239,7 @@ const BookPage = ({
           {item.caption && (
             <div className={styles.captionFrame}>
               <p className={styles.captionText}>
-                “{item.caption}” <br />
+                "{item.caption}" <br />
                 <span className={styles.captionAttribution}>- {uploaderDisplayName}</span>
               </p>
             </div>
@@ -282,6 +278,7 @@ const BookPage = ({
       </div>
     );
   }
+  
   if (isMobileLayout) {
     const userPageNum = pageNumber;
     return (
@@ -323,7 +320,6 @@ const BookPage = ({
   }
 };
 
-
 // --- Main PhotoFeedPage Component ---
 export default function PhotoFeedPage() {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
@@ -340,12 +336,22 @@ export default function PhotoFeedPage() {
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
   const [itemToDelete, setItemToDelete] = useState<MediaItem | null>(null);
 
-  // currentPage is the 0-indexed index of the BookPage component that is currently "at the front" or being interacted with.
-  // 0 is the cover page. 1 is the first content page component, etc.
   const [currentPage, setCurrentPage] = useState<number>(0); 
   const [flippedPages, setFlippedPages] = useState<Set<number>>(new Set());
   const [pageToAnimate, setPageToAnimate] = useState<number | null>(null);
   const [preloadedPages, setPreloadedPages] = useState<Set<number>>(new Set());
+
+  // Navigation state
+  const [isNavigating, setIsNavigating] = useState<boolean>(false);
+  const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Performance optimizations
+  const RENDER_RANGE = 2;
+  const [imageCache, setImageCache] = useState<Map<string, boolean>>(new Map());
+  const preloadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [priorityPreloadQueue, setPriorityPreloadQueue] = useState<Set<number>>(new Set());
+  const imageLoaderRef = useRef<Map<string, Promise<void>>>(new Map());
+  const isOnlineRef = useRef(navigator?.onLine ?? true);
 
   const [isMobileLayout, setIsMobileLayout] = useState(false);
 
@@ -372,11 +378,127 @@ export default function PhotoFeedPage() {
     return isMobileLayout ? mediaItems.length + 1 : Math.ceil(Math.max(0, mediaItems.length) / itemsPerSpread) + 1;
   }, [mediaItems.length, isMobileLayout, itemsPerSpread]);
 
+  const getPageItemsForBookPage = useCallback((pageIdx: number): MediaItem[] => {
+    if (pageIdx === 0) {
+      return isMobileLayout ? [] : mediaItems.length > 0 ? [mediaItems[0]] : [];
+    }
+    if (isMobileLayout) {
+      const itemIndex = pageIdx - 1;
+      return itemIndex < mediaItems.length ? [mediaItems[itemIndex]] : [];
+    } else {
+      const startIndex = (pageIdx - 1) * itemsPerSpread + 1;
+      return mediaItems.slice(startIndex, startIndex + itemsPerSpread);
+    }
+  }, [mediaItems, isMobileLayout, itemsPerSpread]);
+
+  const debouncedPreload = useCallback((pageIndexes: number[]) => {
+    if (preloadTimeoutRef.current) {
+      clearTimeout(preloadTimeoutRef.current);
+    }
+    
+    preloadTimeoutRef.current = setTimeout(() => {
+      const newPreloaded = new Set(preloadedPages);
+      pageIndexes.forEach(idx => {
+        if (idx >= 0 && idx < totalBookPages && idx !== currentPage) {
+          newPreloaded.add(idx);
+        }
+      });
+      setPreloadedPages(newPreloaded);
+    }, 100);
+  }, [preloadedPages, totalBookPages, currentPage]);
+
+  const preloadImages = useCallback((pageIdx: number) => {
+    const items = getPageItemsForBookPage(pageIdx);
+    items.forEach(item => {
+      if (item.contentType?.startsWith('image/') && !imageCache.has(item.url)) {
+        if (imageLoaderRef.current.has(item.url)) {
+          return;
+        }
+        
+        const preloadPromise = new Promise<void>((resolve, reject) => {
+          const link = document.createElement('link');
+          link.rel = 'preload';
+          link.as = 'image';
+          
+          const optimizedUrl = `/_next/image?url=${encodeURIComponent(item.url)}&w=800&q=75`;
+          link.href = optimizedUrl;
+          
+          link.onload = () => {
+            setImageCache(prev => new Map(prev).set(item.url, true));
+            imageLoaderRef.current.delete(item.url);
+            resolve();
+          };
+          
+          link.onerror = () => {
+            setImageCache(prev => new Map(prev).set(item.url, false));
+            imageLoaderRef.current.delete(item.url);
+            reject();
+          };
+          
+          if (isOnlineRef.current) {
+            document.head.appendChild(link);
+            setTimeout(() => {
+              if (document.head.contains(link)) {
+                document.head.removeChild(link);
+              }
+            }, 30000);
+          }
+        });
+        
+        imageLoaderRef.current.set(item.url, preloadPromise);
+      }
+    });
+  }, [getPageItemsForBookPage, imageCache]);
+
+  const getVisiblePageRange = useCallback(() => {
+    const start = Math.max(0, currentPage - RENDER_RANGE);
+    const end = Math.min(totalBookPages - 1, currentPage + RENDER_RANGE);
+    return { start, end };
+  }, [currentPage, totalBookPages]);
+
+  useEffect(() => {
+    const { start, end } = getVisiblePageRange();
+    const newPreloaded = new Set(preloadedPages);
+    
+    for (let i = start; i <= end; i++) {
+      if (i !== currentPage) {
+        newPreloaded.add(i);
+      }
+    }
+    
+    const isNavigatingForward = currentPage > 0;
+    if (isNavigatingForward && currentPage + RENDER_RANGE + 1 < totalBookPages) {
+      newPreloaded.add(currentPage + RENDER_RANGE + 1);
+    }
+    
+    const CLEANUP_DISTANCE = RENDER_RANGE + 1;
+    preloadedPages.forEach(pageIdx => {
+      if (Math.abs(pageIdx - currentPage) > CLEANUP_DISTANCE) {
+        newPreloaded.delete(pageIdx);
+      }
+    });
+    
+    if (newPreloaded.size !== preloadedPages.size || 
+        !Array.from(newPreloaded).every(page => preloadedPages.has(page))) {
+      setPreloadedPages(newPreloaded);
+    }
+    
+    for (let i = start; i <= end; i++) {
+      preloadImages(i);
+    }
+  }, [currentPage, getVisiblePageRange, preloadedPages, totalBookPages, preloadImages]);
+
   const fetchMedia = useCallback(async () => {
     setIsLoading(true);
     setPageError(null);
     try {
-      const response = await fetch("/api/get-guest-media");
+      const response = await fetch("/api/get-guest-media", {
+        next: { 
+          revalidate: 60,
+          tags: ['guest-media']
+        }
+      });
+      
       if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(errorData.message || errorData.error || `Failed to load media. Status: ${response.status}`);
@@ -386,6 +508,7 @@ export default function PhotoFeedPage() {
       if (!data.success) {
         throw new Error(data.error || data.message || "Failed to load media (API error).");
       }
+      
       const sortedMedia = (data.media || []).sort((a, b) => {
         const dateA = a.timeCreated ? new Date(a.timeCreated).getTime() : 0;
         const dateB = b.timeCreated ? new Date(b.timeCreated).getTime() : 0;
@@ -412,6 +535,17 @@ export default function PhotoFeedPage() {
     if (authStatus === "true") {
       setIsAuthenticated(true);
     }
+    
+    const handleOnline = () => { isOnlineRef.current = true; };
+    const handleOffline = () => { isOnlineRef.current = false; };
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, [fetchMedia]);
 
   const openLightbox = (item: MediaItem) => setLightboxItem(item);
@@ -450,13 +584,16 @@ export default function PhotoFeedPage() {
   const confirmDeleteMedia = async () => {
     if (!itemToDelete || !isAuthenticated) return;
     setShowDeleteConfirmModal(false);
-    setIsLoading(true); // Consider a more specific loading state for delete
+    setIsLoading(true);
     try {
       const adminPassword = process.env.NEXT_PUBLIC_MANAGEMENT_PASSWORD || "defaultFallbackPassword";
       const response = await fetch("/api/delete-guest-media", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ gcsObjectName: itemToDelete.name, password: adminPassword }),
+        next: { 
+          tags: ['guest-media']
+        }
       });
       const result: ApiResponse = await response.json();
       if (!response.ok || !result.success) {
@@ -467,23 +604,22 @@ export default function PhotoFeedPage() {
       setMediaItems(updatedMediaItems);
       setNotification({ message: result.message || "Media item deleted successfully.", type: "success" });
       
-      // Recalculate totalBookPages based on new items length
+      if ('caches' in window) {
+        caches.delete('guest-media');
+      }
+      
       const newTotalBookPages = isMobileLayout 
         ? updatedMediaItems.length + 1 
         : Math.ceil(Math.max(0, updatedMediaItems.length) / itemsPerSpread) + 1;
       
       if (currentPage >= newTotalBookPages) {
-        // If current page is now out of bounds, move to the new last page
         const newCurrentPage = Math.max(0, newTotalBookPages - 1);
         setCurrentPage(newCurrentPage);
-        // Adjust flippedPages: remove pages that no longer exist
         const newFlippedPages = new Set<number>();
         flippedPages.forEach(p => {
-          if (p < newCurrentPage) newFlippedPages.add(p); // Only keep flipped pages before the new current page
+          if (p < newCurrentPage) newFlippedPages.add(p);
         });
-        
         setFlippedPages(newFlippedPages);
-
       } else if (updatedMediaItems.length === 0) {
         setCurrentPage(0);
         setFlippedPages(new Set());
@@ -505,54 +641,149 @@ export default function PhotoFeedPage() {
     setFlippedPages(prev => {
       const newSet = new Set(prev);
       if (newSet.has(pageIndexToFlip)) {
-        newSet.delete(pageIndexToFlip); // Unflip the page
+        newSet.delete(pageIndexToFlip);
       } else {
-        newSet.add(pageIndexToFlip); // Flip the page
+        newSet.add(pageIndexToFlip);
       }
       return newSet;
     });
-    // Adjust animation duration for mobile layout
-    const animationDuration = isMobileLayout ? 500 : 800; // Shorter duration for single-page flip
-    setTimeout(() => setPageToAnimate(null), animationDuration);
+    setTimeout(() => setPageToAnimate(null), 100);
   };
 
-  const handleNextPage = () => {
-    if (isLoading || pageToAnimate !== null) return;
+  const handleNextPage = useCallback(() => {
+    if (isLoading) return;
   
     if (currentPage < totalBookPages - 1) {
+      const nextPage = currentPage + 1;
+      
+      setPriorityPreloadQueue(prev => new Set(prev).add(nextPage));
       handlePageFlip(currentPage);
-      setCurrentPage(currentPage + 1);
-    } else if (currentPage === 0 && !flippedPages.has(0) && totalBookPages > 1) { 
-      // Special case for opening the cover when it's the only page but there's content
+      setCurrentPage(nextPage);
+      debouncedPreload([nextPage + 1, nextPage + 2]);
+      
+      setIsNavigating(true);
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
+      navigationTimeoutRef.current = setTimeout(() => {
+        setIsNavigating(false);
+        setPriorityPreloadQueue(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(nextPage);
+          return newSet;
+        });
+      }, 200);
+      
+    } else if (currentPage === 0 && !flippedPages.has(0) && totalBookPages > 1) {
+      setPriorityPreloadQueue(prev => new Set(prev).add(1));
       handlePageFlip(0);
-      setCurrentPage(1); // Move to show the "first page" view
+      setCurrentPage(1);
+      
+      setIsNavigating(true);
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
+      navigationTimeoutRef.current = setTimeout(() => {
+        setIsNavigating(false);
+        setPriorityPreloadQueue(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(1);
+          return newSet;
+        });
+      }, 200);
     }
-  };
+  }, [isLoading, currentPage, totalBookPages, flippedPages, handlePageFlip, debouncedPreload]);
 
-  const handlePrevPage = () => {
-    if (isLoading || pageToAnimate !== null) return;
+  const handlePrevPage = useCallback(() => {
+    if (isLoading) return;
   
     if (currentPage > 0) {
-      const pageToUnflipAndShow = currentPage - 1;
-      handlePageFlip(pageToUnflipAndShow);
-      setCurrentPage(pageToUnflipAndShow);
+      const prevPage = currentPage - 1;
+      
+      setPriorityPreloadQueue(prev => new Set(prev).add(prevPage));
+      handlePageFlip(prevPage);
+      setCurrentPage(prevPage);
+      debouncedPreload([prevPage - 1, prevPage - 2]);
+      
+      setIsNavigating(true);
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
+      navigationTimeoutRef.current = setTimeout(() => {
+        setIsNavigating(false);
+        setPriorityPreloadQueue(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(prevPage);
+          return newSet;
+        });
+      }, 200);
     }
-  };
-  
-  const getPageItemsForBookPage = useCallback((pageIdx: number): MediaItem[] => {
-    if (pageIdx === 0) { // Cover Page
-      // On desktop, the back of the cover shows the first item. On mobile, it's blank.
-      return isMobileLayout ? [] : mediaItems.length > 0 ? [mediaItems[0]] : [];
-    }
-    if (isMobileLayout) {
-      const itemIndex = pageIdx - 1;
-      return itemIndex < mediaItems.length ? [mediaItems[itemIndex]] : [];
-    } else {
-      // Desktop: page 0 is cover, its back has item 0. Page 1 component starts with item 1.
-      const startIndex = (pageIdx - 1) * itemsPerSpread + 1;
-      return mediaItems.slice(startIndex, startIndex + itemsPerSpread);
-    }
-  }, [mediaItems, isMobileLayout, itemsPerSpread]);
+  }, [isLoading, currentPage, handlePageFlip, debouncedPreload]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (lightboxItem || showAuthModal || showDeleteConfirmModal) return;
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
+
+      switch (event.key) {
+        case 'ArrowLeft':
+        case 'h':
+          event.preventDefault();
+          handlePrevPage();
+          break;
+        case 'ArrowRight':
+        case 'l':
+        case ' ':
+          event.preventDefault();
+          handleNextPage();
+          break;
+        case 'Home':
+          event.preventDefault();
+          if (!isLoading) {
+            setCurrentPage(0);
+            setFlippedPages(new Set());
+            setIsNavigating(true);
+            if (navigationTimeoutRef.current) {
+              clearTimeout(navigationTimeoutRef.current);
+            }
+            navigationTimeoutRef.current = setTimeout(() => {
+              setIsNavigating(false);
+            }, 200);
+          }
+          break;
+        case 'End':
+          event.preventDefault();
+          if (!isLoading && totalBookPages > 1) {
+            const lastPage = totalBookPages - 1;
+            setCurrentPage(lastPage);
+            const newFlippedPages = new Set<number>();
+            for (let i = 0; i < lastPage; i++) {
+              newFlippedPages.add(i);
+            }
+            setFlippedPages(newFlippedPages);
+            setIsNavigating(true);
+            if (navigationTimeoutRef.current) {
+              clearTimeout(navigationTimeoutRef.current);
+            }
+            navigationTimeoutRef.current = setTimeout(() => {
+              setIsNavigating(false);
+            }, 200);
+          }
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
+      if (preloadTimeoutRef.current) {
+        clearTimeout(preloadTimeoutRef.current);
+      }
+    };
+  }, [lightboxItem, showAuthModal, showDeleteConfirmModal, handleNextPage, handlePrevPage, isLoading, totalBookPages]);
 
   const getCurrentViewingPageLabel = () => {
     if (mediaItems.length === 0) return "Cover";
@@ -582,15 +813,14 @@ export default function PhotoFeedPage() {
   };
 
   const isNextDisabled = () => {
-    return isLoading || pageToAnimate !== null || currentPage >= totalBookPages - 1;
+    return isLoading || currentPage >= totalBookPages - 1;
   };
   
   const isPrevDisabled = () => {
-    if (isLoading || pageToAnimate !== null) return true;
+    if (isLoading) return true;
     if (isMobileLayout) {
       return currentPage === 0;
     } else {
-      // Can't go back if on the cover and it's not flipped
       return currentPage === 0 && !flippedPages.has(0);
     }
   };
@@ -611,6 +841,9 @@ export default function PhotoFeedPage() {
           <p className={styles.pageSubtitle}>
             See the moments captured by you, our wonderful guests!
           </p>
+          <div className={styles.keyboardHint}>
+            Use arrow keys, spacebar, or click to navigate
+          </div>
           {isAuthenticated ? (
             <button onClick={handleLogout} className={`${styles.button} ${styles.authToggleButton}`} title="Logout Admin">
               <FaUnlock aria-hidden="true" /> Admin Mode
@@ -657,7 +890,7 @@ export default function PhotoFeedPage() {
           </div>
         )}
 
-        {!isLoading && (mediaItems.length > 0 || (pageError && mediaItems.length === 0)) && ( // Show book structure if items or initial empty error
+        {!isLoading && (mediaItems.length > 0 || (pageError && mediaItems.length === 0)) && (
           <>
             <div className={styles.flipBookContainer} aria-label="Photo Album">
               <div className={styles.book}>
@@ -665,6 +898,22 @@ export default function PhotoFeedPage() {
                 <div className={styles.bookPages}>
                   {Array.from({ length: totalBookPages }, (_, i) => {
                     const pageComponentIndex = i;
+                    const { start, end } = getVisiblePageRange();
+                    
+                    if (pageComponentIndex < start || pageComponentIndex > end) {
+                      return (
+                        <div
+                          key={`placeholder-${pageComponentIndex}`}
+                          className={styles.bookPagePlaceholder}
+                          style={{ 
+                            zIndex: flippedPages.has(pageComponentIndex) 
+                              ? pageComponentIndex + 1 
+                              : MAX_Z_INDEX_BASE - pageComponentIndex 
+                          }}
+                        />
+                      );
+                    }
+                    
                     const isFlipped = flippedPages.has(pageComponentIndex);
                     
                     let zIndexValue;
@@ -678,7 +927,16 @@ export default function PhotoFeedPage() {
                         zIndexValue = MAX_Z_INDEX_BASE - pageComponentIndex;
                     }
 
-                    const pageLoadingStrategy = (pageComponentIndex === currentPage || preloadedPages.has(pageComponentIndex)) ? "eager" : "lazy";
+                    let pageLoadingStrategy: "lazy" | "eager";
+                    if (pageComponentIndex === currentPage) {
+                      pageLoadingStrategy = "eager";
+                    } else if (priorityPreloadQueue.has(pageComponentIndex)) {
+                      pageLoadingStrategy = "eager";
+                    } else if (preloadedPages.has(pageComponentIndex)) {
+                      pageLoadingStrategy = "eager";
+                    } else {
+                      pageLoadingStrategy = "lazy";
+                    }
 
                     return (
                       <BookPage
@@ -690,7 +948,6 @@ export default function PhotoFeedPage() {
                             if (pageComponentIndex === currentPage && !isFlipped) {
                                 handleNextPage();
                             } else if (pageComponentIndex < currentPage) {
-                                // Clicking a page to the "left" of the stack should turn back to it
                                 setCurrentPage(pageComponentIndex);
                                 setFlippedPages(prev => {
                                     const newSet = new Set<number>();
@@ -720,7 +977,7 @@ export default function PhotoFeedPage() {
                  <button 
                    onClick={handlePrevPage} 
                    disabled={isPrevDisabled()}
-                   className={styles.pageButton}
+                   className={`${styles.pageButton} ${isNavigating ? styles.navigating : ''}`}
                    aria-label="Previous page"
                  >
                    <FaChevronLeft /> Previous
@@ -731,15 +988,31 @@ export default function PhotoFeedPage() {
                  <button 
                    onClick={handleNextPage}
                    disabled={isNextDisabled()}
-                   className={styles.pageButton}
+                   className={`${styles.pageButton} ${isNavigating ? styles.navigating : ''}`}
                    aria-label="Next page"
                    onMouseEnter={() => {
                      if (!isNextDisabled()) {
                        const nextPageToPreload = currentPage + 1;
-                       if (nextPageToPreload < totalBookPages) {
-                         setPreloadedPages(prev => new Set(prev).add(nextPageToPreload));
-                       }
+                       const nextNextPage = currentPage + 2;
+                       setPriorityPreloadQueue(prev => {
+                         const newSet = new Set(prev);
+                         if (nextPageToPreload < totalBookPages) newSet.add(nextPageToPreload);
+                         return newSet;
+                       });
+                       debouncedPreload([nextPageToPreload, nextNextPage]);
                      }
+                   }}
+                   onMouseLeave={() => {
+                     setTimeout(() => {
+                       setPriorityPreloadQueue(prev => {
+                         const newSet = new Set(prev);
+                         const nextPage = currentPage + 1;
+                         if (!isNavigating && newSet.has(nextPage)) {
+                           newSet.delete(nextPage);
+                         }
+                         return newSet;
+                       });
+                     }, 1000);
                    }}
                  >
                    Next <FaChevronRight />

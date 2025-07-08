@@ -36,7 +36,7 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({ item, uploaderDisplayName, 
   };
 
   return (
-    <div className={styles.mediaDisplayContainer} onClick={() => onMediaClick(item)}>
+    <div className={styles.mediaDisplayContainer} onClick={(e) => { e.stopPropagation(); onMediaClick(item); }}>
       {isLoading && (
         <div className={styles.loadingOverlay}>
           <FaSpinner className={styles.loadingSpinner} />
