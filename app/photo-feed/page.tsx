@@ -239,7 +239,7 @@ const BookPage = ({
           {item.caption && (
             <div className={styles.captionFrame}>
               <p className={styles.captionText}>
-                "{item.caption}" <br />
+                &quot;{item.caption}&quot; <br />
                 <span className={styles.captionAttribution}>- {uploaderDisplayName}</span>
               </p>
             </div>
@@ -636,7 +636,7 @@ export default function PhotoFeedPage() {
     }
   };
 
-  const handlePageFlip = (pageIndexToFlip: number) => {
+  const handlePageFlip = useCallback((pageIndexToFlip: number) => {
     setPageToAnimate(pageIndexToFlip);
     setFlippedPages(prev => {
       const newSet = new Set(prev);
@@ -648,7 +648,7 @@ export default function PhotoFeedPage() {
       return newSet;
     });
     setTimeout(() => setPageToAnimate(null), 100);
-  };
+  }, [setPageToAnimate, setFlippedPages]);
 
   const handleNextPage = useCallback(() => {
     if (isLoading) return;
