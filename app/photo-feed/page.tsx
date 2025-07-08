@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import styles from "./PhotoFeed.module.css";
 import Image from "next/image";
 import { FaTrash, FaLock, FaUnlock, FaSpinner, FaExclamationTriangle, FaCheckCircle, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import MediaDisplay from "../components/MediaDisplay";
 
 // --- Interfaces ---
 interface MediaItem {
@@ -13,7 +14,7 @@ interface MediaItem {
   url: string; 
   contentType: string | undefined;
   timeCreated: string | undefined;
-  updated: string | undefined;
+  updated?: string | undefined;
   uploaderId?: number | null;
   uploaderName?: string | null;
   guestMediaDbId?: number; 
@@ -156,8 +157,9 @@ const BookPage = ({
   zIndexValue,
   isTurning,
   isMobileLayout,
+  loadingStrategy,
 }: {
-  items: MediaItem[]; 
+  items: MediaItem[];
   pageNumber: number;
   isFlipped: boolean;
   onFlip: () => void;
@@ -167,6 +169,7 @@ const BookPage = ({
   zIndexValue: number;
   isTurning: boolean;
   isMobileLayout: boolean;
+  loadingStrategy: "lazy" | "eager";
 }) => {
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return "Unknown date";
@@ -179,7 +182,7 @@ const BookPage = ({
     }
   };
 
-  const renderMediaItem = (item: MediaItem) => {
+  const renderMediaItem = (item: MediaItem, currentLoadingStrategy: "lazy" | "eager") => {
     // Determine the display name for the uploader
     // If the uploaderId matches the anonymous ID, display "a guest"
     // Otherwise, use the uploaderName or "a guest" as a fallback
@@ -188,7 +191,7 @@ const BookPage = ({
                                : item.uploaderName || "a guest";
     return (
       <div key={item.id} className={styles.pageContentItem}>
-        <div className={styles.pageMediaWrapper} onClick={() => onMediaClick(item)}>
+        <div className={styles.pageMediaWrapper}>
           {isAuthenticated && (
             <button
               onClick={(e) => {
@@ -203,39 +206,7 @@ const BookPage = ({
               <FaTrash />
             </button>
           )}
-          {item.contentType?.startsWith("image/") ? (
-            <Image
-              src={item.url}
-              alt={`Shared by ${uploaderDisplayName}: ${item.name}`}
-              width={350}
-              height={262}
-              className={styles.mediaContent}
-              style={{ objectFit: "cover" }}
-            />
-          ) : item.contentType?.startsWith("video/") ? (
-            <div className={styles.videoPlaceholder}>
-              <video
-                src={item.url + '#t=0.1'} // #t=0.1 for thumbnail on some browsers
-                className={styles.mediaContent}
-                preload="metadata"
-                aria-label={`Shared by ${uploaderDisplayName}: ${item.name}`}
-                muted
-                playsInline
-              >
-                Your browser does not support the video tag.
-              </video>
-              <div className={styles.playIconOverlay}>
-                <svg viewBox="0 0 24 24" fill="currentColor" height="1em" width="1em">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </div>
-            </div>
-          ) : (
-            <div className={styles.unsupportedMedia}>
-              <FaExclamationTriangle className={styles.unsupportedIcon} />
-              <p>Unsupported file</p>
-            </div>
-          )}
+          <MediaDisplay item={item} uploaderDisplayName={uploaderDisplayName} onMediaClick={onMediaClick} loadingStrategy={currentLoadingStrategy} />
         </div>
         <div className={styles.pageMediaInfo}>
           <span className={styles.uploadInfo}>
@@ -269,7 +240,7 @@ const BookPage = ({
           <div className={styles.bookCoverDate}>Click to open</div>
         </div>
         <div className={`${styles.pageBack} ${styles.bookCoverBack}`}>
-          {!isMobileLayout && items[0] ? renderMediaItem(items[0]) : (
+          {!isMobileLayout && items[0] ? renderMediaItem(items[0], loadingStrategy) : (
             <div className={styles.pageContent}>
               <div className={styles.bookCoverBackContent}>
                 <p className={styles.dedicationText}>Dedicated to our friends and family</p>
@@ -294,7 +265,7 @@ const BookPage = ({
         aria-label={`Page ${userPageNum}`}
       >
         <div className={styles.pageFront}>
-          {items[0] && renderMediaItem(items[0])}
+          {items[0] && renderMediaItem(items[0], loadingStrategy)}
           {items[0] && <div className={styles.pageNumber}>{userPageNum}</div>}
         </div>
         <div className={styles.pageBack}></div>
@@ -312,11 +283,11 @@ const BookPage = ({
         aria-label={`Page spread ${userPageFront}-${userPageBack}`}
       >
         <div className={styles.pageFront}>
-          {items[0] && renderMediaItem(items[0])}
+          {items[0] && renderMediaItem(items[0], loadingStrategy)}
           {items[0] && <div className={styles.pageNumber}>{userPageFront}</div>}
         </div>
         <div className={styles.pageBack}>
-          {items[1] && renderMediaItem(items[1])}
+          {items[1] && renderMediaItem(items[1], loadingStrategy)}
           {items[1] && <div className={styles.pageNumber}>{userPageBack}</div>}
         </div>
       </div>
@@ -346,6 +317,7 @@ export default function PhotoFeedPage() {
   const [currentPage, setCurrentPage] = useState<number>(0); 
   const [flippedPages, setFlippedPages] = useState<Set<number>>(new Set());
   const [pageToAnimate, setPageToAnimate] = useState<number | null>(null);
+  const [preloadedPages, setPreloadedPages] = useState<Set<number>>(new Set());
 
   const [isMobileLayout, setIsMobileLayout] = useState(false);
 
@@ -678,6 +650,8 @@ export default function PhotoFeedPage() {
                         zIndexValue = MAX_Z_INDEX_BASE - pageComponentIndex;
                     }
 
+                    const pageLoadingStrategy = (pageComponentIndex === currentPage || preloadedPages.has(pageComponentIndex)) ? "eager" : "lazy";
+
                     return (
                       <BookPage
                         key={`bookpage-${pageComponentIndex}`} 
@@ -705,6 +679,7 @@ export default function PhotoFeedPage() {
                         zIndexValue={zIndexValue}
                         isTurning={pageToAnimate === pageComponentIndex}
                         isMobileLayout={isMobileLayout}
+                        loadingStrategy={pageLoadingStrategy}
                       />
                     );
                   })}
@@ -730,6 +705,14 @@ export default function PhotoFeedPage() {
                    disabled={isNextDisabled()}
                    className={styles.pageButton}
                    aria-label="Next page"
+                   onMouseEnter={() => {
+                     if (!isNextDisabled()) {
+                       const nextPageToPreload = currentPage + 1;
+                       if (nextPageToPreload < totalBookPages) {
+                         setPreloadedPages(prev => new Set(prev).add(nextPageToPreload));
+                       }
+                     }
+                   }}
                  >
                    Next <FaChevronRight />
                  </button>

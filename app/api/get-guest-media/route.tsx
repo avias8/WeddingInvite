@@ -78,7 +78,7 @@ interface MediaItemResponse {
   url: string;
   contentType: string | undefined;
   timeCreated: string | undefined;
-  updated: string | undefined;
+  updated?: string | undefined;
   uploaderId?: number | null;
   uploaderName?: string | null;
   guestMediaDbId?: number;
