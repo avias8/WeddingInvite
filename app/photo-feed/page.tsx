@@ -98,6 +98,17 @@ const ConfirmationModal = ({
 // --- LightboxModal Component ---
 const LightboxModal = ({ src, alt, type, onClose }: { src: string; alt: string; type: string | undefined; onClose: () => void }) => {
   const modalContentRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  const handleLoad = () => {
+    setIsLoading(false);
+  };
+
+  const handleError = () => {
+    setIsLoading(false);
+    setHasError(true);
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -123,18 +134,35 @@ const LightboxModal = ({ src, alt, type, onClose }: { src: string; alt: string; 
     <div className={styles.lightboxOverlay} onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="lightboxTitle">
       <div className={styles.lightboxContent} ref={modalContentRef} onClick={(e) => e.stopPropagation()}>
         <button className={styles.lightboxClose} onClick={onClose} aria-label="Close media view">×</button>
-        {type?.startsWith("image/") ? (
+        {isLoading && (
+          <div className={styles.lightboxLoadingOverlay}>
+            <FaSpinner className={styles.loadingSpinner} />
+          </div>
+        )}
+        {hasError ? (
+          <p id="lightboxTitle" className={styles.unsupportedText}>Error loading media: {alt}</p>
+        ) : type?.startsWith("image/") ? (
           <Image
             src={src}
             alt={alt}
-            className={styles.lightboxMedia}
+            className={`${styles.lightboxMedia} ${isLoading ? styles.hidden : ""}`}
             width={800}
             height={600}
             style={{ objectFit: "contain" }}
             priority
+            onLoad={handleLoad}
+            onError={handleError}
           />
         ) : type?.startsWith("video/") ? (
-          <video src={src} controls autoPlay className={styles.lightboxMedia} aria-label={alt}>
+          <video
+            src={src}
+            controls
+            autoPlay
+            className={`${styles.lightboxMedia} ${isLoading ? styles.hidden : ""}`}
+            aria-label={alt}
+            onLoadedData={handleLoad}
+            onError={handleError}
+          >
             Your browser does not support the video tag.
           </video>
         ) : (
