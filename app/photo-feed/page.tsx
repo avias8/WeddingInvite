@@ -443,6 +443,8 @@ export default function PhotoFeedPage() {
               }
             }, 30000);
           }
+        }).catch(err => {
+          console.warn(`Failed to preload image: ${item.name} (${item.url})`, err);
         });
         
         imageLoaderRef.current.set(item.url, preloadPromise);
@@ -500,13 +502,20 @@ export default function PhotoFeedPage() {
       });
       
       if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || errorData.error || `Failed to load media. Status: ${response.status}`);
+        let errorDetail = `Status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorDetail = errorData.message || errorData.error || errorDetail;
+        } catch (jsonError) {
+          // If JSON parsing fails, it's likely a network issue or non-JSON response
+          errorDetail = `Network error or unexpected response format. ${response.statusText || ''}`;
+        }
+        throw new Error(`Failed to load media: ${errorDetail}`);
       }
       const data: ApiResponse = await response.json();
 
       if (!data.success) {
-        throw new Error(data.error || data.message || "Failed to load media (API error).");
+        throw new Error(data.error || data.message || "Failed to load media due to an API error.");
       }
       
       const sortedMedia = (data.media || []).sort((a, b) => {
@@ -521,13 +530,19 @@ export default function PhotoFeedPage() {
       }
     } catch (err) {
       console.error("Error fetching media:", err);
-      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred while fetching media.";
+      const errorMessage = err instanceof Error && err.message.includes("Failed to fetch") 
+        ? "Could not connect to the server. Please check your internet connection." 
+        : (err instanceof Error ? err.message : "An unknown error occurred while fetching media.");
       setPageError(errorMessage);
       setNotification({ message: `Error: ${errorMessage}`, type: "error" });
     } finally {
       setIsLoading(false);
     }
   }, []);
+
+  const retryFetchMedia = useCallback(() => {
+    fetchMedia();
+  }, [fetchMedia]);
 
   useEffect(() => {
     fetchMedia();
@@ -547,6 +562,20 @@ export default function PhotoFeedPage() {
       window.removeEventListener('offline', handleOffline);
     };
   }, [fetchMedia]);
+
+  // Add a retry button to the UI when pageError is present
+  const renderPageError = () => {
+    if (pageError && !isLoading && mediaItems.length === 0) {
+      return (
+        <div className={styles.emptyStateContainer}>
+          <FaExclamationTriangle className={styles.emptyStateIcon} />
+          <p className={styles.errorMessage}>{pageError}</p>
+          <button onClick={retryFetchMedia} className={`${styles.button} ${styles.retryButton}`}>Retry</button>
+        </div>
+      );
+    }
+    return null;
+  };
 
   const openLightbox = (item: MediaItem) => setLightboxItem(item);
   const closeLightbox = () => setLightboxItem(null);
@@ -582,7 +611,10 @@ export default function PhotoFeedPage() {
   };
 
   const confirmDeleteMedia = async () => {
-    if (!itemToDelete || !isAuthenticated) return;
+    if (!itemToDelete || !isAuthenticated) {
+      setNotification({ message: "Error: Cannot delete media. Item not selected or not authenticated.", type: "error" });
+      return;
+    }
     setShowDeleteConfirmModal(false);
     setIsLoading(true);
     try {
@@ -595,9 +627,21 @@ export default function PhotoFeedPage() {
           tags: ['guest-media']
         }
       });
+      
+      if (!response.ok) {
+        let errorDetail = `Status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorDetail = errorData.message || errorData.error || errorDetail;
+        } catch (jsonError) {
+          errorDetail = `Network error or unexpected response format. ${response.statusText || ''}`;
+        }
+        throw new Error(`Failed to delete media: ${errorDetail}`);
+      }
+
       const result: ApiResponse = await response.json();
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || result.message || "Failed to delete media item.");
+      if (!result.success) {
+        throw new Error(result.error || result.message || "Failed to delete media item due to an API error.");
       }
 
       const updatedMediaItems = mediaItems.filter(item => item.id !== itemToDelete.id);
@@ -628,7 +672,9 @@ export default function PhotoFeedPage() {
 
     } catch (err) {
       console.error("Error deleting media:", err);
-      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred during deletion.";
+      const errorMessage = err instanceof Error && err.message.includes("Failed to fetch") 
+        ? "Could not connect to the server. Please check your internet connection." 
+        : (err instanceof Error ? err.message : "An unknown error occurred during deletion.");
       setNotification({ message: `Error: ${errorMessage}`, type: "error" });
     } finally {
       setItemToDelete(null);
@@ -883,12 +929,7 @@ export default function PhotoFeedPage() {
           </div>
         )}
         
-        {pageError && !isLoading && mediaItems.length === 0 && (
-          <div className={styles.emptyStateContainer}>
-            <FaExclamationTriangle className={styles.emptyStateIcon} />
-            <p className={styles.errorMessage}>{pageError}</p>
-          </div>
-        )}
+        {renderPageError()}
 
         {!isLoading && (mediaItems.length > 0 || (pageError && mediaItems.length === 0)) && (
           <>
