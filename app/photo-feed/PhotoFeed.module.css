@@ -37,7 +37,7 @@
   
   /* Mobile/Portrait: Single page layout */
   --mobile-page-width: min(85vw, 400px);
-  --mobile-book-height: min(70vh, 600px);
+  --mobile-book-height: min(80vh, 700px);
 
   min-height: 100vh;
   background: 
@@ -1124,6 +1124,8 @@
     max-width: 90%;
     padding: 6px;
     margin-bottom: 1rem;
+    aspect-ratio: 3 / 4; /* Vertical aspect ratio for mobile */
+    max-height: 60vh; /* Larger height on mobile */
   }
   
   .pageMediaInfo {
@@ -1206,7 +1208,7 @@
 @media (max-width: 480px) {
   .pageContainer {
     --mobile-page-width: min(92vw, 350px);
-    --mobile-book-height: min(65vh, 500px);
+    --mobile-book-height: min(75vh, 600px);
     padding: 1.5rem 0.5rem;
   }
   
@@ -1246,6 +1248,8 @@
   .pageMediaWrapper {
     max-width: 95%;
     margin-bottom: 0.8rem;
+    aspect-ratio: 3 / 4; /* Vertical aspect ratio for small mobile */
+    max-height: 55vh; /* Larger height on small mobile */
   }
   
   .pageMediaInfo {
@@ -1353,7 +1357,7 @@
 @media (max-width: 360px) {
   .pageContainer {
     --mobile-page-width: min(95vw, 320px);
-    --mobile-book-height: min(60vh, 450px);
+    --mobile-book-height: min(70vh, 550px);
     padding: 1rem 0.25rem;
   }
   
