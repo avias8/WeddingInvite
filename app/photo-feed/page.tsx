@@ -506,7 +506,8 @@ export default function PhotoFeedPage() {
         try {
           const errorData = await response.json();
           errorDetail = errorData.message || errorData.error || errorDetail;
-        } catch (jsonError) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (_jsonError) {
           // If JSON parsing fails, it's likely a network issue or non-JSON response
           errorDetail = `Network error or unexpected response format. ${response.statusText || ''}`;
         }
@@ -633,7 +634,8 @@ export default function PhotoFeedPage() {
         try {
           const errorData = await response.json();
           errorDetail = errorData.message || errorData.error || errorDetail;
-        } catch (jsonError) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (_jsonError) {
           errorDetail = `Network error or unexpected response format. ${response.statusText || ''}`;
         }
         throw new Error(`Failed to delete media: ${errorDetail}`);
